@@ -41,28 +41,50 @@ If you are starting a new project or setting up a brand-new computer, simply **c
 
 ## 🔌 Manual Installation
 
-If you prefer to install it manually:
+### Step 0: Clone Lotus to a permanent home
 
-### 1. Global Installation (Configure all your IDEs)
+Pick a directory where Lotus will live permanently (you'll `git pull` here for updates):
+
 **Windows (PowerShell):**
 ```powershell
-.\install.ps1 -Global
+git clone https://github.com/Bronc-X/Lotus.git C:\Dev\Lotus
 ```
 **macOS / Linux:**
 ```bash
-./install.sh --global
+git clone https://github.com/Bronc-X/Lotus.git ~/Dev/Lotus
 ```
 
-### 2. New Project Initialization
-Inside your empty new project folder, inject your preferred technology stack:
+### Step 1: Global Installation (Configure all your IDEs)
+
+This injects Lotus rules into the global config of every supported AI tool on your machine.
+
+> ⚠️ **Safe by design**: If you already have existing config files (e.g., `CLAUDE.md`, `GEMINI.md`, `.aider.conf.yml`), the installer will automatically create `.bak` backups before overwriting. You can always restore them.
+
 **Windows (PowerShell):**
 ```powershell
-C:\path\to\Lotus\install.ps1 -Project nextjs
+C:\Dev\Lotus\install.ps1 -Global
 ```
 **macOS / Linux:**
 ```bash
-/path/to/Lotus/install.sh --project nextjs
+~/Dev/Lotus/install.sh --global
 ```
+
+### Step 2: New Project Initialization (Optional)
+
+Inside your empty new project folder, inject your preferred technology stack template:
+
+**Windows (PowerShell):**
+```powershell
+cd C:\Users\YourName\Projects\MyNewApp
+C:\Dev\Lotus\install.ps1 -Project nextjs
+```
+**macOS / Linux:**
+```bash
+cd ~/Projects/MyNewApp
+~/Dev/Lotus/install.sh --project nextjs
+```
+
+*(Available templates: `nextjs`, `vite`, `html`)*
 
 ## 🎯 Tool Wake-Up Mechanisms (Skills)
 
