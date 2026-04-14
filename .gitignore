@@ -1,0 +1,19 @@
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Mac
+.AppleDouble
+.LSOverride
+
+# Temp files
+*.tmp
+*.bak
+*~

@@ -1,0 +1,30 @@
+---
+description: Global engineering workflow and quality standards from GStack
+alwaysApply: true
+---
+
+# GStack Engineering Rules
+
+## Workflow
+
+- Scene A (Large Features): CEO Review → Eng Review → Pause for approval → Code → Module review → Global review
+- Scene B (Bug Fix): Trace bug chain → Systematic root cause → Fix → Build verify
+- Scene C (UI Tweak): Locate component → Precise edit → User confirms
+- Scene D (Refactor): Review target → Small steps with build verification → No business logic changes
+
+## Quality Gates
+
+- Zero silent failures: every catch block has user-visible feedback
+- State completeness: every loading state has loaded/error counterpart
+- Empty states: every list/table has empty state message
+- Interaction feedback: every button has loading/disabled/animation response
+- DRY: extract after 3+ repetitions
+- No residuals: no console.log, no TODO, no hardcoded paths
+- Type safety: no `any` type, complete interface definitions
+
+## Design Quality
+
+- Style consistency: follow project design system
+- Restrained animation: only enhance UX, no flashy effects
+- Responsive: all grid layouts degrade gracefully
+- Accessibility: hover and focus styles on all interactive elements
