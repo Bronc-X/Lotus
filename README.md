@@ -59,15 +59,15 @@ Once Lotus is installed globally, it registers "Skills" in your agents. You can 
 
 ### Available Wakes:
 
-1. **[`@gstack` / `/gstack`](https://github.com/Bronc-X/AGENTRULES/blob/main/skills/gstack.md)**
+1. **[`@gstack` / `/gstack`](https://github.com/Bronc-X/Lotus/blob/main/skills/gstack.md)**
    * **What it does**: Triggers the elite multi-role developer workflow. The AI will explicitly switch between Product Manager, Architect, Builder, and QA before writing code to ensure system integrity.
-2. **[`@feynman` / `/feynman`](https://github.com/Bronc-X/AGENTRULES/blob/main/skills/feynman.md)**
+2. **[`@feynman` / `/feynman`](https://github.com/Bronc-X/Lotus/blob/main/skills/feynman.md)**
    * **What it does**: Forces the AI to use the Feynman Technique. It will break down and explain complex bugs or physical gear mechanisms using absolute layman terms before attempting to apply a fix.
-3. **[`@polanyi-tacit` / `/polanyi-tacit`](https://github.com/Bronc-X/AGENTRULES/blob/main/skills/polanyi-tacit.md)**
+3. **[`@polanyi-tacit` / `/polanyi-tacit`](https://github.com/Bronc-X/Lotus/blob/main/skills/polanyi-tacit.md)**
    * **What it does**: Wakes up a deeply analytical mode. The AI deliberately looks for architectural compromises, "defensive" code blocks, and unspoken organizational debt hidden behind the scenes.
-4. **[`@auto-build` / `/auto-build`](https://github.com/Bronc-X/AGENTRULES/blob/main/skills/auto-build.md)**
+4. **[`@auto-build` / `/auto-build`](https://github.com/Bronc-X/Lotus/blob/main/skills/auto-build.md)**
    * **What it does**: Silently performs an `npm install`, runs `npm run build`, and checks for compilation errors independently without ever asking for your permission.
-5. **[`@vibe` / `/vibe`](https://github.com/Bronc-X/AGENTRULES/blob/main/skills/vibe.md)**
+5. **[`@vibe` / `/vibe`](https://github.com/Bronc-X/Lotus/blob/main/skills/vibe.md)**
    * **What it does**: Vibe Coding mode. Delegates technical aesthetics entirely to the AI, prioritizing visual elegance and silent, rapid iterations without asking boilerplate questions.
 
 ## 🏗️ Architecture (Hub-and-Spoke)
