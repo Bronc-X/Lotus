@@ -122,6 +122,15 @@ Lotus/
 └── install scripts      ← 🤖 Auto-generates platform-specific IDE adapters
 ```
 
+## 🛡️ Safety
+
+Lotus touches your global IDE config files. We take this seriously:
+
+- **Auto-Backup**: Before overwriting any existing file (`CLAUDE.md`, `GEMINI.md`, `.aider.conf.yml`, etc.), the installer automatically creates a `.bak` backup in the same directory. Nothing is silently lost.
+- **Read-Only Rules**: Lotus only writes static Markdown files to config directories. It does **not** install executables, daemons, browser extensions, or background processes.
+- **No Network Calls**: The install scripts run entirely offline. No telemetry, no analytics, no outbound requests. The only network operation is `git clone` / `git pull`, which you control.
+- **Fully Reversible**: To completely uninstall Lotus, simply delete the injected files (e.g., `~/.claude/CLAUDE.md`, `~/.gemini/GEMINI.md`) or restore from the `.bak` backups. There is no registry, no system service, nothing hidden.
+
 ## 🔄 Update Philosophy
 
 Lotus is **not a "set and forget" config**. It is a living, evolving protocol.
