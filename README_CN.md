@@ -16,8 +16,35 @@ Lotus 持续采用**最新、最安全、最稳定的全局 Agent 管理机制**
 | Codex CLI | ✅ 完全自动 | `~/.codex/AGENTS.md` 自动加载 |
 | OpenCode | ✅ 完全自动 | `~/.config/opencode/AGENTS.md` |
 | Aider | ✅ 完全自动 | `~/.aider.conf.yml` |
-| Windsurf | ⚠️ 需手动粘贴 | 打开 Windsurf → 自定义 → 规则 → 点击「+ Global」粘贴内容 |
-| Cursor | ⚠️ 需手动粘贴 | 打开 Cursor Settings → General → Rules for AI → 粘贴内容 |
+| Windsurf | ⚠️ 需手动粘贴 | 见下方步骤 |
+| Cursor | ⚠️ 需手动粘贴 | 见下方步骤 |
+
+<details>
+<summary>📋 Windsurf 手动配置步骤（点击展开）</summary>
+
+1. 打开 Windsurf
+2. 点击右上角的 **自定义图标**（书本图标）
+3. 在弹出面板中找到 **Rules（规则）** 选项卡
+4. 点击 **「+ Global」** 按钮
+5. 将 `core/AGENTS.md` 的完整内容复制粘贴进去
+6. 保存即可，此后每次使用 Cascade 都会自动加载
+
+> ⚠️ Windsurf 全局规则有 **6,000 字符上限**。如果内容超限，只保留核心原则和意图路由部分即可。
+
+</details>
+
+<details>
+<summary>📋 Cursor 手动配置步骤（点击展开）</summary>
+
+1. 打开 Cursor
+2. 点击右上角的**齿轮图标** → 进入 **Cursor Settings**
+3. 在左侧找到 **General** → 找到 **「Rules for AI」** 输入框
+4. 将 `core/AGENTS.md` 的完整内容复制粘贴进去
+5. 保存即可，此后每个项目的 AI 对话都会自动携带这些规则
+
+> 💡 如果你还需要项目级规则，可以在项目根目录创建 `.cursor/rules/` 文件夹，放入 `.mdc` 格式的规则文件。Lotus 的 `install.ps1 -Project` 命令会自动帮你生成。
+
+</details>
 
 ## 🧬 第一性原理：为什么 Lotus 有效
 

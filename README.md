@@ -16,8 +16,35 @@ Lotus continuously leverages the **latest, safest, and most stable global agent 
 | Codex CLI | ✅ Fully automatic | `~/.codex/AGENTS.md` auto-loaded |
 | OpenCode | ✅ Fully automatic | `~/.config/opencode/AGENTS.md` |
 | Aider | ✅ Fully automatic | `~/.aider.conf.yml` |
-| Windsurf | ⚠️ Manual paste | Open Windsurf → Customizations → Rules → Click "+ Global" and paste |
-| Cursor | ⚠️ Manual paste | Open Cursor Settings → General → Rules for AI → Paste content |
+| Windsurf | ⚠️ Manual paste | See steps below |
+| Cursor | ⚠️ Manual paste | See steps below |
+
+<details>
+<summary>📋 Windsurf Manual Setup (click to expand)</summary>
+
+1. Open Windsurf
+2. Click the **Customizations icon** (book icon) in the top-right
+3. Navigate to the **Rules** tab
+4. Click the **"+ Global"** button
+5. Copy and paste the full contents of `core/AGENTS.md`
+6. Save — Cascade will now auto-load these rules for every session
+
+> ⚠️ Windsurf has a **6,000 character limit** for global rules. If the content exceeds this, keep only the core principles and intent routing sections.
+
+</details>
+
+<details>
+<summary>📋 Cursor Manual Setup (click to expand)</summary>
+
+1. Open Cursor
+2. Click the **gear icon** in the top-right → open **Cursor Settings**
+3. Navigate to **General** → find the **"Rules for AI"** input box
+4. Copy and paste the full contents of `core/AGENTS.md`
+5. Save — all AI conversations in every project will now carry these rules
+
+> 💡 For project-level rules, create a `.cursor/rules/` folder in your project root with `.mdc` rule files. Lotus's `install.ps1 -Project` command will auto-generate these for you.
+
+</details>
 
 ## 🧬 First Principles: Why Lotus Works
 
