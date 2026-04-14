@@ -50,6 +50,17 @@ C:\path\to\AGENTRULES\install.ps1 -Project nextjs
 
 *(Currently available templates: `nextjs`, `vite`, `html`)*
 
+### 3. The Auto-Init Prompt (Day-0 Universal Start)
+
+If you are starting a new project on a **brand-new computer, cloud server, or different terminal**, just paste the following prompt to your AI coding agent. It will securely fetch your rules from GitHub, install them globally on the new machine, configure the local project, and clean up after itself:
+
+> "This is a brand new project directory. Please execute the following initialization steps locally:
+> 1. Clone `https://github.com/Bronc-X/AGENTRULES.git` into a temporary directory in the system.
+> 2. Determine my OS. Run the installer inside the temporary repo to apply the `nextjs` template to my current directory (Windows: `install.ps1 -Project nextjs`, Mac/Linux: `install.sh --project nextjs`).
+> 3. To make sure you retain our workflows globally on this new machine, also run the global install flag (Windows: `install.ps1 -Global`, Mac/Linux: `install.sh --global`).
+> 4. Once finished, delete the temporary cloned repository.
+> 5. Carefully read the newly generated `AGENTS.md` and `.agents/rules/` in my current directory to understand my coding standards and design language. Let me know when you are ready."
+
 ## Architecture (Hub-and-Spoke)
 
 ```text
@@ -67,9 +78,10 @@ AGENTRULES/
 Once installed globally, you can invoke these skills by mentioning them (`@name`) in your agent's chat prompt in **any project**:
 
 1. `@gstack`: Developer workflows and persona switching (PM, Architect, Coder, QA).
-2. `@feynman`: Complex topic breakdown explaining the core "gears".
-3. `@polanyi-tacit`: Decoding defensive code and organizational debt.
-4. `@auto-build`: Silent compilation verification.
+2. `@vibe`: Vibe Coding mode. Delegate technical aesthetics entirely to AI, prioritizing visual elegance and silent iteration without asking boilerplate questions.
+3. `@feynman`: Complex topic breakdown explaining the core "gears".
+4. `@polanyi-tacit`: Decoding defensive code and organizational debt.
+5. `@auto-build`: Silent compilation verification.
 
 ## Customization
 
