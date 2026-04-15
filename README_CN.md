@@ -158,31 +158,37 @@ cd ~/Projects/MyNewApp
 
 1. **[`@gstack` / `/gstack`](https://github.com/Bronc-X/Lotus/blob/main/skills/gstack.md)**
    * **功能**：触发精英级多角色开发者工作流。AI 会在编写代码前，在产品经理、架构师、构建者和 QA 之间显式切换角色，确保系统完整性。
-2. **[`@feynman` / `/feynman`](https://github.com/Bronc-X/Lotus/blob/main/skills/feynman.md)**
+2. **[`@test-driven-development` / `/test-driven-development`](https://github.com/Bronc-X/Lotus/blob/main/skills/test-driven-development.md)**
+   * **功能**：严格执行红绿重构（Red-Green-Refactor）。在编写业务逻辑之前强制要求 AI 先写出必定失败的测试。这是对抗 AI 幻觉的终极武器。
+3. **[`@frontend-design` / `/frontend-design`](https://github.com/Bronc-X/Lotus/blob/main/skills/frontend-design.md)**
+   * **功能**：Vercel Labs 级前端审美边界。屏蔽通用“AI 感”布局，强制明确设计锚点（如 Brutalist, Editorial 等），并在编写 CSS/React 之前应用设计可行性分析（DFII）。
+4. **[`@debugging-strategies` / `/debugging-strategies`](https://github.com/Bronc-X/Lotus/blob/main/skills/debugging-strategies.md)**
+   * **功能**：用科学的 Debug 循环取代枯燥的盲猜。强制 AI 提出假设，编写探测代码证伪，只有在根因确立后才提供修复方案。
+5. **[`@security-auditor` / `/security-auditor`](https://github.com/Bronc-X/Lotus/blob/main/skills/security-auditor.md)**
+   * **功能**：深度的 DevSecOps 审查。扫描 OWASP Top 10 漏洞、越权风险、原型链污染及弱密码学算法。建议提 PR 前执行。
+6. **[`@feynman` / `/feynman`](https://github.com/Bronc-X/Lotus/blob/main/skills/feynman.md)**
    * **功能**：强制 AI 使用费曼技巧。用绝对通俗易懂的语言拆解复杂 Bug 或底层机制，然后再尝试修复。
-3. **[`@polanyi-tacit` / `/polanyi-tacit`](https://github.com/Bronc-X/Lotus/blob/main/skills/polanyi-tacit.md)**
+7. **[`@polanyi-tacit` / `/polanyi-tacit`](https://github.com/Bronc-X/Lotus/blob/main/skills/polanyi-tacit.md)**
    * **功能**：唤醒深度分析模式。AI 会刻意寻找架构妥协、"防御性"代码块以及隐藏在表象下的组织技术债务。
-4. **[`@auto-build` / `/auto-build`](https://github.com/Bronc-X/Lotus/blob/main/skills/auto-build.md)**
+8. **[`@auto-build` / `/auto-build`](https://github.com/Bronc-X/Lotus/blob/main/skills/auto-build.md)**
    * **功能**：静默执行 `npm install`、运行 `npm run build` 并检查编译错误，全程无需征求你的许可。
-5. **[`@btw` / `/btw`](https://github.com/Bronc-X/Lotus/blob/main/skills/btw.md)**
-   * **功能**：旁路快问模式。灵感来自 Claude Code 原生的 `/btw` 命令。在不中断主线任务的情况下提出一个临时问题，AI 用 3-5 句话回答，不修改任何文件，然后无缝回到主线任务。跨所有平台可用，不仅限于 Claude Code。
+9. **[`@btw` / `/btw`](https://github.com/Bronc-X/Lotus/blob/main/skills/btw.md)**
+   * **功能**：旁路快问模式。在不中断主线任务的情况下提出一个临时问题，AI 用 3-5 句话回答，不修改任何文件，然后无缝回到主线任务。
 
 #### 源自 Claude Code 的原生斜杠命令（Lotus 复刻/适配到其他平台）
 
-以下命令原本是 Claude Code CLI 的独有功能。Lotus 将它们的**核心行为逻辑**提炼为 skill 文件，使其他平台的用户也能获得相似的体验。
-
-6. **[`@powerup` / `/powerup`](https://github.com/Bronc-X/Lotus/blob/main/skills/powerup.md)**
+10. **[`@powerup` / `/powerup`](https://github.com/Bronc-X/Lotus/blob/main/skills/powerup.md)**
    * **什么时候用**：你刚开始用 AI 编程，或者觉得自己只用到了 AI 能力的 10%。
-   * **功能**：相当于 Claude Code 版的「多邻国闯关」。一共分 **10 关**，每关大约 2 分钟，20 分钟就能通关。从最基础的"怎么和代码库对话"、"怎么撤销 AI 的操作"，到进阶的"怎么把任务放到后台跑"、"怎么让 AI 记住你的偏好"、"怎么创建子 Agent"、"怎么用手机远程控制"——每一关都是 Anthropic 帮你划好的重点。与其到处找零散教程，不如先把这十关打通。在 Claude Code 中直接输入 `/powerup` 即可启动；在其他平台触发 `@powerup` 会获得同等内容的文字版教学。
-7. **[`@insights` / `/insights`](https://github.com/Bronc-X/Lotus/blob/main/skills/insights.md)**
-   * **什么时候用**：你已经用了一段时间，想看看自己的使用习惯有没有可以优化的地方。
-   * **功能**：生成一份过去 **30 天**你使用 AI 编程的习惯报告。这份交互式 HTML 报告会告诉你：最常用的命令是什么、哪些操作模式高度重复、哪里经常卡住或反复 debug。更妙的是，它还会推荐一些可以自定义的命令或现成的 Skill 来消除这些摩擦点。**这是回顾你来时的路，非常有正反馈！** 在 Claude Code 中输入 `/insights` 即可生成报告；在其他平台触发 `@insights` 会引导 AI 对当前项目的历史对话做类似的回顾与建议。
-8. **[`@loop` / `/loop`](https://github.com/Bronc-X/Lotus/blob/main/skills/loop.md)**
-   * **什么时候用**：你有一些需要定期、反复执行的检查任务（比如每 5 分钟看一下部署状态、持续监控 PR 变化）。
-   * **功能**：设置一个会话内的定时循环任务。你给出间隔时间和一个指令（例如 `/loop 5m 检查部署状态`），AI 就会像一个小闹钟一样定期自动执行。这个循环是会话内的——关掉终端就停了，不会变成一个系统级的后台守护进程，非常安全可控。在 Claude Code 中直接使用 `/loop <间隔> <指令>`；在其他平台触发 `@loop` 后 AI 会用平台原生能力模拟类似的定期提醒与执行。
-9. **[`@subagent` / `/subagent`](https://github.com/Bronc-X/Lotus/blob/main/skills/subagent.md)**
-   * **什么时候用**：你的任务太复杂了，一个 AI 顾不过来；或者你想让 AI 并行处理多件事。
-   * **功能**：创建和管理**子 Agent（Subagent）**。每个子 Agent 都有自己独立的上下文窗口、独立的系统提示、独立的工具权限。你可以让一个子 Agent 专门负责搜索代码库、另一个专门跑测试、主 Agent 只负责写核心逻辑——互不干扰。这是解决"上下文窗口挤爆"的终极方案：把噪音隔离到子进程里，主线保持干净。在 Claude Code 中使用 `/agents` 管理；在其他平台触发 `@subagent` 会引导 AI 用多轮对话模拟类似的任务拆分与隔离模式。
+   * **功能**：相当于 Claude Code 版的「多邻国闯关」。一共分 **10 关**，从基础对话到后台任务管理等。
+11. **[`@insights` / `/insights`](https://github.com/Bronc-X/Lotus/blob/main/skills/insights.md)**
+   * **什么时候用**：你想看看自己的使用习惯有没有可以优化的地方。
+   * **功能**：生成一份过去 **30 天**你使用 AI 的习惯交互报告，告诉你由于高频短视行为卡住的摩擦点。
+12. **[`@loop` / `/loop`](https://github.com/Bronc-X/Lotus/blob/main/skills/loop.md)**
+   * **什么时候用**：你有一些需要定期、反复执行的检查任务（比如每 5 分钟看一下部署状态）。
+   * **功能**：设置一个会话内的定时循环任务。像一个小闹钟持续静音运行。
+13. **[`@subagent` / `/subagent`](https://github.com/Bronc-X/Lotus/blob/main/skills/subagent.md)**
+   * **什么时候用**：任务太复杂或需要并行处理。
+   * **功能**：创建和管理**子 Agent（Subagent）**。拥有独立的上下文窗口以避免主干内容被塞爆。
 
 ## 🏗️ 架构（Hub-and-Spoke 中心辐射模型）
 
