@@ -7,14 +7,19 @@
 
 Lotus 持续采用**最新、最安全、最稳定的全局 Agent 管理机制**。通过将规则注入到你本地机器上各 AI 工具的全局配置中，Lotus 同时管控**所有**项目中 AI 助手的行为——无需重复编写 prompt 指令，也无需为每个项目做繁琐的前期配置。
 
+现在，Lotus 还把 **官方 [garrytan/gstack](https://github.com/garrytan/gstack)** 视为 gstack 运行时的唯一真源。一次全局安装会同时完成两件事：
+
+1. 把 Lotus 的全局规则注入各个 AI 工具的全局配置。
+2. 将官方 gstack clone / update 到 `~/.gstack/repos/gstack`，为支持的平台执行上游 setup，并开启自动更新。
+
 **平台兼容性说明：**
 
 | 平台 | 全局自动注入 | 备注 |
 |---|---|---|
-| Claude Code | ✅ 完全自动 | `~/.claude/CLAUDE.md` 自动加载 |
+| Claude Code | ✅ 完全自动 | `~/.claude/CLAUDE.md` + 官方 gstack 运行时 |
 | Antigravity / Gemini CLI | ✅ 完全自动 | `~/.gemini/GEMINI.md` 自动加载 |
-| Codex CLI | ✅ 完全自动 | `~/.codex/AGENTS.md` 自动加载 |
-| OpenCode | ✅ 完全自动 | `~/.config/opencode/AGENTS.md` |
+| Codex CLI | ✅ 完全自动 | `~/.codex/AGENTS.md` + 官方 gstack 运行时 |
+| OpenCode | ✅ 完全自动 | `~/.config/opencode/AGENTS.md` + 官方 gstack 运行时 |
 | Aider | ✅ 完全自动 | `~/.aider.conf.yml` |
 | Windsurf | ⚠️ 需手动粘贴 | 见下方步骤 |
 | Cursor | ⚠️ 需手动粘贴 | 见下方步骤 |
@@ -81,6 +86,10 @@ Lotus 持续采用**最新、最安全、最稳定的全局 Agent 管理机制**
 
 全局安装完成后，Lotus 的核心规则（工作流、质量门禁等）已经自动驻留在你所有 AI 工具的全局配置中了，**不需要每次唤醒**。
 
+对 Codex 来说，这表示 Lotus 会写入 `~/.codex/AGENTS.md`，然后由 Codex 在你打开任意本地仓库时自动继承这些规则。这里是“继承加载”，不是“把文件同步到每个项目目录”，所以如果你只执行了全局安装，项目根目录里**不会**自动出现新的 `AGENTS.md`。
+
+对 Claude、Codex 和 OpenCode 来说，Lotus 还会把官方 gstack 运行时托管在 `~/.gstack/repos/gstack`。它是全局的、可更新的，不再依赖 Lotus 仓库里那份静态快照。
+
 但如果你需要为新项目添加**项目级模板**（设计系统、技术栈约束），只需在新项目目录里运行一次：
 
 ```powershell
@@ -112,6 +121,12 @@ git clone https://github.com/Bronc-X/Lotus.git ~/Dev/Lotus
 ### 第 1 步：全局安装（配置你所有的 IDE）
 
 这会将 Lotus 规则注入到你机器上每个受支持的 AI 工具的全局配置中。
+
+同时，它还会把**官方 gstack 上游**安装到 `~/.gstack/repos/gstack`，为 Claude/Codex/OpenCode 执行官方 setup，并开启 gstack 自动更新，让 skill 运行时始终跟着上游走。
+
+对 Codex 而言，全局安装目标是 `~/.codex/AGENTS.md`。这一步不会改动你的本地项目目录。如果你希望项目里看得到 `AGENTS.md` 和 `.agents/rules/`，还需要在该项目目录里继续执行第 2 步。
+
+**官方 gstack 运行时依赖：** `git`、`bash`、`bun`，以及 Windows 下的 `node`。
 
 > ⚠️ **安全设计**：如果你已经有现有的配置文件（如 `CLAUDE.md`、`GEMINI.md`、`.aider.conf.yml`），安装器会在覆盖前自动创建 `.bak` 备份。你随时可以恢复。
 
@@ -156,8 +171,8 @@ cd ~/Projects/MyNewApp
 
 #### Lotus 核心技能（跨所有平台可用）
 
-1. **[`@gstack` / `/gstack`](https://github.com/Bronc-X/Lotus/blob/main/skills/gstack.md)**
-   * **功能**：触发精英级多角色开发者工作流。AI 会在编写代码前，在产品经理、架构师、构建者和 QA 之间显式切换角色，确保系统完整性。
+1. **[`@gstack` / `/gstack`](https://github.com/garrytan/gstack)**
+   * **功能**：Lotus 现在把它委托给全局安装的官方 gstack 运行时。`/office-hours`、`/plan-eng-review`、`/review`、`/investigate`、`/qa`、`/ship` 等工作流能力都以上游实现为准。
 2. **[`@test-driven-development` / `/test-driven-development`](https://github.com/Bronc-X/Lotus/blob/main/skills/test-driven-development.md)**
    * **功能**：严格执行红绿重构（Red-Green-Refactor）。在编写业务逻辑之前强制要求 AI 先写出必定失败的测试。这是对抗 AI 幻觉的终极武器。
 3. **[`@frontend-design` / `/frontend-design`](https://github.com/Bronc-X/Lotus/blob/main/skills/frontend-design.md)**
@@ -231,5 +246,9 @@ cd C:\Dev\Lotus; git pull; .\install.ps1 -Global
 ## 📌 持久性：一次配置，永久生效
 
 一旦 Lotus 全局安装完成，**你创建的每一个新项目都会自动继承你的规则**。不需要复制粘贴。不需要"记得添加配置文件"。规则存在于每个 AI 工具的操作系统级全局配置中，所以它们始终生效——无论你是在开一个全新的 Next.js 应用、调试一个遗留代码库，还是在同事的机器上结对编程。
+
+在 Codex 里，“自动继承”指的是应用会自动读取 `~/.codex/AGENTS.md`，而不是 Lotus 会把 `AGENTS.md` 实体复制到你磁盘上的每一个仓库里。
+
+对支持的平台来说，官方 gstack 运行时同样是全局常驻的。Lotus 会把它托管在 `~/.gstack/repos/gstack`，并在每次全局安装时重新执行上游 setup，所以这里的“永久生效”既包括规则，也包括运行时本身。
 
 如需项目级别的覆盖（设计系统、技术栈），只需使用 `install.ps1 -Project <模板名>` 在上层叠加即可。全局规则不受影响。

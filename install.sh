@@ -3,11 +3,13 @@
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_AGENTS="$REPO_ROOT/core/AGENTS.md"
 SKILLS_DIR="$REPO_ROOT/skills"
+MANAGED_GSTACK_INSTALLER="$REPO_ROOT/scripts/install-managed-gstack.sh"
 
 # Skills that rely on "staying in current conversation" and are incompatible
 # with Codex App's architecture (each skill invocation = new task context).
 # These skills work via AGENTS.md rule-level recognition instead.
 CODEX_EXCLUDED_SKILLS=("btw" "loop")
+MANAGED_OFFICIAL_SKILLS=("gstack")
 
 GLOBAL=0
 PROJECT=""
@@ -27,6 +29,26 @@ backup_if_exists() {
         cp "$1" "$1.bak"
         echo "    ⚠️  Backed up existing: $1 → $1.bak"
     fi
+}
+
+copy_lotus_skills() {
+    local target_dir="$1"
+    shift
+    mkdir -p "$target_dir"
+    for skill_file in "$SKILLS_DIR"/*.md; do
+        local skill_name
+        skill_name="$(basename "$skill_file" .md)"
+        local should_skip=false
+        for excluded in "$@"; do
+            if [ "$skill_name" = "$excluded" ]; then
+                should_skip=true
+                break
+            fi
+        done
+        if [ "$should_skip" = false ]; then
+            cp "$skill_file" "$target_dir/"
+        fi
+    done
 }
 
 # Convert a Lotus skill .md file into a Codex-compatible SKILL.md directory.
@@ -102,14 +124,14 @@ if [ "$GLOBAL" -eq 1 ]; then
     mkdir -p ~/.gemini/antigravity/skills
     backup_if_exists ~/.gemini/GEMINI.md
     cp "$CORE_AGENTS" ~/.gemini/GEMINI.md
-    cp "$SKILLS_DIR"/* ~/.gemini/antigravity/skills/
+    copy_lotus_skills ~/.gemini/antigravity/skills "${MANAGED_OFFICIAL_SKILLS[@]}"
     echo "  ✅ Antigravity & Gemini CLI configured"
 
     # 2. Claude Code
     mkdir -p ~/.claude/skills
     backup_if_exists ~/.claude/CLAUDE.md
     cp "$CORE_AGENTS" ~/.claude/CLAUDE.md
-    cp "$SKILLS_DIR"/* ~/.claude/skills/
+    copy_lotus_skills ~/.claude/skills "${MANAGED_OFFICIAL_SKILLS[@]}"
     echo "  ✅ Claude Code configured"
 
     # 3. OpenCode
@@ -124,15 +146,15 @@ if [ "$GLOBAL" -eq 1 ]; then
     cp "$CORE_AGENTS" ~/.windsurf/rules/global.md
     echo "  ✅ Windsurf Cascade configured"
 
-    # 5. Codex CLI — Rules + Skills (auto-convert to Codex SKILL.md format)
-    #    Skills that require "in-context" behavior (btw, loop, subagent, insights)
-    #    are excluded — they work via AGENTS.md rules instead of /commands.
+    # 5. Codex CLI — Rules + Lotus-only compatible skills.
+    #    Official gstack skills are installed by the managed upstream setup below.
+    #    In-context-only Lotus skills are excluded — they work via AGENTS.md rules.
     mkdir -p ~/.codex/skills
     backup_if_exists ~/.codex/AGENTS.md
     cp "$CORE_AGENTS" ~/.codex/AGENTS.md
 
     # Clean up previously deployed incompatible skills
-    for excluded in "${CODEX_EXCLUDED_SKILLS[@]}"; do
+    for excluded in "${CODEX_EXCLUDED_SKILLS[@]}" "${MANAGED_OFFICIAL_SKILLS[@]}"; do
         if [ -d "$HOME/.codex/skills/$excluded" ]; then
             rm -rf "$HOME/.codex/skills/$excluded"
             echo "    🗑️  Removed incompatible skill: $excluded"
@@ -144,19 +166,19 @@ if [ "$GLOBAL" -eq 1 ]; then
         skill_name=$(basename "$skill_file" .md)
         # Check if skill is in excluded list
         is_excluded=false
-        for excluded in "${CODEX_EXCLUDED_SKILLS[@]}"; do
+        for excluded in "${CODEX_EXCLUDED_SKILLS[@]}" "${MANAGED_OFFICIAL_SKILLS[@]}"; do
             if [ "$skill_name" = "$excluded" ]; then
                 is_excluded=true
                 break
             fi
         done
         if [ "$is_excluded" = true ]; then
-            echo "    ⏭️  Skipped (in-context only): $skill_name"
+            echo "    ⏭️  Skipped (managed elsewhere or in-context only): $skill_name"
         else
             convert_to_codex_skill "$skill_file" ~/.codex/skills
         fi
     done
-    echo "  ✅ Codex CLI configured (rules + compatible skills)"
+    echo "  ✅ Codex CLI configured (rules + Lotus-only compatible skills)"
 
     # 6. Cursor (Global Rules)
     mkdir -p ~/.cursor/rules
@@ -182,9 +204,19 @@ read:
 EOF
     echo "  ✅ Aider AI configured"
 
+    echo "  ↻ Installing official gstack upstream..."
+    bash "$MANAGED_GSTACK_INSTALLER"
+    echo "  ✅ Official gstack configured for Claude/Codex/OpenCode"
+
     echo ""
     echo -e "\033[0;32mGlobal installation completed successfully!\033[0m"
     echo -e "\033[0;33mIf any existing configs were overwritten, .bak backups have been created.\033[0m"
+    echo ""
+    echo -e "\033[0;36mCodex note:\033[0m"
+    echo "  - Global rules were installed to ~/.codex/AGENTS.md and are auto-loaded in local repos."
+    echo "  - --global does not create AGENTS.md inside each project folder."
+    echo "  - Run ./install.sh --project nextjs|vite|html inside a project when you want local AGENTS.md and .agents/rules/ files."
+    echo "  - Official gstack is managed at ~/.gstack/repos/gstack and kept auto-updatable."
 fi
 
 if [ -n "$PROJECT" ]; then

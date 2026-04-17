@@ -7,14 +7,19 @@
 
 Lotus continuously leverages the **latest, safest, and most stable global agent management mechanisms**. By applying these rules to your local AI tools' global configurations, Lotus governs the behavior of your AI agents across **all** your projects simultaneously — without ever needing to write repetitive prompt instructions or perform tedious per-project setups.
 
+Lotus now treats **official [garrytan/gstack](https://github.com/garrytan/gstack)** as the source of truth for the gstack runtime. Global install does two things in one shot:
+
+1. Inject Lotus global rules into each agent's global config.
+2. Clone or update official gstack into `~/.gstack/repos/gstack`, run upstream setup for supported hosts, and enable auto-updates.
+
 **Platform Compatibility:**
 
 | Platform | Auto-Inject Global? | Notes |
 |---|---|---|
-| Claude Code | ✅ Fully automatic | `~/.claude/CLAUDE.md` auto-loaded |
+| Claude Code | ✅ Fully automatic | `~/.claude/CLAUDE.md` + official gstack runtime |
 | Antigravity / Gemini CLI | ✅ Fully automatic | `~/.gemini/GEMINI.md` auto-loaded |
-| Codex CLI | ✅ Fully automatic | `~/.codex/AGENTS.md` auto-loaded |
-| OpenCode | ✅ Fully automatic | `~/.config/opencode/AGENTS.md` |
+| Codex CLI | ✅ Fully automatic | `~/.codex/AGENTS.md` + official gstack runtime |
+| OpenCode | ✅ Fully automatic | `~/.config/opencode/AGENTS.md` + official gstack runtime |
 | Aider | ✅ Fully automatic | `~/.aider.conf.yml` |
 | Windsurf | ⚠️ Manual paste | See steps below |
 | Cursor | ⚠️ Manual paste | See steps below |
@@ -81,6 +86,10 @@ If you are starting a new project or setting up a brand-new computer, simply **c
 
 Once globally installed, Lotus core rules (workflows, quality gates) are **already active** in all your AI tools — **no wake-up needed**.
 
+For Codex, that means Lotus writes to `~/.codex/AGENTS.md`, and Codex automatically loads those rules in every local repository you open. This is an inheritance mechanism, not a file sync, so you will **not** see a new `AGENTS.md` appear in each project unless you also run a project template install.
+
+For Claude, Codex, and OpenCode, Lotus also manages the official gstack runtime at `~/.gstack/repos/gstack`. That runtime is global, updateable, and no longer copied from a stale Lotus snapshot.
+
 If you want to add **project-level templates** (design systems, tech stack constraints) to a new project, just run once inside the project folder:
 
 ```powershell
@@ -112,6 +121,12 @@ git clone https://github.com/Bronc-X/Lotus.git ~/Dev/Lotus
 ### Step 1: Global Installation (Configure all your IDEs)
 
 This injects Lotus rules into the global config of every supported AI tool on your machine.
+
+It also installs the **official gstack upstream** into `~/.gstack/repos/gstack`, runs upstream setup for Claude/Codex/OpenCode, and enables gstack auto-update so the skill runtime stays current.
+
+For Codex specifically, the global install target is `~/.codex/AGENTS.md`. Local project folders remain untouched after this step. If you want a visible project-level `AGENTS.md` plus `.agents/rules/`, run Step 2 inside that project as well.
+
+**Requirements for official gstack runtime:** `git`, `bash`, `bun`, and `node` on Windows.
 
 > ⚠️ **Safe by design**: If you already have existing config files (e.g., `CLAUDE.md`, `GEMINI.md`, `.aider.conf.yml`), the installer will automatically create `.bak` backups before overwriting. You can always restore them.
 
@@ -156,8 +171,8 @@ The trigger syntax depends on whether you are using a visual IDE or a command-li
 
 #### Lotus Core Skills (Cross-Platform)
 
-1. **[`@gstack` / `/gstack`](https://github.com/Bronc-X/Lotus/blob/main/skills/gstack.md)**
-   * **What it does**: Triggers the elite multi-role developer workflow. The AI will explicitly switch between Product Manager, Architect, Builder, and QA before writing code to ensure system integrity.
+1. **[`@gstack` / `/gstack`](https://github.com/garrytan/gstack)**
+   * **What it does**: Lotus now delegates this to the official gstack upstream runtime it installs globally. Use the upstream workflow and specialist skills such as `/office-hours`, `/plan-eng-review`, `/review`, `/investigate`, `/qa`, and `/ship`.
 2. **[`@test-driven-development` / `/test-driven-development`](https://github.com/Bronc-X/Lotus/blob/main/skills/test-driven-development.md)**
    * **What it does**: Forces strict Red-Green-Refactor constraints. The AI is forbidden from writing business logic until it writes a failing test. The ultimate anti-hallucination tool.
 3. **[`@frontend-design` / `/frontend-design`](https://github.com/Bronc-X/Lotus/blob/main/skills/frontend-design.md)**
@@ -231,5 +246,9 @@ cd C:\path\to\Lotus; git pull; .\install.ps1 -Global
 ## 📌 Persistence: Set Up Once, Apply Forever
 
 Once Lotus is installed globally, **every new project you create automatically inherits your rules**. No copy-pasting. No "remember to add the config file". The rules live at the OS-level global config of each AI tool, so they are always active—whether you're starting a fresh Next.js app, debugging a legacy codebase, or pair-programming on a colleague's machine.
+
+On Codex, inheritance means the app reads `~/.codex/AGENTS.md` automatically when you open a local repo. It does **not** mean Lotus copies `AGENTS.md` into every repo on disk.
+
+For supported hosts, the official gstack runtime is also global. Lotus keeps it in `~/.gstack/repos/gstack` and re-runs upstream setup on every global install, so "permanent" means both rules and runtime survive across repos and machine restarts.
 
 For project-specific overrides (design systems, tech stacks), just use `install.ps1 -Project <template>` to layer on top. The global rules remain untouched.

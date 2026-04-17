@@ -6,11 +6,13 @@ param (
 $RepoRoot = $PSScriptRoot
 $CoreAgents = Join-Path $RepoRoot "core\AGENTS.md"
 $SkillsDir = Join-Path $RepoRoot "skills"
+$ManagedGstackInstaller = Join-Path $RepoRoot "scripts\install-managed-gstack.sh"
 
 # Skills that rely on "staying in current conversation" and are incompatible
 # with Codex App's architecture (each skill invocation = new task context).
 # These skills work via AGENTS.md rule-level recognition instead.
 $CodexExcludedSkills = @("btw", "loop")
+$ManagedOfficialSkills = @("gstack")
 
 # Backup helper: creates a .bak copy if the target file already exists
 function Backup-IfExists {
@@ -19,6 +21,24 @@ function Backup-IfExists {
         $BackupPath = "$FilePath.bak"
         Copy-Item $FilePath $BackupPath -Force
         Write-Host "    ⚠️  Backed up existing: $FilePath → $BackupPath" -ForegroundColor Yellow
+    }
+}
+
+function Copy-LotusSkills {
+    param (
+        [string]$TargetDir,
+        [string[]]$ExcludedSkills = @()
+    )
+
+    if (-not (Test-Path $TargetDir)) {
+        New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
+    }
+
+    Get-ChildItem (Join-Path $SkillsDir "*.md") | ForEach-Object {
+        $baseName = [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
+        if ($ExcludedSkills -notcontains $baseName) {
+            Copy-Item $_.FullName $TargetDir -Force
+        }
     }
 }
 
@@ -105,7 +125,7 @@ if ($Global) {
     
     $GeminiSkills = Join-Path $GeminiDir "antigravity\skills"
     if (-not (Test-Path $GeminiSkills)) { New-Item -ItemType Directory -Path $GeminiSkills -Force | Out-Null }
-    Copy-Item (Join-Path $SkillsDir "*") $GeminiSkills -Force
+    Copy-LotusSkills -TargetDir $GeminiSkills -ExcludedSkills $ManagedOfficialSkills
     Write-Host "  ✅ Antigravity & Gemini CLI configured"
     
     # 2. Claude Code
@@ -116,7 +136,7 @@ if ($Global) {
     
     $ClaudeSkills = Join-Path $ClaudeDir "skills"
     if (-not (Test-Path $ClaudeSkills)) { New-Item -ItemType Directory -Path $ClaudeSkills -Force | Out-Null }
-    Copy-Item (Join-Path $SkillsDir "*") $ClaudeSkills -Force
+    Copy-LotusSkills -TargetDir $ClaudeSkills -ExcludedSkills $ManagedOfficialSkills
     Write-Host "  ✅ Claude Code configured"
     
     # 3. OpenCode
@@ -133,9 +153,9 @@ if ($Global) {
     Copy-Item $CoreAgents (Join-Path $WindsurfDir "global.md") -Force
     Write-Host "  ✅ Windsurf Cascade configured"
     
-    # 5. Codex CLI — Rules + Skills (auto-convert to Codex SKILL.md format)
-    #    Skills that require "in-context" behavior (btw, loop, subagent, insights)
-    #    are excluded — they work via AGENTS.md rules instead of /commands.
+    # 5. Codex CLI — Rules + Lotus-only compatible skills.
+    #    Official gstack skills are installed by the managed upstream setup below.
+    #    In-context-only Lotus skills are excluded — they work via AGENTS.md rules.
     $CodexDir = Join-Path $HOME ".codex"
     if (-not (Test-Path $CodexDir)) { New-Item -ItemType Directory -Path $CodexDir -Force | Out-Null }
     Backup-IfExists (Join-Path $CodexDir "AGENTS.md")
@@ -145,7 +165,7 @@ if ($Global) {
     if (-not (Test-Path $CodexSkills)) { New-Item -ItemType Directory -Path $CodexSkills -Force | Out-Null }
     
     # Clean up previously deployed incompatible skills
-    foreach ($excluded in $CodexExcludedSkills) {
+    foreach ($excluded in ($CodexExcludedSkills + $ManagedOfficialSkills)) {
         $excludedDir = Join-Path $CodexSkills $excluded
         if (Test-Path $excludedDir) {
             Remove-Item $excludedDir -Recurse -Force
@@ -156,14 +176,14 @@ if ($Global) {
     # Convert compatible Lotus skills to Codex directory format
     Get-ChildItem (Join-Path $SkillsDir "*.md") | ForEach-Object {
         $baseName = [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
-        if ($CodexExcludedSkills -contains $baseName) {
-            Write-Host "    ⏭️  Skipped (in-context only): $baseName"
+        if (($CodexExcludedSkills + $ManagedOfficialSkills) -contains $baseName) {
+            Write-Host "    ⏭️  Skipped (managed elsewhere or in-context only): $baseName"
         } else {
             Convert-ToCodexSkill -SourceFile $_.FullName -TargetDir $CodexSkills
             Write-Host "    📦 Converted skill: $baseName"
         }
     }
-    Write-Host "  ✅ Codex CLI configured (rules + compatible skills)"
+    Write-Host "  ✅ Codex CLI configured (rules + Lotus-only compatible skills)"
     
     # 6. Cursor (Global Rules)
     $CursorDir = Join-Path $HOME ".cursor\rules"
@@ -192,10 +212,27 @@ read:
   - AGENTS.md
 "@ | Out-File $AiderFile -Encoding UTF8
     Write-Host "  ✅ Aider AI configured"
+
+    Write-Host "  ↻ Installing official gstack upstream..."
+    if (-not (Get-Command bash -ErrorAction SilentlyContinue)) {
+        throw "Git Bash is required to install official gstack on Windows. Install Git for Windows or ensure 'bash' is on PATH."
+    }
+    $BashManagedGstackInstaller = $ManagedGstackInstaller -replace '\\', '/'
+    & bash $BashManagedGstackInstaller
+    if ($LASTEXITCODE -ne 0) {
+        throw "Official gstack installation failed."
+    }
+    Write-Host "  ✅ Official gstack configured for Claude/Codex/OpenCode"
     
     Write-Host ""
     Write-Host "Global installation completed successfully!" -ForegroundColor Green
     Write-Host "If any existing configs were overwritten, .bak backups have been created." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Codex note:" -ForegroundColor Cyan
+    Write-Host "  - Global rules were installed to $CodexDir\AGENTS.md and are auto-loaded in local repos."
+    Write-Host "  - `-Global` does not create `AGENTS.md` inside each project folder."
+    Write-Host "  - Run `.\install.ps1 -Project nextjs|vite|html` inside a project when you want local `AGENTS.md` and `.agents/rules/` files."
+    Write-Host "  - Official gstack is managed at $HOME\.gstack\repos\gstack and kept auto-updatable."
 }
 
 if ($Project) {

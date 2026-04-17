@@ -127,8 +127,10 @@ npm ls --depth=0
 
 以下技能可通过 `@` 或 `/` 触发（需安装到对应平台的 skills 目录）：
 
+> **官方源说明**：从现在开始，`gstack` 不再以 Lotus 仓库里的快照为准。Lotus 的全局安装脚本会把 **官方 [garrytan/gstack](https://github.com/garrytan/gstack)** 安装到 `~/.gstack/repos/gstack` 并为支持的平台生成技能。凡是 `gstack` 相关能力，以上游仓库为唯一真源。
+
 **任务级技能**（可作为独立任务执行，兼容所有平台的 `/` 命令）：
-1. **@gstack** — 极客开发工作流。代入 PM/Eng/Builder/QA/DevOps 五大角色。
+1. **@gstack** — 官方 gstack 工作流入口。由 Lotus 全局安装并更新上游版本，相关的 `/office-hours`、`/plan-eng-review`、`/review`、`/investigate`、`/qa`、`/ship` 等能力均以上游实现为准。
 2. **@test-driven-development** — 红绿重构 TDD。强制要求：先写挂掉的测试，再写业务代码，彻底防幻觉。
 3. **@frontend-design** — Vercel 级前端审美。内置 DFII，杜绝“通用 AI 缝合怪 UI”。
 4. **@debugging-strategies** — 科学排错。不再瞎盲猜，强制走“假设->排除->提议->修复”的严谨证明链路。
