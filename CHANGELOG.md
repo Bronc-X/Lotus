@@ -17,6 +17,25 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.0] - 2026-04-18
+
+### Added
+
+- Managed official `garrytan/gstack` upstream installation during global setup
+- Auto-update bootstrap for the upstream gstack runtime under `~/.gstack/repos/gstack`
+- Clear separation between Lotus global rules/project templates and upstream gstack runtime ownership
+
+### Changed
+
+- Global install now keeps Lotus as the global rules and template layer while delegating gstack runtime setup to the official upstream project
+- Lotus-only skills continue to be installed globally without copying Lotus's stale `gstack` runtime snapshot into host tool skill folders
+- Documentation now explains the new upstream-managed global workflow for Claude, Codex, and OpenCode
+
+### Fixed
+
+- Resolved the long-standing mismatch where Lotus shipped an outdated local `gstack` snapshot instead of the official runtime
+- Restored the intended "one-command global install, permanently effective" workflow while keeping the runtime aligned with upstream updates
+
 ## [1.0.0] - 2026-04-15
 
 ### 🎉 Initial Release
