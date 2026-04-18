@@ -17,6 +17,18 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.2] - 2026-04-19
+
+### Added
+
+- Scheduled GitHub Actions workflow that watches official `garrytan/gstack` upstream and opens a review PR when upstream `main` changes
+- Tracked upstream state file at `.github/upstream/gstack.json` so Lotus can compare against the last acknowledged upstream snapshot
+
+### Changed
+
+- README now makes the install boundary explicit: cloning Lotus alone does not activate rules, skills, or upstream gstack auto-updates
+- README now explains the difference between Lotus repo updates and official gstack runtime auto-updates on a user's machine
+
 ## [1.1.1] - 2026-04-19
 
 ### Added

@@ -1,0 +1,108 @@
+name: Watch Upstream GStack
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "19 */6 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: watch-upstream-gstack
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read tracked upstream state
+        id: current
+        run: |
+          echo "commit=$(jq -r '.commit' .github/upstream/gstack.json)" >> "$GITHUB_OUTPUT"
+          echo "version=$(jq -r '.version' .github/upstream/gstack.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch latest upstream metadata
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          api_response="$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/garrytan/gstack/commits/main)"
+
+          upstream_commit="$(jq -r '.sha' <<<"$api_response")"
+          upstream_commit_date="$(jq -r '.commit.committer.date' <<<"$api_response")"
+          upstream_commit_subject="$(jq -r '.commit.message' <<<"$api_response" | head -n 1)"
+          upstream_version="$(curl -fsSL https://raw.githubusercontent.com/garrytan/gstack/main/VERSION | tr -d '\r\n')"
+
+          echo "commit=$upstream_commit" >> "$GITHUB_OUTPUT"
+          echo "commit_date=$upstream_commit_date" >> "$GITHUB_OUTPUT"
+          echo "commit_subject=$upstream_commit_subject" >> "$GITHUB_OUTPUT"
+          echo "version=$upstream_version" >> "$GITHUB_OUTPUT"
+
+          if [ "$upstream_commit" = "${{ steps.current.outputs.commit }}" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update tracked upstream state
+        if: steps.upstream.outputs.changed == 'true'
+        run: |
+          jq -n \
+            --arg repo "garrytan/gstack" \
+            --arg branch "main" \
+            --arg version "${{ steps.upstream.outputs.version }}" \
+            --arg commit "${{ steps.upstream.outputs.commit }}" \
+            --arg commit_date "${{ steps.upstream.outputs.commit_date }}" \
+            --arg commit_subject "${{ steps.upstream.outputs.commit_subject }}" \
+            --arg tracked_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            '{
+              repo: $repo,
+              branch: $branch,
+              version: $version,
+              commit: $commit,
+              commit_date: $commit_date,
+              commit_subject: $commit_subject,
+              tracked_at_utc: $tracked_at
+            }' > .github/upstream/gstack.json
+
+      - name: Log no-op result
+        if: steps.upstream.outputs.changed != 'true'
+        run: |
+          echo "No upstream change detected."
+          echo "Tracked version: ${{ steps.current.outputs.version }}"
+          echo "Tracked commit: ${{ steps.current.outputs.commit }}"
+
+      - name: Create pull request
+        if: steps.upstream.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/watch-gstack-upstream
+          delete-branch: true
+          commit-message: "chore: track upstream gstack ${{ steps.upstream.outputs.version }}"
+          title: "chore: track upstream gstack ${{ steps.upstream.outputs.version }}"
+          body: |
+            ## Summary
+            - detected a new upstream `garrytan/gstack` main commit
+            - updated `.github/upstream/gstack.json`
+            - did not auto-publish a Lotus release
+
+            ## Upstream snapshot
+            - version: `${{ steps.upstream.outputs.version }}`
+            - commit: `${{ steps.upstream.outputs.commit }}`
+            - commit date: `${{ steps.upstream.outputs.commit_date }}`
+            - subject: `${{ steps.upstream.outputs.commit_subject }}`
+
+            ## Review checklist
+            - confirm whether Lotus installer behavior still matches upstream
+            - confirm whether README / changelog needs a human-authored update
+            - merge only after review
+          add-paths: |
+            .github/upstream/gstack.json

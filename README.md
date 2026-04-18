@@ -94,9 +94,13 @@ The full global flow is automated once you run the installer and confirm any ove
 2. Lotus installs or updates official gstack under `~/.gstack/repos/gstack`
 3. Lotus syncs the host-global skills into the correct `~/.xxxx/skills` directories
 
+`git clone Lotus` by itself does **not** make any host app pick up the rules or skills. The clone only gives you the installer and templates. The global behavior starts after you run `install.ps1 -Global` or `install.sh --global`.
+
 For Codex, that means Lotus writes to `~/.codex/AGENTS.md`, and Codex automatically loads those rules in every local repository you open. This is an inheritance mechanism, not a file sync, so you will **not** see a new `AGENTS.md` appear in each project unless you also run a project template install.
 
 For Claude, Codex, Cursor, and OpenCode, Lotus also manages the official gstack runtime at `~/.gstack/repos/gstack`. That runtime is global, updateable, and no longer copied from a stale Lotus snapshot.
+
+After a successful global install, Lotus enables the upstream gstack auto-update flags. In practice, that means the **official gstack runtime on the user's machine** can follow upstream updates automatically on new sessions. This does **not** mean the Lotus repository itself auto-updates after clone.
 
 If you want to add **project-level templates** (design systems, tech stack constraints) to a new project, just run once inside the project folder:
 
@@ -131,6 +135,8 @@ git clone https://github.com/Bronc-X/Lotus.git ~/Dev/Lotus
 This injects Lotus rules into the global config of every supported AI tool on your machine.
 
 It also installs the **official gstack upstream** into `~/.gstack/repos/gstack`, runs upstream setup for Claude/Codex/OpenCode, syncs the generated Cursor skills into `~/.cursor/skills`, and enables gstack auto-update so the skill runtime stays current.
+
+Cloning Lotus without running this step will not install rules, will not install slash skills, and will not turn on upstream gstack auto-updates.
 
 For Codex specifically, the global install target is `~/.codex/AGENTS.md`. Local project folders remain untouched after this step. If you want a visible project-level `AGENTS.md` plus `.agents/rules/`, run Step 2 inside that project as well.
 
@@ -265,6 +271,7 @@ Lotus is **not a "set and forget" config**. It is a living, evolving protocol.
 - **What we discard**: Hype-driven features, unstable APIs, and anything that adds complexity without measurable value.
 - **The first-principles filter**: Before any new pattern is adopted, we ask: *Does this help vectors lock on more accurately? Does this reduce context waste?* If neither, it doesn't go in.
 - **How to stay current**: Simply `git pull` and re-run the installer. Your global rules across all IDEs will be refreshed in seconds.
+- **How upstream gstack is watched**: Lotus now tracks `garrytan/gstack` separately. A scheduled GitHub Actions workflow checks upstream `main`, updates `.github/upstream/gstack.json`, and opens a PR for human review when upstream changes. It does not auto-merge or auto-release Lotus.
 
 ```bash
 # Stay up to date in one command
@@ -282,5 +289,7 @@ Once Lotus is installed globally, **every new project you create automatically i
 On Codex, inheritance means the app reads `~/.codex/AGENTS.md` automatically when you open a local repo. It does **not** mean Lotus copies `AGENTS.md` into every repo on disk.
 
 For supported hosts, the official gstack runtime is also global. Lotus keeps it in `~/.gstack/repos/gstack` and re-runs upstream setup on every global install, so "permanent" means both rules and runtime survive across repos and machine restarts.
+
+If upstream gstack ships a new version later, the runtime can auto-upgrade on the user's machine only if Lotus global install has already been run and upstream auto-upgrade remains enabled in `~/.gstack/config.yaml`.
 
 For project-specific overrides (design systems, tech stacks), just use `install.ps1 -Project <template>` to layer on top. The global rules remain untouched.
