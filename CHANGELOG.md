@@ -17,6 +17,17 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.3] - 2026-04-19
+
+### Changed
+
+- Lotus now force-syncs official gstack skills into the real Codex, OpenCode, and Cursor global skills directories after upstream setup, instead of relying on host setup side effects alone
+- Global install validation now checks a full set of core official gstack skills (`office-hours`, `investigate`, `plan-eng-review`, `qa`, `review`, `ship`) so partial installs fail loudly
+
+### Fixed
+
+- Re-running Lotus global install now self-heals stale or half-updated Codex/OpenCode/Cursor gstack skill directories for both new installs and mid-stream upgrades
+
 ## [1.1.2] - 2026-04-19
 
 ### Added

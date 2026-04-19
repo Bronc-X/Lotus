@@ -134,7 +134,7 @@ git clone https://github.com/Bronc-X/Lotus.git ~/Dev/Lotus
 
 This injects Lotus rules into the global config of every supported AI tool on your machine.
 
-It also installs the **official gstack upstream** into `~/.gstack/repos/gstack`, runs upstream setup for Claude/Codex/OpenCode, syncs the generated Cursor skills into `~/.cursor/skills`, and enables gstack auto-update so the skill runtime stays current.
+It also installs the **official gstack upstream** into `~/.gstack/repos/gstack`, runs upstream setup for Claude/Codex/OpenCode, force-syncs the generated Codex/OpenCode/Cursor gstack skills into the real host global skills directories, and enables gstack auto-update so the skill runtime stays current.
 
 Cloning Lotus without running this step will not install rules, will not install slash skills, and will not turn on upstream gstack auto-updates.
 
@@ -176,6 +176,8 @@ If `/review`, `/qa`, or other gstack skills do not show up after install:
 4. Restart the IDE/app so it re-scans global skills
 
 Lotus now fails the install if official gstack setup does not complete, instead of silently claiming success.
+
+Lotus also self-heals partial upgrades now: after upstream setup finishes, it force-refreshes the host `gstack` and `gstack-*` entries in the real global skills folders so stale or half-updated skill directories do not survive across upgrades.
 
 ### Step 2: New Project Initialization (Optional)
 

@@ -34,33 +34,119 @@ function Test-AnyPath {
     return $false
 }
 
+function Add-MissingSkillIfAbsent {
+    param (
+        [System.Collections.Generic.List[string]]$Missing,
+        [string]$Label,
+        [string[]]$Candidates
+    )
+
+    if (-not (Test-AnyPath $Candidates)) {
+        $Missing.Add($Label)
+    }
+}
+
 function Assert-ManagedGstackInstall {
     $missing = New-Object System.Collections.Generic.List[string]
 
     if (-not (Test-Path (Join-Path $HOME ".gstack\repos\gstack\.git"))) {
         $missing.Add("official gstack repo (~/.gstack/repos/gstack)")
     }
-    if (-not (Test-AnyPath @((Join-Path $HOME ".claude\skills\gstack")))) {
-        $missing.Add("Claude runtime (~/.claude/skills/gstack)")
-    }
-    if (-not (Test-AnyPath @(
-        (Join-Path $HOME ".codex\skills\gstack-review\SKILL.md"),
-        (Join-Path $HOME ".codex\skills\review\SKILL.md")
-    ))) {
-        $missing.Add("Codex skill (~/.codex/skills/gstack-review or review)")
-    }
-    if (-not (Test-AnyPath @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-review\SKILL.md"),
-        (Join-Path $HOME ".config\opencode\skills\review\SKILL.md")
-    ))) {
-        $missing.Add("OpenCode skill (~/.config/opencode/skills/gstack-review or review)")
-    }
-    if (-not (Test-AnyPath @(
-        (Join-Path $HOME ".cursor\skills\gstack-review\SKILL.md"),
-        (Join-Path $HOME ".cursor\skills\review\SKILL.md")
-    ))) {
-        $missing.Add("Cursor skill (~/.cursor/skills/gstack-review or review)")
-    }
+
+    Add-MissingSkillIfAbsent $missing "Claude runtime (~/.claude/skills/gstack)" @(
+        (Join-Path $HOME ".claude\skills\gstack\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\gstack")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude office-hours skill (~/.claude/skills/gstack-office-hours or office-hours)" @(
+        (Join-Path $HOME ".claude\skills\gstack-office-hours\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\office-hours\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude investigate skill (~/.claude/skills/gstack-investigate or investigate)" @(
+        (Join-Path $HOME ".claude\skills\gstack-investigate\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\investigate\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude plan-eng-review skill (~/.claude/skills/gstack-plan-eng-review or plan-eng-review)" @(
+        (Join-Path $HOME ".claude\skills\gstack-plan-eng-review\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\plan-eng-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude qa skill (~/.claude/skills/gstack-qa or qa)" @(
+        (Join-Path $HOME ".claude\skills\gstack-qa\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\qa\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude review skill (~/.claude/skills/gstack-review or review)" @(
+        (Join-Path $HOME ".claude\skills\gstack-review\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude ship skill (~/.claude/skills/gstack-ship or ship)" @(
+        (Join-Path $HOME ".claude\skills\gstack-ship\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\ship\SKILL.md")
+    )
+
+    Add-MissingSkillIfAbsent $missing "Codex gstack runtime (~/.codex/skills/gstack/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex office-hours skill (~/.codex/skills/gstack-office-hours/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-office-hours\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex investigate skill (~/.codex/skills/gstack-investigate/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-investigate\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex plan-eng-review skill (~/.codex/skills/gstack-plan-eng-review/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-plan-eng-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex qa skill (~/.codex/skills/gstack-qa/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-qa\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex review skill (~/.codex/skills/gstack-review/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex ship skill (~/.codex/skills/gstack-ship/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-ship\SKILL.md")
+    )
+
+    Add-MissingSkillIfAbsent $missing "OpenCode gstack runtime (~/.config/opencode/skills/gstack/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode office-hours skill (~/.config/opencode/skills/gstack-office-hours/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-office-hours\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode investigate skill (~/.config/opencode/skills/gstack-investigate/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-investigate\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode plan-eng-review skill (~/.config/opencode/skills/gstack-plan-eng-review/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-plan-eng-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode qa skill (~/.config/opencode/skills/gstack-qa/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-qa\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode review skill (~/.config/opencode/skills/gstack-review/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode ship skill (~/.config/opencode/skills/gstack-ship/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-ship\SKILL.md")
+    )
+
+    Add-MissingSkillIfAbsent $missing "Cursor gstack runtime (~/.cursor/skills/gstack/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor office-hours skill (~/.cursor/skills/gstack-office-hours/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-office-hours\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor investigate skill (~/.cursor/skills/gstack-investigate/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-investigate\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor plan-eng-review skill (~/.cursor/skills/gstack-plan-eng-review/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-plan-eng-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor qa skill (~/.cursor/skills/gstack-qa/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-qa\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor review skill (~/.cursor/skills/gstack-review/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor ship skill (~/.cursor/skills/gstack-ship/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-ship\SKILL.md")
+    )
 
     if ($missing.Count -gt 0) {
         $message = @(

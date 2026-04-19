@@ -41,24 +41,92 @@ path_exists_any() {
     return 1
 }
 
+require_skill_file() {
+    local missing_ref="$1"
+    shift
+    local label="$1"
+    shift
+
+    if path_exists_any "$@"; then
+        return 0
+    fi
+
+    eval "$missing_ref+=(\"\$label\")"
+}
+
 verify_managed_gstack_install() {
     local missing=()
 
     if [ ! -d "$HOME/.gstack/repos/gstack/.git" ]; then
         missing+=("official gstack repo (~/.gstack/repos/gstack)")
     fi
-    if ! path_exists_any "$HOME/.claude/skills/gstack"; then
-        missing+=("Claude runtime (~/.claude/skills/gstack)")
-    fi
-    if ! path_exists_any "$HOME/.codex/skills/gstack-review/SKILL.md" "$HOME/.codex/skills/review/SKILL.md"; then
-        missing+=("Codex skill (~/.codex/skills/gstack-review or review)")
-    fi
-    if ! path_exists_any "$HOME/.config/opencode/skills/gstack-review/SKILL.md" "$HOME/.config/opencode/skills/review/SKILL.md"; then
-        missing+=("OpenCode skill (~/.config/opencode/skills/gstack-review or review)")
-    fi
-    if ! path_exists_any "$HOME/.cursor/skills/gstack-review/SKILL.md" "$HOME/.cursor/skills/review/SKILL.md"; then
-        missing+=("Cursor skill (~/.cursor/skills/gstack-review or review)")
-    fi
+
+    require_skill_file missing "Claude runtime (~/.claude/skills/gstack)" \
+        "$HOME/.claude/skills/gstack/SKILL.md" \
+        "$HOME/.claude/skills/gstack"
+    require_skill_file missing "Claude office-hours skill (~/.claude/skills/gstack-office-hours or office-hours)" \
+        "$HOME/.claude/skills/gstack-office-hours/SKILL.md" \
+        "$HOME/.claude/skills/office-hours/SKILL.md"
+    require_skill_file missing "Claude investigate skill (~/.claude/skills/gstack-investigate or investigate)" \
+        "$HOME/.claude/skills/gstack-investigate/SKILL.md" \
+        "$HOME/.claude/skills/investigate/SKILL.md"
+    require_skill_file missing "Claude plan-eng-review skill (~/.claude/skills/gstack-plan-eng-review or plan-eng-review)" \
+        "$HOME/.claude/skills/gstack-plan-eng-review/SKILL.md" \
+        "$HOME/.claude/skills/plan-eng-review/SKILL.md"
+    require_skill_file missing "Claude qa skill (~/.claude/skills/gstack-qa or qa)" \
+        "$HOME/.claude/skills/gstack-qa/SKILL.md" \
+        "$HOME/.claude/skills/qa/SKILL.md"
+    require_skill_file missing "Claude review skill (~/.claude/skills/gstack-review or review)" \
+        "$HOME/.claude/skills/gstack-review/SKILL.md" \
+        "$HOME/.claude/skills/review/SKILL.md"
+    require_skill_file missing "Claude ship skill (~/.claude/skills/gstack-ship or ship)" \
+        "$HOME/.claude/skills/gstack-ship/SKILL.md" \
+        "$HOME/.claude/skills/ship/SKILL.md"
+
+    require_skill_file missing "Codex gstack runtime (~/.codex/skills/gstack/SKILL.md)" \
+        "$HOME/.codex/skills/gstack/SKILL.md"
+    require_skill_file missing "Codex office-hours skill (~/.codex/skills/gstack-office-hours/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-office-hours/SKILL.md"
+    require_skill_file missing "Codex investigate skill (~/.codex/skills/gstack-investigate/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-investigate/SKILL.md"
+    require_skill_file missing "Codex plan-eng-review skill (~/.codex/skills/gstack-plan-eng-review/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-plan-eng-review/SKILL.md"
+    require_skill_file missing "Codex qa skill (~/.codex/skills/gstack-qa/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-qa/SKILL.md"
+    require_skill_file missing "Codex review skill (~/.codex/skills/gstack-review/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-review/SKILL.md"
+    require_skill_file missing "Codex ship skill (~/.codex/skills/gstack-ship/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-ship/SKILL.md"
+
+    require_skill_file missing "OpenCode gstack runtime (~/.config/opencode/skills/gstack/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack/SKILL.md"
+    require_skill_file missing "OpenCode office-hours skill (~/.config/opencode/skills/gstack-office-hours/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-office-hours/SKILL.md"
+    require_skill_file missing "OpenCode investigate skill (~/.config/opencode/skills/gstack-investigate/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-investigate/SKILL.md"
+    require_skill_file missing "OpenCode plan-eng-review skill (~/.config/opencode/skills/gstack-plan-eng-review/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-plan-eng-review/SKILL.md"
+    require_skill_file missing "OpenCode qa skill (~/.config/opencode/skills/gstack-qa/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-qa/SKILL.md"
+    require_skill_file missing "OpenCode review skill (~/.config/opencode/skills/gstack-review/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-review/SKILL.md"
+    require_skill_file missing "OpenCode ship skill (~/.config/opencode/skills/gstack-ship/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-ship/SKILL.md"
+
+    require_skill_file missing "Cursor gstack runtime (~/.cursor/skills/gstack/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack/SKILL.md"
+    require_skill_file missing "Cursor office-hours skill (~/.cursor/skills/gstack-office-hours/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-office-hours/SKILL.md"
+    require_skill_file missing "Cursor investigate skill (~/.cursor/skills/gstack-investigate/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-investigate/SKILL.md"
+    require_skill_file missing "Cursor plan-eng-review skill (~/.cursor/skills/gstack-plan-eng-review/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-plan-eng-review/SKILL.md"
+    require_skill_file missing "Cursor qa skill (~/.cursor/skills/gstack-qa/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-qa/SKILL.md"
+    require_skill_file missing "Cursor review skill (~/.cursor/skills/gstack-review/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-review/SKILL.md"
+    require_skill_file missing "Cursor ship skill (~/.cursor/skills/gstack-ship/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-ship/SKILL.md"
 
     if [ "${#missing[@]}" -gt 0 ]; then
         echo "Official gstack install is incomplete. Missing:" >&2
