@@ -14,11 +14,13 @@ MANAGED_OFFICIAL_SKILLS=("gstack")
 GLOBAL=0
 PROJECT=""
 ASSUME_YES=0
+GSTACK_PROFILE="core"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --global) GLOBAL=1 ;;
         --project) PROJECT="$2"; shift ;;
+        --gstack-profile) GSTACK_PROFILE="$2"; shift ;;
         --yes|-y) ASSUME_YES=1 ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -73,6 +75,18 @@ verify_managed_gstack_install() {
     require_skill_file missing "Claude plan-eng-review skill (~/.claude/skills/gstack-plan-eng-review or plan-eng-review)" \
         "$HOME/.claude/skills/gstack-plan-eng-review/SKILL.md" \
         "$HOME/.claude/skills/plan-eng-review/SKILL.md"
+    require_skill_file missing "Claude plan-ceo-review skill (~/.claude/skills/gstack-plan-ceo-review or plan-ceo-review)" \
+        "$HOME/.claude/skills/gstack-plan-ceo-review/SKILL.md" \
+        "$HOME/.claude/skills/plan-ceo-review/SKILL.md"
+    require_skill_file missing "Claude plan-design-review skill (~/.claude/skills/gstack-plan-design-review or plan-design-review)" \
+        "$HOME/.claude/skills/gstack-plan-design-review/SKILL.md" \
+        "$HOME/.claude/skills/plan-design-review/SKILL.md"
+    require_skill_file missing "Claude design-review skill (~/.claude/skills/gstack-design-review or design-review)" \
+        "$HOME/.claude/skills/gstack-design-review/SKILL.md" \
+        "$HOME/.claude/skills/design-review/SKILL.md"
+    require_skill_file missing "Claude browse skill (~/.claude/skills/gstack-browse or browse)" \
+        "$HOME/.claude/skills/gstack-browse/SKILL.md" \
+        "$HOME/.claude/skills/browse/SKILL.md"
     require_skill_file missing "Claude qa skill (~/.claude/skills/gstack-qa or qa)" \
         "$HOME/.claude/skills/gstack-qa/SKILL.md" \
         "$HOME/.claude/skills/qa/SKILL.md"
@@ -91,6 +105,14 @@ verify_managed_gstack_install() {
         "$HOME/.codex/skills/gstack-investigate/SKILL.md"
     require_skill_file missing "Codex plan-eng-review skill (~/.codex/skills/gstack-plan-eng-review/SKILL.md)" \
         "$HOME/.codex/skills/gstack-plan-eng-review/SKILL.md"
+    require_skill_file missing "Codex plan-ceo-review skill (~/.codex/skills/gstack-plan-ceo-review/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-plan-ceo-review/SKILL.md"
+    require_skill_file missing "Codex plan-design-review skill (~/.codex/skills/gstack-plan-design-review/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-plan-design-review/SKILL.md"
+    require_skill_file missing "Codex design-review skill (~/.codex/skills/gstack-design-review/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-design-review/SKILL.md"
+    require_skill_file missing "Codex browse skill (~/.codex/skills/gstack-browse/SKILL.md)" \
+        "$HOME/.codex/skills/gstack-browse/SKILL.md"
     require_skill_file missing "Codex qa skill (~/.codex/skills/gstack-qa/SKILL.md)" \
         "$HOME/.codex/skills/gstack-qa/SKILL.md"
     require_skill_file missing "Codex review skill (~/.codex/skills/gstack-review/SKILL.md)" \
@@ -106,6 +128,14 @@ verify_managed_gstack_install() {
         "$HOME/.config/opencode/skills/gstack-investigate/SKILL.md"
     require_skill_file missing "OpenCode plan-eng-review skill (~/.config/opencode/skills/gstack-plan-eng-review/SKILL.md)" \
         "$HOME/.config/opencode/skills/gstack-plan-eng-review/SKILL.md"
+    require_skill_file missing "OpenCode plan-ceo-review skill (~/.config/opencode/skills/gstack-plan-ceo-review/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-plan-ceo-review/SKILL.md"
+    require_skill_file missing "OpenCode plan-design-review skill (~/.config/opencode/skills/gstack-plan-design-review/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-plan-design-review/SKILL.md"
+    require_skill_file missing "OpenCode design-review skill (~/.config/opencode/skills/gstack-design-review/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-design-review/SKILL.md"
+    require_skill_file missing "OpenCode browse skill (~/.config/opencode/skills/gstack-browse/SKILL.md)" \
+        "$HOME/.config/opencode/skills/gstack-browse/SKILL.md"
     require_skill_file missing "OpenCode qa skill (~/.config/opencode/skills/gstack-qa/SKILL.md)" \
         "$HOME/.config/opencode/skills/gstack-qa/SKILL.md"
     require_skill_file missing "OpenCode review skill (~/.config/opencode/skills/gstack-review/SKILL.md)" \
@@ -121,6 +151,14 @@ verify_managed_gstack_install() {
         "$HOME/.cursor/skills/gstack-investigate/SKILL.md"
     require_skill_file missing "Cursor plan-eng-review skill (~/.cursor/skills/gstack-plan-eng-review/SKILL.md)" \
         "$HOME/.cursor/skills/gstack-plan-eng-review/SKILL.md"
+    require_skill_file missing "Cursor plan-ceo-review skill (~/.cursor/skills/gstack-plan-ceo-review/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-plan-ceo-review/SKILL.md"
+    require_skill_file missing "Cursor plan-design-review skill (~/.cursor/skills/gstack-plan-design-review/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-plan-design-review/SKILL.md"
+    require_skill_file missing "Cursor design-review skill (~/.cursor/skills/gstack-design-review/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-design-review/SKILL.md"
+    require_skill_file missing "Cursor browse skill (~/.cursor/skills/gstack-browse/SKILL.md)" \
+        "$HOME/.cursor/skills/gstack-browse/SKILL.md"
     require_skill_file missing "Cursor qa skill (~/.cursor/skills/gstack-qa/SKILL.md)" \
         "$HOME/.cursor/skills/gstack-qa/SKILL.md"
     require_skill_file missing "Cursor review skill (~/.cursor/skills/gstack-review/SKILL.md)" \
@@ -354,7 +392,7 @@ EOF
     echo "  Aider AI configured"
 
     echo "  Installing official gstack upstream..."
-    if ! bash "$MANAGED_GSTACK_INSTALLER"; then
+    if ! LOTUS_GSTACK_PROFILE="$GSTACK_PROFILE" bash "$MANAGED_GSTACK_INSTALLER"; then
         echo "Official gstack installation failed. Lotus rules were written, but slash skills were not fully installed." >&2
         exit 1
     fi
@@ -370,6 +408,8 @@ EOF
     echo "  - --global does not create AGENTS.md inside each project folder."
     echo "  - Run ./install.sh --project nextjs|vite|html inside a project when you want local AGENTS.md and .agents/rules/ files."
     echo "  - Official gstack is managed at ~/.gstack/repos/gstack and kept auto-updatable."
+    echo "  - Official gstack top-level exposure profile: $GSTACK_PROFILE"
+    echo "  - Hidden official gstack skills stay in ~/.gstack/repos/gstack/.agents/skills and can still be routed by AGENTS.md."
     echo "  - Slash skills live in host-specific global skills folders such as ~/.codex/skills, ~/.claude/skills, ~/.cursor/skills, and ~/.config/opencode/skills."
 fi
 
@@ -398,9 +438,12 @@ if [ "$GLOBAL" -eq 0 ] && [ -z "$PROJECT" ]; then
     echo -e "\033[0;36mLotus Installer\033[0m"
     echo "--------------------"
     echo "Usage:"
-    echo "  ./install.sh --global              (Install global rules to all IDE/CLI folders)"
-    echo "  ./install.sh --global --yes        (Overwrite existing global configs without prompting)"
-    echo "  ./install.sh --project <name>      (Apply template to current directory)"
+    echo "  ./install.sh --global                            (Install global rules to all IDE/CLI folders)"
+    echo "  ./install.sh --global --gstack-profile core     (Default curated official gstack top-level set)"
+    echo "  ./install.sh --global --gstack-profile full     (Expose the full official gstack top-level set)"
+    echo "  ./install.sh --global --yes                     (Overwrite existing global configs without prompting)"
+    echo "  ./install.sh --project <name>                   (Apply template to current directory)"
     echo ""
+    echo "Available gstack profiles: core, design, review, deploy, full"
     echo "Available templates: nextjs, vite, html"
 fi

@@ -1,7 +1,9 @@
 param (
     [switch]$Global,
     [string]$Project,
-    [switch]$Force
+    [switch]$Force,
+    [ValidateSet("core", "design", "review", "deploy", "full")]
+    [string]$GstackProfile = "core"
 )
 
 $RepoRoot = $PSScriptRoot
@@ -69,6 +71,18 @@ function Assert-ManagedGstackInstall {
         (Join-Path $HOME ".claude\skills\gstack-plan-eng-review\SKILL.md"),
         (Join-Path $HOME ".claude\skills\plan-eng-review\SKILL.md")
     )
+    Add-MissingSkillIfAbsent $missing "Claude plan-ceo-review skill (~/.claude/skills/gstack-plan-ceo-review or plan-ceo-review)" @(
+        (Join-Path $HOME ".claude\skills\gstack-plan-ceo-review\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\plan-ceo-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude plan-design-review skill (~/.claude/skills/gstack-plan-design-review or plan-design-review)" @(
+        (Join-Path $HOME ".claude\skills\gstack-plan-design-review\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\plan-design-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Claude design-review skill (~/.claude/skills/gstack-design-review or design-review)" @(
+        (Join-Path $HOME ".claude\skills\gstack-design-review\SKILL.md"),
+        (Join-Path $HOME ".claude\skills\design-review\SKILL.md")
+    )
     Add-MissingSkillIfAbsent $missing "Claude qa skill (~/.claude/skills/gstack-qa or qa)" @(
         (Join-Path $HOME ".claude\skills\gstack-qa\SKILL.md"),
         (Join-Path $HOME ".claude\skills\qa\SKILL.md")
@@ -94,6 +108,18 @@ function Assert-ManagedGstackInstall {
     Add-MissingSkillIfAbsent $missing "Codex plan-eng-review skill (~/.codex/skills/gstack-plan-eng-review/SKILL.md)" @(
         (Join-Path $HOME ".codex\skills\gstack-plan-eng-review\SKILL.md")
     )
+    Add-MissingSkillIfAbsent $missing "Codex plan-ceo-review skill (~/.codex/skills/gstack-plan-ceo-review/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-plan-ceo-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex plan-design-review skill (~/.codex/skills/gstack-plan-design-review/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-plan-design-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex design-review skill (~/.codex/skills/gstack-design-review/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-design-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Codex browse skill (~/.codex/skills/gstack-browse/SKILL.md)" @(
+        (Join-Path $HOME ".codex\skills\gstack-browse\SKILL.md")
+    )
     Add-MissingSkillIfAbsent $missing "Codex qa skill (~/.codex/skills/gstack-qa/SKILL.md)" @(
         (Join-Path $HOME ".codex\skills\gstack-qa\SKILL.md")
     )
@@ -116,6 +142,18 @@ function Assert-ManagedGstackInstall {
     Add-MissingSkillIfAbsent $missing "OpenCode plan-eng-review skill (~/.config/opencode/skills/gstack-plan-eng-review/SKILL.md)" @(
         (Join-Path $HOME ".config\opencode\skills\gstack-plan-eng-review\SKILL.md")
     )
+    Add-MissingSkillIfAbsent $missing "OpenCode plan-ceo-review skill (~/.config/opencode/skills/gstack-plan-ceo-review/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-plan-ceo-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode plan-design-review skill (~/.config/opencode/skills/gstack-plan-design-review/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-plan-design-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode design-review skill (~/.config/opencode/skills/gstack-design-review/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-design-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "OpenCode browse skill (~/.config/opencode/skills/gstack-browse/SKILL.md)" @(
+        (Join-Path $HOME ".config\opencode\skills\gstack-browse\SKILL.md")
+    )
     Add-MissingSkillIfAbsent $missing "OpenCode qa skill (~/.config/opencode/skills/gstack-qa/SKILL.md)" @(
         (Join-Path $HOME ".config\opencode\skills\gstack-qa\SKILL.md")
     )
@@ -137,6 +175,18 @@ function Assert-ManagedGstackInstall {
     )
     Add-MissingSkillIfAbsent $missing "Cursor plan-eng-review skill (~/.cursor/skills/gstack-plan-eng-review/SKILL.md)" @(
         (Join-Path $HOME ".cursor\skills\gstack-plan-eng-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor plan-ceo-review skill (~/.cursor/skills/gstack-plan-ceo-review/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-plan-ceo-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor plan-design-review skill (~/.cursor/skills/gstack-plan-design-review/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-plan-design-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor design-review skill (~/.cursor/skills/gstack-design-review/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-design-review\SKILL.md")
+    )
+    Add-MissingSkillIfAbsent $missing "Cursor browse skill (~/.cursor/skills/gstack-browse/SKILL.md)" @(
+        (Join-Path $HOME ".cursor\skills\gstack-browse\SKILL.md")
     )
     Add-MissingSkillIfAbsent $missing "Cursor qa skill (~/.cursor/skills/gstack-qa/SKILL.md)" @(
         (Join-Path $HOME ".cursor\skills\gstack-qa\SKILL.md")
@@ -373,9 +423,21 @@ read:
     }
 
     $BashManagedGstackInstaller = $ManagedGstackInstaller -replace '\\', '/'
-    & bash $BashManagedGstackInstaller
-    if ($LASTEXITCODE -ne 0) {
-        throw "Official gstack installation failed. Lotus rules were written, but slash skills were not fully installed."
+
+    $previousGstackProfile = $env:LOTUS_GSTACK_PROFILE
+    $env:LOTUS_GSTACK_PROFILE = $GstackProfile
+    try {
+        & bash $BashManagedGstackInstaller
+        if ($LASTEXITCODE -ne 0) {
+            throw "Official gstack installation failed. Lotus rules were written, but slash skills were not fully installed."
+        }
+    }
+    finally {
+        if ($null -ne $previousGstackProfile) {
+            $env:LOTUS_GSTACK_PROFILE = $previousGstackProfile
+        } else {
+            Remove-Item Env:LOTUS_GSTACK_PROFILE -ErrorAction SilentlyContinue
+        }
     }
 
     Assert-ManagedGstackInstall
@@ -390,6 +452,8 @@ read:
     Write-Host "  - `-Global` does not create `AGENTS.md` inside each project folder."
     Write-Host "  - Run `.\install.ps1 -Project nextjs|vite|html` inside a project when you want local `AGENTS.md` and `.agents/rules/` files."
     Write-Host "  - Official gstack is managed at $HOME\.gstack\repos\gstack and kept auto-updatable."
+    Write-Host "  - Official gstack top-level exposure profile: $GstackProfile"
+    Write-Host "  - Hidden official gstack skills stay in ~/.gstack/repos/gstack/.agents/skills and can still be routed by AGENTS.md."
     Write-Host "  - Slash skills live in host-specific global skills folders such as ~/.codex/skills, ~/.claude/skills, ~/.cursor/skills, and ~/.config/opencode/skills."
 }
 
@@ -417,9 +481,12 @@ if (-not $Global -and -not $Project) {
     Write-Host "Lotus Installer" -ForegroundColor Cyan
     Write-Host "--------------------"
     Write-Host "Usage:"
-    Write-Host "  .\install.ps1 -Global              (Install global rules to all IDE/CLI folders)"
-    Write-Host "  .\install.ps1 -Global -Force       (Overwrite existing global configs without prompting)"
-    Write-Host "  .\install.ps1 -Project <name>      (Apply template to current directory)"
+    Write-Host "  .\install.ps1 -Global                                  (Install global rules to all IDE/CLI folders)"
+    Write-Host "  .\install.ps1 -Global -GstackProfile core              (Default curated official gstack top-level set)"
+    Write-Host "  .\install.ps1 -Global -GstackProfile full              (Expose the full official gstack top-level set)"
+    Write-Host "  .\install.ps1 -Global -Force                           (Overwrite existing global configs without prompting)"
+    Write-Host "  .\install.ps1 -Project <name>                          (Apply template to current directory)"
     Write-Host ""
+    Write-Host "Available gstack profiles: core, design, review, deploy, full"
     Write-Host "Available templates: nextjs, vite, html"
 }

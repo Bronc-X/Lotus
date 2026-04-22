@@ -5,6 +5,43 @@ GSTACK_REPO_URL="${LOTUS_GSTACK_REPO_URL:-https://github.com/garrytan/gstack.git
 GSTACK_DIR="${LOTUS_GSTACK_DIR:-$HOME/.gstack/repos/gstack}"
 GSTACK_PARENT="$(dirname "$GSTACK_DIR")"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
+GSTACK_PROFILE="$(printf '%s' "${LOTUS_GSTACK_PROFILE:-core}" | tr '[:upper:]' '[:lower:]')"
+
+CORE_EXPOSED_GSTACK_SKILLS=(
+  "gstack"
+  "gstack-office-hours"
+  "gstack-plan-ceo-review"
+  "gstack-plan-design-review"
+  "gstack-plan-eng-review"
+  "gstack-design-review"
+  "gstack-review"
+  "gstack-investigate"
+  "gstack-browse"
+  "gstack-qa"
+  "gstack-ship"
+)
+
+DESIGN_PROFILE_EXTRAS=(
+  "gstack-design-consultation"
+  "gstack-design-shotgun"
+  "gstack-design-html"
+)
+
+REVIEW_PROFILE_EXTRAS=(
+  "gstack-qa-only"
+  "gstack-health"
+  "gstack-cso"
+  "gstack-devex-review"
+  "gstack-benchmark"
+)
+
+DEPLOY_PROFILE_EXTRAS=(
+  "gstack-setup-deploy"
+  "gstack-land-and-deploy"
+  "gstack-canary"
+  "gstack-document-release"
+  "gstack-open-gstack-browser"
+)
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -24,6 +61,53 @@ case "$(uname -s)" in
 esac
 
 mkdir -p "$GSTACK_PARENT"
+
+case "$GSTACK_PROFILE" in
+  core|design|review|deploy|full)
+    ;;
+  *)
+    echo "Unsupported Lotus gstack profile: $GSTACK_PROFILE" >&2
+    echo "Supported profiles: core, design, review, deploy, full" >&2
+    exit 1
+    ;;
+esac
+
+skill_in_list() {
+  local skill_name="$1"
+  shift
+  local candidate
+
+  for candidate in "$@"; do
+    if [ "$candidate" = "$skill_name" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+should_expose_generated_skill() {
+  local skill_name="$1"
+  local allowed_skills=("${CORE_EXPOSED_GSTACK_SKILLS[@]}")
+
+  case "$GSTACK_PROFILE" in
+    core)
+      ;;
+    design)
+      allowed_skills+=("${DESIGN_PROFILE_EXTRAS[@]}")
+      ;;
+    review)
+      allowed_skills+=("${REVIEW_PROFILE_EXTRAS[@]}")
+      ;;
+    deploy)
+      allowed_skills+=("${DEPLOY_PROFILE_EXTRAS[@]}")
+      ;;
+    full)
+      return 0
+      ;;
+  esac
+
+  skill_in_list "$skill_name" "${allowed_skills[@]}"
+}
 
 clone_fresh() {
   git clone --single-branch --depth 1 "$GSTACK_REPO_URL" "$GSTACK_DIR"
@@ -336,15 +420,76 @@ reset_claude_managed_gstack_checkout() {
   fi
 }
 
+claude_host_skill_name_for_generated_skill() {
+  local skill_name="$1"
+  local normalized_name="${skill_name#gstack-}"
+
+  case "$normalized_name" in
+    gstack)
+      echo "gstack"
+      ;;
+    upgrade)
+      echo "gstack-upgrade"
+      ;;
+    *)
+      echo "$normalized_name"
+      ;;
+  esac
+}
+
+prune_claude_host_skills() {
+  local generated_dir="$1"
+  local target_dir="$2"
+  local skill_dir
+  local skill_name
+  local host_skill_name
+  local selected_host_skills=()
+  local managed_host_skills=()
+  local target_skill_dir
+  local target_skill_name
+
+  if [ ! -d "$target_dir" ] || [ ! -d "$generated_dir" ]; then
+    return 0
+  fi
+
+  for skill_dir in "$generated_dir"/gstack*; do
+    if [ -e "$skill_dir" ]; then
+      skill_name="$(basename "$skill_dir")"
+      host_skill_name="$(claude_host_skill_name_for_generated_skill "$skill_name")"
+      managed_host_skills+=("$host_skill_name")
+      if should_expose_generated_skill "$skill_name"; then
+        selected_host_skills+=("$host_skill_name")
+      fi
+    fi
+  done
+
+  managed_host_skills+=("connect-chrome")
+
+  for target_skill_dir in "$target_dir"/*; do
+    if [ -d "$target_skill_dir" ]; then
+      target_skill_name="$(basename "$target_skill_dir")"
+      if skill_in_list "$target_skill_name" "${managed_host_skills[@]}" && \
+        ! skill_in_list "$target_skill_name" "${selected_host_skills[@]}"; then
+        rm -rf "$target_skill_dir"
+      fi
+    fi
+  done
+
+  echo "Pruned Claude top-level official gstack skills to profile $GSTACK_PROFILE"
+}
+
 sync_generated_host_skills() {
   local generated_dir="$1"
   local target_dir="$2"
   local host_name="$3"
   local staging_dir="$target_dir/.lotus-stage-gstack"
   local copied=0
+  local generated_count=0
   local skill_name
   local final_path
   local backup_path
+  local skill_dir
+  local selected_skill_names=()
 
   if [ ! -d "$generated_dir" ]; then
     echo "Expected generated $host_name skills directory not found: $generated_dir" >&2
@@ -372,13 +517,23 @@ sync_generated_host_skills() {
 
   for skill_dir in "$generated_dir"/gstack*; do
     if [ -e "$skill_dir" ]; then
-      cp -R "$skill_dir" "$staging_dir"/
-      copied=$((copied + 1))
+      generated_count=$((generated_count + 1))
+      skill_name="$(basename "$skill_dir")"
+      if should_expose_generated_skill "$skill_name"; then
+        cp -R "$skill_dir" "$staging_dir"/
+        copied=$((copied + 1))
+        selected_skill_names+=("$skill_name")
+      fi
     fi
   done
 
-  if [ "$copied" -lt 5 ]; then
+  if [ "$generated_count" -lt 5 ]; then
     echo "Generated $host_name gstack skills look incomplete in: $generated_dir" >&2
+    exit 1
+  fi
+
+  if [ "$copied" -lt 1 ]; then
+    echo "Lotus gstack profile '$GSTACK_PROFILE' did not select any $host_name skills." >&2
     exit 1
   fi
 
@@ -396,10 +551,19 @@ sync_generated_host_skills() {
     fi
   done
 
+  for final_path in "$target_dir"/gstack*; do
+    if [ -e "$final_path" ]; then
+      skill_name="$(basename "$final_path")"
+      if ! skill_in_list "$skill_name" "${selected_skill_names[@]}"; then
+        rm -rf "$final_path"
+      fi
+    fi
+  done
+
   rm -rf "$staging_dir"
   find "$target_dir" -mindepth 1 -maxdepth 1 -name '.lotus-backup-gstack*' -exec rm -rf {} + 2>/dev/null || true
 
-  echo "Synced $copied official gstack skills into $target_dir for $host_name"
+  echo "Synced $copied official gstack skills into $target_dir for $host_name (profile: $GSTACK_PROFILE)"
 }
 
 if [ -d "$GSTACK_DIR/.git" ]; then
@@ -433,6 +597,7 @@ localize_skill_descriptions_in_dir "$GSTACK_DIR/.agents/skills"
 localize_skill_descriptions_in_dir "$GSTACK_DIR/.opencode/skills"
 localize_skill_descriptions_in_dir "$GSTACK_DIR/.cursor/skills"
 localize_skill_descriptions_in_dir "$HOME/.claude/skills"
+prune_claude_host_skills "$GSTACK_DIR/.agents/skills" "$HOME/.claude/skills"
 
 # Lotus does a final host-level sync after upstream setup so new installs and
 # mid-stream upgrades land in a deterministic end state, even if the host had
@@ -450,3 +615,4 @@ localize_skill_descriptions_in_dir "$HOME/.cursor/skills"
 
 VERSION="$(cat VERSION 2>/dev/null || echo unknown)"
 echo "Managed official gstack ready at $GSTACK_DIR (version $VERSION)"
+echo "Official gstack top-level profile: $GSTACK_PROFILE"

@@ -145,12 +145,16 @@ After global install, open a **fresh host session** and send this exact prompt t
 >    - Simplicity First
 >    - Surgical Changes
 >    - Goal-Driven Execution
-> 4. Check the host-global skills directory for this host and confirm these official gstack skills exist at the top level:
+> 4. Check the host-global skills directory for this host and confirm these default top-level official gstack skills exist:
 >    - `gstack`
 >    - `gstack-office-hours`
+>    - `gstack-plan-ceo-review`
+>    - `gstack-plan-design-review`
 >    - `gstack-plan-eng-review`
+>    - `gstack-design-review`
 >    - `gstack-review`
 >    - `gstack-investigate`
+>    - `gstack-browse`
 >    - `gstack-qa`
 >    - `gstack-ship`
 > 5. Tell me whether this current session already loaded those global rules and skills, or whether I still need to fully restart the host app and open a new session before they become active.
@@ -186,6 +190,33 @@ It also installs the **official gstack upstream** into `~/.gstack/repos/gstack`,
 
 Cloning Lotus without running this step will not install rules, will not install slash skills, and will not turn on upstream gstack auto-updates.
 
+Lotus now separates **top-level exposure** from **background routing**:
+
+- Top-level exposed skills are the small official gstack set users can manually pick from the host `/` menu
+- Hidden official gstack skills still stay in `~/.gstack/repos/gstack/.agents/skills` and can still be routed by `AGENTS.md` when the task semantics clearly match
+
+The default top-level official gstack profile is `core`, which exposes:
+
+- `gstack`
+- `gstack-office-hours`
+- `gstack-plan-ceo-review`
+- `gstack-plan-design-review`
+- `gstack-plan-eng-review`
+- `gstack-design-review`
+- `gstack-review`
+- `gstack-investigate`
+- `gstack-browse`
+- `gstack-qa`
+- `gstack-ship`
+
+Optional profiles:
+
+- `core`: the curated default set above
+- `design`: `core` plus `design-consultation`, `design-shotgun`, and `design-html`
+- `review`: `core` plus `qa-only`, `health`, `cso`, `devex-review`, and `benchmark`
+- `deploy`: `core` plus `setup-deploy`, `land-and-deploy`, `canary`, `document-release`, and `open-gstack-browser`
+- `full`: expose the full current official gstack top-level set
+
 The **four Lotus rails** also become top-level rules through this step, not through a later prompt:
 
 - Think Before Coding
@@ -212,6 +243,17 @@ C:\Dev\Lotus\install.ps1 -Global
 ~/Dev/Lotus/install.sh --global
 ```
 
+If you want a different official gstack top-level exposure profile:
+
+**Windows (PowerShell):**
+```powershell
+C:\Dev\Lotus\install.ps1 -Global -GstackProfile design
+```
+**macOS / Linux:**
+```bash
+~/Dev/Lotus/install.sh --global --gstack-profile design
+```
+
 ### Troubleshooting: why `/skill` may still not appear
 
 `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and similar global rule files do not store slash skills themselves. They only provide routing and behavior instructions.
@@ -229,8 +271,10 @@ If `/review`, `/qa`, or other gstack skills do not show up after install:
 
 1. Re-run `install.ps1 -Global` or `install.sh --global`
 2. Confirm `~/.gstack/repos/gstack` exists
-3. Confirm the host-specific skills folder above contains `gstack-*` skills
+3. Confirm the host-specific skills folder above contains the top-level skills for your chosen gstack profile
 4. Restart the IDE/app so it re-scans global skills
+
+Not seeing a hidden official gstack skill in the `/` menu does **not** mean Lotus removed that capability. It only means Lotus did not expose it at the host top level for manual picking. The official skill can still remain available in the upstream repo for AGENTS-based background routing.
 
 Lotus now fails the install if official gstack setup does not complete, instead of silently claiming success.
 

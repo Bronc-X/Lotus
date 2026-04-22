@@ -167,6 +167,8 @@ npm ls --depth=0
 
 > **官方源说明**：从现在开始，`gstack` 不再以 Lotus 仓库里的快照为准。Lotus 的全局安装脚本会把 **官方 [garrytan/gstack](https://github.com/garrytan/gstack)** 安装到 `~/.gstack/repos/gstack` 并为支持的平台生成技能。凡是 `gstack` 相关能力，以上游仓库为唯一真源。
 
+> **顶层露出 vs 后台路由**：Lotus 默认只把少数官方 gstack skill 暴露到宿主顶层菜单，供用户手动 `/` 或 `@` 选择：`gstack`、`office-hours`、`plan-ceo-review`、`plan-design-review`、`plan-eng-review`、`design-review`、`review`、`investigate`、`browse`、`qa`、`ship`。其他官方 gstack skill 仍保留在 `~/.gstack/repos/gstack/.agents/skills/` 中，不在顶层菜单显示；当任务语义明显命中时，可在后台按需读取对应 `SKILL.md` 并执行其流程。
+
 **任务级技能**（可作为独立任务执行，兼容所有平台的 `/` 命令）：
 1. **@gstack** — 官方 gstack 工作流入口。由 Lotus 全局安装并更新上游版本，相关的 `/office-hours`、`/plan-eng-review`、`/review`、`/investigate`、`/qa`、`/ship` 等能力均以上游实现为准。
 2. **@test-driven-development** — 红绿重构 TDD。强制要求：先写挂掉的测试，再写业务代码，彻底防幻觉。

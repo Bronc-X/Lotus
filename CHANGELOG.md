@@ -17,6 +17,18 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.7] - 2026-04-22
+
+### Changed
+
+- Lotus global install now separates official gstack top-level exposure from the full upstream skill set: the default `core` profile exposes only a curated official menu (`gstack`, `office-hours`, `plan-ceo-review`, `plan-design-review`, `plan-eng-review`, `design-review`, `review`, `investigate`, `browse`, `qa`, `ship`)
+- Global install now supports official gstack top-level exposure profiles: `core`, `design`, `review`, `deploy`, and `full`
+- README and global AGENTS guidance now explicitly explain the difference between user-visible top-level skills and hidden official gstack skills that remain in the upstream repo for AGENTS-based background routing
+
+### Fixed
+
+- Lotus host sync now removes stale official `gstack*` top-level directories that no longer belong to the selected profile, so old menu residue does not survive across upgrades
+
 ## [1.1.6] - 2026-04-22
 
 ### Changed
