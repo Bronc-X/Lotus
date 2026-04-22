@@ -17,6 +17,17 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.8] - 2026-04-22
+
+### Added
+
+- New `web-to-design-md` Lotus skill that fuses website reference extraction with a structured website-design consultant workflow, producing `design.md` outputs and optional HTML previews from URLs, docs, screenshots, and pasted requirements
+
+### Changed
+
+- Codex skill conversion now grants `web-to-design-md` the search and file-editing tools it needs to actually inspect references and write design deliverables during global install
+- README and `core/AGENTS.md` now position `web-to-design-md` as the pre-build design-planning step that pairs with `frontend-design`
+
 ## [1.1.7] - 2026-04-22
 
 ### Changed

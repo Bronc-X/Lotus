@@ -591,11 +591,8 @@ cd "$GSTACK_DIR"
 reset_claude_managed_gstack_checkout
 ./setup --host claude --team -q
 ./setup --host codex -q
-./setup --host opencode -q
 
 localize_skill_descriptions_in_dir "$GSTACK_DIR/.agents/skills"
-localize_skill_descriptions_in_dir "$GSTACK_DIR/.opencode/skills"
-localize_skill_descriptions_in_dir "$GSTACK_DIR/.cursor/skills"
 localize_skill_descriptions_in_dir "$HOME/.claude/skills"
 prune_claude_host_skills "$GSTACK_DIR/.agents/skills" "$HOME/.claude/skills"
 
@@ -603,12 +600,8 @@ prune_claude_host_skills "$GSTACK_DIR/.agents/skills" "$HOME/.claude/skills"
 # mid-stream upgrades land in a deterministic end state, even if the host had
 # stale directories from older installs.
 sync_generated_host_skills "$GSTACK_DIR/.agents/skills" "$HOME/.codex/skills" "Codex"
-sync_generated_host_skills "$GSTACK_DIR/.opencode/skills" "$HOME/.config/opencode/skills" "OpenCode"
-sync_generated_host_skills "$GSTACK_DIR/.cursor/skills" "$HOME/.cursor/skills" "Cursor"
 
 localize_skill_descriptions_in_dir "$HOME/.codex/skills"
-localize_skill_descriptions_in_dir "$HOME/.config/opencode/skills"
-localize_skill_descriptions_in_dir "$HOME/.cursor/skills"
 
 ./bin/gstack-config set auto_upgrade true >/dev/null 2>&1 || true
 ./bin/gstack-config set update_check true >/dev/null 2>&1 || true

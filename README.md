@@ -13,44 +13,17 @@ Lotus now leads with a tighter anti-hallucination core: **Think Before Coding, S
 
 Lotus now treats **official [garrytan/gstack](https://github.com/garrytan/gstack)** as the source of truth for the gstack runtime. Global install does two things in one shot:
 
-1. Inject Lotus global rules into each agent's global config.
-2. Clone or update official gstack into `~/.gstack/repos/gstack`, run upstream setup for supported hosts, and enable auto-updates.
+1. Inject Lotus global rules into the managed Claude Code and Codex global config paths.
+2. Clone or update official gstack into `~/.gstack/repos/gstack`, run upstream setup for Claude/Codex, and enable auto-updates.
 
-**Platform Compatibility:**
+**Managed Global Install Scope:**
 
-| Platform | Auto-Inject Global? | Notes |
+| Platform | `install.ps1 -Global` / `install.sh --global` | Notes |
 |---|---|---|
-| Claude Code | ✅ Fully automatic | `~/.claude/CLAUDE.md` + official gstack runtime |
-| Antigravity / Gemini CLI | ✅ Fully automatic | `~/.gemini/GEMINI.md` auto-loaded |
-| Codex CLI | ✅ Fully automatic | `~/.codex/AGENTS.md` + official gstack runtime |
-| OpenCode | ✅ Fully automatic | `~/.config/opencode/AGENTS.md` + official gstack runtime |
-| Aider | ✅ Fully automatic | `~/.aider.conf.yml` |
-| Windsurf | ⚠️ Manual paste | See steps below |
-| Cursor | ⚠️ Manual paste | See steps below |
+| Claude Code | ✅ Managed | `~/.claude/CLAUDE.md` + official gstack runtime |
+| Codex CLI | ✅ Managed | `~/.codex/AGENTS.md` + official gstack runtime |
 
-<details>
-<summary>📋 Windsurf Manual Setup (click to expand)</summary>
-
-1. Open Windsurf
-2. Click the **Customizations icon** in the top-right
-3. Navigate to **Rules**
-4. Click the **"+ Global"** button
-5. Copy and paste the full contents of `core/AGENTS.md`
-6. Save — Cascade will now auto-load these rules for every session
-</details>
-
-<details>
-<summary>📋 Cursor Manual Setup (click to expand)</summary>
-
-1. Open Cursor
-2. Open **Cursor Settings**
-3. Navigate to **General** → find the **"Rules for AI"** input box
-4. Copy and paste the full contents of `core/AGENTS.md`
-5. Save — all AI conversations in every project will now carry these rules
-
-> 💡 For project-level rules, create a `.cursor/rules/` folder in your project root with `.mdc` rule files. Lotus's `install.ps1 -Project` command will auto-generate these for you.
-
-</details>
+For any other host, Lotus does not manage the global path for you. If that host supports manual global rules, use [`core/AGENTS.md`](C:/Users/Administrator/Desktop/Toni/Lotus/core/AGENTS.md) as the single source of truth and import it with the host's own workflow.
 
 ## 🧬 First Principles: Why Lotus Works
 
@@ -74,7 +47,7 @@ These four rails sit at the top of `core/AGENTS.md` and shape how the agent beha
 ## ✨ Why Choose Lotus?
 
 - 🧠 **Mindset Over Scripts**: Lotus teaches your AI *how to think* before it teaches it what command to run. The top-level rules now explicitly bias toward clarifying assumptions, keeping solutions simple, making surgical diffs, and defining success in testable terms.
-- 🌍 **Write Once, Run Everywhere**: A Single Source of Truth (`core/AGENTS.md`) automatically adapts and installs into Claude Code, Antigravity, Cursor, Windsurf, Copilot, and more.
+- 🌍 **Write Once, Reuse Everywhere**: A Single Source of Truth (`core/AGENTS.md`) powers the managed Claude/Codex installer and stays portable for manual use in other hosts.
 - 🚧 **Zero Silent Failures**: Built-in quality gates guarantee your generated code includes proper user feedback, loading states, and aesthetic consistency.
 - ⚡ **Seamless Wake-Up Calls (`@` and `/`)**: Summon specific expert personas and architectural overviews dynamically mid-chat using platform-native triggers.
 - 🗑️ **Anti-Plugin Bloat**: 95% of plugins and skills on the market become stale junk within weeks. Lotus takes the opposite approach—every skill is **hand-curated, battle-tested, and minimally sufficient**. We only ship what survives real production workflows.
@@ -99,19 +72,19 @@ If you are starting a new project or setting up a brand-new computer, simply **c
 
 ### What about future new projects?
 
-Once globally installed, Lotus core rules (workflows, quality gates) are **already active** in all your AI tools — **no wake-up needed**.
+Once globally installed, Lotus core rules (workflows, quality gates) are **already active** in the managed Claude/Codex hosts on that machine — **no wake-up needed**.
 
 The full global flow is automated once you run the installer and confirm any overwrite prompt:
 
-1. Lotus writes the host-global rules into each supported app's global config path
+1. Lotus writes the managed host-global rules into the Claude/Codex global config paths
 2. Lotus installs or updates official gstack under `~/.gstack/repos/gstack`
-3. Lotus syncs the host-global skills into the correct `~/.xxxx/skills` directories
+3. Lotus syncs the host-global skills into `~/.claude/skills` and `~/.codex/skills`
 
 `git clone Lotus` by itself does **not** make any host app pick up the rules or skills. The clone only gives you the installer and templates. The global behavior starts after you run `install.ps1 -Global` or `install.sh --global`.
 
 For Codex, that means Lotus writes to `~/.codex/AGENTS.md`, and Codex automatically loads those rules in every local repository you open. This is an inheritance mechanism, not a file sync, so you will **not** see a new `AGENTS.md` appear in each project unless you also run a project template install.
 
-For Claude, Codex, Cursor, and OpenCode, Lotus also manages the official gstack runtime at `~/.gstack/repos/gstack`. That runtime is global, updateable, and no longer copied from a stale Lotus snapshot.
+For Claude and Codex, Lotus also manages the official gstack runtime at `~/.gstack/repos/gstack`. That runtime is global, updateable, and no longer copied from a stale Lotus snapshot.
 
 After a successful global install, Lotus enables the upstream gstack auto-update flags. In practice, that means the **official gstack runtime on the user's machine** can follow upstream updates automatically on new sessions. This does **not** mean the Lotus repository itself auto-updates after clone.
 
@@ -137,9 +110,6 @@ After global install, open a **fresh host session** and send this exact prompt t
 > 2. Read the host-global rules file for this host and confirm Lotus is installed there:
 >    - Codex: `~/.codex/AGENTS.md`
 >    - Claude Code: `~/.claude/CLAUDE.md`
->    - OpenCode: `~/.config/opencode/AGENTS.md`
->    - Gemini / Antigravity: `~/.gemini/GEMINI.md`
->    - Cursor: the installed Lotus global rules file for Cursor, if this host supports reading it directly
 > 3. Confirm the top-level Lotus execution rails are present near the top of that file:
 >    - Think Before Coding
 >    - Simplicity First
@@ -182,11 +152,11 @@ git clone https://github.com/Bronc-X/Lotus.git C:\Dev\Lotus
 git clone https://github.com/Bronc-X/Lotus.git ~/Dev/Lotus
 ```
 
-### Step 1: Global Installation (Configure all your IDEs)
+### Step 1: Global Installation (Configure the managed hosts)
 
-This injects Lotus rules into the global config of every supported AI tool on your machine.
+This injects Lotus rules into the managed Claude Code and Codex global configs on your machine.
 
-It also installs the **official gstack upstream** into `~/.gstack/repos/gstack`, runs upstream setup for Claude/Codex/OpenCode, force-syncs the generated Codex/OpenCode/Cursor gstack skills into the real host global skills directories, and enables gstack auto-update so the skill runtime stays current.
+It also installs the **official gstack upstream** into `~/.gstack/repos/gstack`, runs upstream setup for Claude/Codex, force-syncs the generated gstack skills into the real managed host global skills directories, and enables gstack auto-update so the skill runtime stays current.
 
 Cloning Lotus without running this step will not install rules, will not install slash skills, and will not turn on upstream gstack auto-updates.
 
@@ -230,7 +200,7 @@ For Codex specifically, the global install target is `~/.codex/AGENTS.md`. Local
 
 **Requirements for official gstack runtime:** `git`, `bash`, `bun`, and `node` on Windows.
 
-> ⚠️ **Safe by design**: If you already have existing config files (e.g., `CLAUDE.md`, `GEMINI.md`, `.aider.conf.yml`), the installer will automatically create `.bak` backups before overwriting. You can always restore them.
+> ⚠️ **Safe by design**: If you already have existing managed config files (for example `CLAUDE.md` or `AGENTS.md`), the installer will automatically create `.bak` backups before overwriting. You can always restore them.
 
 If Lotus detects an existing global rule/config file, it now asks for confirmation before overwriting it. For unattended automation, pass `--yes` on `install.sh` or `-Force` on `install.ps1`.
 
@@ -256,14 +226,12 @@ C:\Dev\Lotus\install.ps1 -Global -GstackProfile design
 
 ### Troubleshooting: why `/skill` may still not appear
 
-`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and similar global rule files do not store slash skills themselves. They only provide routing and behavior instructions.
+`AGENTS.md`, `CLAUDE.md`, and similar global rule files do not store slash skills themselves. They only provide routing and behavior instructions.
 
 Slash skills must also exist in each host's own global skills directory:
 
 - Codex: `~/.codex/skills`
 - Claude Code: `~/.claude/skills`
-- Cursor: `~/.cursor/skills`
-- OpenCode: `~/.config/opencode/skills`
 
 So "global rules installed" and "`/skill` is available" are related, but they are not the same thing.
 
@@ -318,31 +286,33 @@ The trigger syntax depends on whether you are using a visual IDE or a command-li
    * **What it does**: Forces strict Red-Green-Refactor constraints. The AI is forbidden from writing business logic until it writes a failing test. The ultimate anti-hallucination tool.
 3. **[`@frontend-design` / `/frontend-design`](https://github.com/Bronc-X/Lotus/blob/main/skills/frontend-design.md)**
    * **What it does**: Vercel Labs-grade UI/UX boundaries. Blocks generic "AI aesthetic" layouts, forces explicit design stances (e.g. Brutalist, Editorial), and applies the Design Feasibility & Impact Index (DFII) before writing CSS/React.
-4. **[`@debugging-strategies` / `/debugging-strategies`](https://github.com/Bronc-X/Lotus/blob/main/skills/debugging-strategies.md)**
+4. **[`@web-to-design-md` / `/web-to-design-md`](https://github.com/Bronc-X/Lotus/blob/main/skills/web-to-design-md.md)**
+   * **What it does**: Fuses website reference extraction with a design-consultant workflow. Turns URLs, existing `design.md`, brand docs, requirement docs, or screenshots into a structured `design.md`, and can optionally produce a visual HTML preview before you hand implementation to `@frontend-design`.
+5. **[`@debugging-strategies` / `/debugging-strategies`](https://github.com/Bronc-X/Lotus/blob/main/skills/debugging-strategies.md)**
    * **What it does**: Replaces raw guessing with a scientific debugging loop. Forces the AI to state hypotheses, write probing code to disprove them, and only apply fixes once the root cause is proven.
-5. **[`@security-auditor` / `/security-auditor`](https://github.com/Bronc-X/Lotus/blob/main/skills/security-auditor.md)**
+6. **[`@security-auditor` / `/security-auditor`](https://github.com/Bronc-X/Lotus/blob/main/skills/security-auditor.md)**
    * **What it does**: Deep DevSecOps review. Scans for OWASP Top 10 vulnerabilities, auth leaks, prototype pollution, and weak crypto. Run this before opening a PR.
-6. **[`@feynman` / `/feynman`](https://github.com/Bronc-X/Lotus/blob/main/skills/feynman.md)**
+7. **[`@feynman` / `/feynman`](https://github.com/Bronc-X/Lotus/blob/main/skills/feynman.md)**
    * **What it does**: Forces the AI to use the Feynman Technique. It will break down and explain complex bugs or mechanisms using absolute layman terms before attempting a fix.
-7. **[`@polanyi-tacit` / `/polanyi-tacit`](https://github.com/Bronc-X/Lotus/blob/main/skills/polanyi-tacit.md)**
+8. **[`@polanyi-tacit` / `/polanyi-tacit`](https://github.com/Bronc-X/Lotus/blob/main/skills/polanyi-tacit.md)**
    * **What it does**: Wakes up a deeply analytical mode. The AI deliberately looks for architectural compromises, "defensive" code blocks, and unspoken organizational debt hidden behind the scenes.
-8. **[`@auto-build` / `/auto-build`](https://github.com/Bronc-X/Lotus/blob/main/skills/auto-build.md)**
+9. **[`@auto-build` / `/auto-build`](https://github.com/Bronc-X/Lotus/blob/main/skills/auto-build.md)**
    * **What it does**: Silently performs `npm install`, runs `npm run build`, and checks for compilation errors without asking for your permission.
-9. **[`@btw` / `/btw`](https://github.com/Bronc-X/Lotus/blob/main/skills/btw.md)**
+10. **[`@btw` / `/btw`](https://github.com/Bronc-X/Lotus/blob/main/skills/btw.md)**
    * **What it does**: Side-channel quick question mode. Ask a quick question mid-task without interrupting your main workflow. The AI answers in 3-5 sentences, modifies zero files, and seamlessly returns to the primary task.
 
 #### Adapted from Claude Code Native Commands (Lotus ports to other platforms)
 
-10. **[`@powerup` / `/powerup`](https://github.com/Bronc-X/Lotus/blob/main/skills/powerup.md)**
+11. **[`@powerup` / `/powerup`](https://github.com/Bronc-X/Lotus/blob/main/skills/powerup.md)**
    * **When to use**: You're new to AI coding, or feel you're only using 10% of your AI's capabilities.
    * **What it does**: Think of it as the "Duolingo" for Claude Code — **10 structured lessons** covering everything from advanced prompt caching to background tasks.
-11. **[`@insights` / `/insights`](https://github.com/Bronc-X/Lotus/blob/main/skills/insights.md)**
+12. **[`@insights` / `/insights`](https://github.com/Bronc-X/Lotus/blob/main/skills/insights.md)**
    * **When to use**: You want to see what habits you can optimize.
    * **What it does**: Generates a retrospective HTML report of your past month's coding habits, friction points, and debugging loops.
-12. **[`@loop` / `/loop`](https://github.com/Bronc-X/Lotus/blob/main/skills/loop.md)**
+13. **[`@loop` / `/loop`](https://github.com/Bronc-X/Lotus/blob/main/skills/loop.md)**
    * **When to use**: You have recurring check tasks (e.g., poll deployment status every 5 minutes).
    * **What it does**: Sets up an in-session recurring task alarm clock. Session-scoped, safe, and controllable.
-13. **[`@subagent` / `/subagent`](https://github.com/Bronc-X/Lotus/blob/main/skills/subagent.md)**
+14. **[`@subagent` / `/subagent`](https://github.com/Bronc-X/Lotus/blob/main/skills/subagent.md)**
    * **When to use**: Complex tasks needing parallel execution.
    * **What it does**: Manage independent Subagents each with their own context window to prevent main-thread context overflow.
 
@@ -360,10 +330,10 @@ Lotus/
 
 Lotus touches your global IDE config files. We take this seriously:
 
-- **Auto-Backup**: Before overwriting any existing file (`CLAUDE.md`, `GEMINI.md`, `.aider.conf.yml`, etc.), the installer automatically creates a `.bak` backup in the same directory. Nothing is silently lost.
+- **Auto-Backup**: Before overwriting any existing managed file (such as `CLAUDE.md` or `AGENTS.md`), the installer automatically creates a `.bak` backup in the same directory. Nothing is silently lost.
 - **Read-Only Rules**: Lotus only writes static Markdown files to config directories. It does **not** install executables, daemons, browser extensions, or background processes.
 - **No Network Calls**: The install scripts run entirely offline. No telemetry, no analytics, no outbound requests. The only network operation is `git clone` / `git pull`, which you control.
-- **Fully Reversible**: To completely uninstall Lotus, simply delete the injected files (e.g., `~/.claude/CLAUDE.md`, `~/.gemini/GEMINI.md`) or restore from the `.bak` backups. There is no registry, no system service, nothing hidden.
+- **Fully Reversible**: To completely uninstall Lotus, simply delete the injected files (for example `~/.claude/CLAUDE.md` or `~/.codex/AGENTS.md`) or restore from the `.bak` backups. There is no registry, no system service, nothing hidden.
 
 ## 🔄 Update Philosophy
 
@@ -373,7 +343,7 @@ Lotus is **not a "set and forget" config**. It is a living, evolving protocol.
 - **What we track**: New global rule injection mechanisms, safer permission models, improved context-window strategies, and proven workflow patterns.
 - **What we discard**: Hype-driven features, unstable APIs, and anything that adds complexity without measurable value.
 - **The first-principles filter**: Before any new pattern is adopted, we ask: *Does this help vectors lock on more accurately? Does this reduce context waste?* If neither, it doesn't go in.
-- **How to stay current**: Simply `git pull` and re-run the installer. Your global rules across all IDEs will be refreshed in seconds.
+- **How to stay current**: Simply `git pull` and re-run the installer. Your managed Claude/Codex global rules will be refreshed in seconds.
 - **How upstream gstack is watched**: Lotus now tracks `garrytan/gstack` separately. A scheduled GitHub Actions workflow checks upstream `main`, updates `.github/upstream/gstack.json`, and opens a PR for human review when upstream changes. It does not auto-merge or auto-release Lotus.
 
 ```bash
@@ -387,11 +357,11 @@ cd C:\path\to\Lotus; git pull; .\install.ps1 -Global
 
 ## 📌 Persistence: Set Up Once, Apply Forever
 
-Once Lotus is installed globally, **every new project you create automatically inherits your rules**. No copy-pasting. No "remember to add the config file". The rules live at the OS-level global config of each AI tool, so they are always active—whether you're starting a fresh Next.js app, debugging a legacy codebase, or pair-programming on a colleague's machine.
+Once Lotus is installed globally, **every new project you create automatically inherits your rules** on the managed hosts. No copy-pasting. No "remember to add the config file". The rules live at the OS-level global config of Claude Code and Codex, so they are always active—whether you're starting a fresh Next.js app, debugging a legacy codebase, or pair-programming on a colleague's machine.
 
 On Codex, inheritance means the app reads `~/.codex/AGENTS.md` automatically when you open a local repo. It does **not** mean Lotus copies `AGENTS.md` into every repo on disk.
 
-For supported hosts, the official gstack runtime is also global. Lotus keeps it in `~/.gstack/repos/gstack` and re-runs upstream setup on every global install, so "permanent" means both rules and runtime survive across repos and machine restarts.
+For Claude and Codex, the official gstack runtime is also global. Lotus keeps it in `~/.gstack/repos/gstack` and re-runs upstream setup on every global install, so "permanent" means both rules and runtime survive across repos and machine restarts.
 
 If upstream gstack ships a new version later, the runtime can auto-upgrade on the user's machine only if Lotus global install has already been run and upstream auto-upgrade remains enabled in `~/.gstack/config.yaml`.
 

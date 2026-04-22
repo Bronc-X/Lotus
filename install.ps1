@@ -130,74 +130,6 @@ function Assert-ManagedGstackInstall {
         (Join-Path $HOME ".codex\skills\gstack-ship\SKILL.md")
     )
 
-    Add-MissingSkillIfAbsent $missing "OpenCode gstack runtime (~/.config/opencode/skills/gstack/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode office-hours skill (~/.config/opencode/skills/gstack-office-hours/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-office-hours\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode investigate skill (~/.config/opencode/skills/gstack-investigate/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-investigate\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode plan-eng-review skill (~/.config/opencode/skills/gstack-plan-eng-review/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-plan-eng-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode plan-ceo-review skill (~/.config/opencode/skills/gstack-plan-ceo-review/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-plan-ceo-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode plan-design-review skill (~/.config/opencode/skills/gstack-plan-design-review/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-plan-design-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode design-review skill (~/.config/opencode/skills/gstack-design-review/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-design-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode browse skill (~/.config/opencode/skills/gstack-browse/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-browse\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode qa skill (~/.config/opencode/skills/gstack-qa/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-qa\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode review skill (~/.config/opencode/skills/gstack-review/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "OpenCode ship skill (~/.config/opencode/skills/gstack-ship/SKILL.md)" @(
-        (Join-Path $HOME ".config\opencode\skills\gstack-ship\SKILL.md")
-    )
-
-    Add-MissingSkillIfAbsent $missing "Cursor gstack runtime (~/.cursor/skills/gstack/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor office-hours skill (~/.cursor/skills/gstack-office-hours/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-office-hours\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor investigate skill (~/.cursor/skills/gstack-investigate/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-investigate\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor plan-eng-review skill (~/.cursor/skills/gstack-plan-eng-review/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-plan-eng-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor plan-ceo-review skill (~/.cursor/skills/gstack-plan-ceo-review/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-plan-ceo-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor plan-design-review skill (~/.cursor/skills/gstack-plan-design-review/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-plan-design-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor design-review skill (~/.cursor/skills/gstack-design-review/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-design-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor browse skill (~/.cursor/skills/gstack-browse/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-browse\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor qa skill (~/.cursor/skills/gstack-qa/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-qa\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor review skill (~/.cursor/skills/gstack-review/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-review\SKILL.md")
-    )
-    Add-MissingSkillIfAbsent $missing "Cursor ship skill (~/.cursor/skills/gstack-ship/SKILL.md)" @(
-        (Join-Path $HOME ".cursor\skills\gstack-ship\SKILL.md")
-    )
-
     if ($missing.Count -gt 0) {
         $message = @(
             "Official gstack install is incomplete. Missing:"
@@ -287,6 +219,7 @@ function Convert-ToCodexSkill {
         "insights" { "Read, Bash, Grep, Glob" }
         "loop" { "Bash, Read, AskUserQuestion" }
         "subagent" { "Bash, Read, Write, Edit, Grep, Glob, AskUserQuestion" }
+        "web-to-design-md" { "Read, Write, Edit, Grep, Glob, AskUserQuestion, WebSearch" }
         "gstack" { "Bash, Read, Write, Edit, Grep, Glob, AskUserQuestion" }
         default { "Read, AskUserQuestion" }
     }
@@ -317,33 +250,13 @@ $(($allowedTools -split ', ' | ForEach-Object { "  - $_" }) -join "`n")
 if ($Global) {
     Write-Host "Installing Global Rules & Skills..." -ForegroundColor Cyan
 
-    $GeminiRuleFile = Join-Path $HOME ".gemini\GEMINI.md"
     $ClaudeRuleFile = Join-Path $HOME ".claude\CLAUDE.md"
-    $OpenCodeRuleFile = Join-Path $HOME ".config\opencode\AGENTS.md"
-    $WindsurfRuleFile = Join-Path $HOME ".windsurf\rules\global.md"
     $CodexRuleFile = Join-Path $HOME ".codex\AGENTS.md"
-    $CursorRuleFile = Join-Path $HOME ".cursor\rules\lotus.mdc"
-    $AiderFile = Join-Path $HOME ".aider.conf.yml"
 
     Confirm-GlobalRuleOverwrite @(
-        $GeminiRuleFile,
         $ClaudeRuleFile,
-        $OpenCodeRuleFile,
-        $WindsurfRuleFile,
-        $CodexRuleFile,
-        $CursorRuleFile,
-        $AiderFile
+        $CodexRuleFile
     )
-
-    $GeminiDir = Join-Path $HOME ".gemini"
-    if (-not (Test-Path $GeminiDir)) { New-Item -ItemType Directory -Path $GeminiDir -Force | Out-Null }
-    Backup-IfExists $GeminiRuleFile
-    Copy-Item $CoreAgents $GeminiRuleFile -Force
-
-    $GeminiSkills = Join-Path $GeminiDir "antigravity\skills"
-    if (-not (Test-Path $GeminiSkills)) { New-Item -ItemType Directory -Path $GeminiSkills -Force | Out-Null }
-    Copy-LotusSkills -TargetDir $GeminiSkills -ExcludedSkills $ManagedOfficialSkills
-    Write-Host "  Antigravity & Gemini CLI configured"
 
     $ClaudeDir = Join-Path $HOME ".claude"
     if (-not (Test-Path $ClaudeDir)) { New-Item -ItemType Directory -Path $ClaudeDir -Force | Out-Null }
@@ -354,18 +267,6 @@ if ($Global) {
     if (-not (Test-Path $ClaudeSkills)) { New-Item -ItemType Directory -Path $ClaudeSkills -Force | Out-Null }
     Copy-LotusSkills -TargetDir $ClaudeSkills -ExcludedSkills $ManagedOfficialSkills
     Write-Host "  Claude Code configured"
-
-    $OpenCodeDir = Join-Path $HOME ".config\opencode"
-    if (-not (Test-Path $OpenCodeDir)) { New-Item -ItemType Directory -Path $OpenCodeDir -Force | Out-Null }
-    Backup-IfExists $OpenCodeRuleFile
-    Copy-Item $CoreAgents $OpenCodeRuleFile -Force
-    Write-Host "  OpenCode CLI configured"
-
-    $WindsurfDir = Join-Path $HOME ".windsurf\rules"
-    if (-not (Test-Path $WindsurfDir)) { New-Item -ItemType Directory -Path $WindsurfDir -Force | Out-Null }
-    Backup-IfExists $WindsurfRuleFile
-    Copy-Item $CoreAgents $WindsurfRuleFile -Force
-    Write-Host "  Windsurf Cascade configured"
 
     $CodexDir = Join-Path $HOME ".codex"
     if (-not (Test-Path $CodexDir)) { New-Item -ItemType Directory -Path $CodexDir -Force | Out-Null }
@@ -394,29 +295,6 @@ if ($Global) {
     }
     Write-Host "  Codex CLI configured (rules + Lotus-only compatible skills)"
 
-    $CursorDir = Join-Path $HOME ".cursor\rules"
-    if (-not (Test-Path $CursorDir)) { New-Item -ItemType Directory -Path $CursorDir -Force | Out-Null }
-    Backup-IfExists $CursorRuleFile
-    $cursorContent = @"
----
-description: Lotus GStack Engineering Protocol - Global rules and workflow standards
-globs:
-alwaysApply: true
----
-
-$(Get-Content $CoreAgents -Raw -Encoding UTF8)
-"@
-    $cursorContent | Out-File $CursorRuleFile -Encoding UTF8 -Force
-    Write-Host "  Cursor configured"
-
-    Backup-IfExists $AiderFile
-    @"
-read:
-  - CONVENTIONS.md
-  - AGENTS.md
-"@ | Out-File $AiderFile -Encoding UTF8
-    Write-Host "  Aider AI configured"
-
     Write-Host "  Installing official gstack upstream..."
     if (-not (Get-Command bash -ErrorAction SilentlyContinue)) {
         throw "Git Bash is required to install official gstack on Windows. Install Git for Windows or ensure 'bash' is on PATH."
@@ -441,7 +319,7 @@ read:
     }
 
     Assert-ManagedGstackInstall
-    Write-Host "  Official gstack configured for Claude/Codex/OpenCode/Cursor"
+    Write-Host "  Official gstack configured for Claude/Codex"
 
     Write-Host ""
     Write-Host "Global installation completed successfully!" -ForegroundColor Green
@@ -454,7 +332,7 @@ read:
     Write-Host "  - Official gstack is managed at $HOME\.gstack\repos\gstack and kept auto-updatable."
     Write-Host "  - Official gstack top-level exposure profile: $GstackProfile"
     Write-Host "  - Hidden official gstack skills stay in ~/.gstack/repos/gstack/.agents/skills and can still be routed by AGENTS.md."
-    Write-Host "  - Slash skills live in host-specific global skills folders such as ~/.codex/skills, ~/.claude/skills, ~/.cursor/skills, and ~/.config/opencode/skills."
+    Write-Host "  - Slash skills live in the managed global skills folders ~/.claude/skills and ~/.codex/skills."
 }
 
 if ($Project) {
@@ -481,7 +359,7 @@ if (-not $Global -and -not $Project) {
     Write-Host "Lotus Installer" -ForegroundColor Cyan
     Write-Host "--------------------"
     Write-Host "Usage:"
-    Write-Host "  .\install.ps1 -Global                                  (Install global rules to all IDE/CLI folders)"
+    Write-Host "  .\install.ps1 -Global                                  (Install global rules to the managed Claude/Codex folders)"
     Write-Host "  .\install.ps1 -Global -GstackProfile core              (Default curated official gstack top-level set)"
     Write-Host "  .\install.ps1 -Global -GstackProfile full              (Expose the full official gstack top-level set)"
     Write-Host "  .\install.ps1 -Global -Force                           (Overwrite existing global configs without prompting)"

@@ -120,52 +120,6 @@ verify_managed_gstack_install() {
     require_skill_file missing "Codex ship skill (~/.codex/skills/gstack-ship/SKILL.md)" \
         "$HOME/.codex/skills/gstack-ship/SKILL.md"
 
-    require_skill_file missing "OpenCode gstack runtime (~/.config/opencode/skills/gstack/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack/SKILL.md"
-    require_skill_file missing "OpenCode office-hours skill (~/.config/opencode/skills/gstack-office-hours/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-office-hours/SKILL.md"
-    require_skill_file missing "OpenCode investigate skill (~/.config/opencode/skills/gstack-investigate/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-investigate/SKILL.md"
-    require_skill_file missing "OpenCode plan-eng-review skill (~/.config/opencode/skills/gstack-plan-eng-review/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-plan-eng-review/SKILL.md"
-    require_skill_file missing "OpenCode plan-ceo-review skill (~/.config/opencode/skills/gstack-plan-ceo-review/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-plan-ceo-review/SKILL.md"
-    require_skill_file missing "OpenCode plan-design-review skill (~/.config/opencode/skills/gstack-plan-design-review/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-plan-design-review/SKILL.md"
-    require_skill_file missing "OpenCode design-review skill (~/.config/opencode/skills/gstack-design-review/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-design-review/SKILL.md"
-    require_skill_file missing "OpenCode browse skill (~/.config/opencode/skills/gstack-browse/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-browse/SKILL.md"
-    require_skill_file missing "OpenCode qa skill (~/.config/opencode/skills/gstack-qa/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-qa/SKILL.md"
-    require_skill_file missing "OpenCode review skill (~/.config/opencode/skills/gstack-review/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-review/SKILL.md"
-    require_skill_file missing "OpenCode ship skill (~/.config/opencode/skills/gstack-ship/SKILL.md)" \
-        "$HOME/.config/opencode/skills/gstack-ship/SKILL.md"
-
-    require_skill_file missing "Cursor gstack runtime (~/.cursor/skills/gstack/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack/SKILL.md"
-    require_skill_file missing "Cursor office-hours skill (~/.cursor/skills/gstack-office-hours/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-office-hours/SKILL.md"
-    require_skill_file missing "Cursor investigate skill (~/.cursor/skills/gstack-investigate/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-investigate/SKILL.md"
-    require_skill_file missing "Cursor plan-eng-review skill (~/.cursor/skills/gstack-plan-eng-review/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-plan-eng-review/SKILL.md"
-    require_skill_file missing "Cursor plan-ceo-review skill (~/.cursor/skills/gstack-plan-ceo-review/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-plan-ceo-review/SKILL.md"
-    require_skill_file missing "Cursor plan-design-review skill (~/.cursor/skills/gstack-plan-design-review/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-plan-design-review/SKILL.md"
-    require_skill_file missing "Cursor design-review skill (~/.cursor/skills/gstack-design-review/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-design-review/SKILL.md"
-    require_skill_file missing "Cursor browse skill (~/.cursor/skills/gstack-browse/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-browse/SKILL.md"
-    require_skill_file missing "Cursor qa skill (~/.cursor/skills/gstack-qa/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-qa/SKILL.md"
-    require_skill_file missing "Cursor review skill (~/.cursor/skills/gstack-review/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-review/SKILL.md"
-    require_skill_file missing "Cursor ship skill (~/.cursor/skills/gstack-ship/SKILL.md)" \
-        "$HOME/.cursor/skills/gstack-ship/SKILL.md"
-
     if [ "${#missing[@]}" -gt 0 ]; then
         echo "Official gstack install is incomplete. Missing:" >&2
         for item in "${missing[@]}"; do
@@ -274,6 +228,7 @@ convert_to_codex_skill() {
         insights)       allowed_tools="Read\n  - Bash\n  - Grep\n  - Glob" ;;
         loop)           allowed_tools="Bash\n  - Read\n  - AskUserQuestion" ;;
         subagent)       allowed_tools="Bash\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - AskUserQuestion" ;;
+        web-to-design-md) allowed_tools="Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - AskUserQuestion\n  - WebSearch" ;;
         gstack)         allowed_tools="Bash\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - AskUserQuestion" ;;
         *)              allowed_tools="Read\n  - AskUserQuestion" ;;
     esac
@@ -301,46 +256,20 @@ CODEX_EOF
 if [ "$GLOBAL" -eq 1 ]; then
     echo -e "\033[0;36mInstalling Global Rules & Skills...\033[0m"
 
-    GEMINI_RULE_FILE="$HOME/.gemini/GEMINI.md"
     CLAUDE_RULE_FILE="$HOME/.claude/CLAUDE.md"
-    OPENCODE_RULE_FILE="$HOME/.config/opencode/AGENTS.md"
-    WINDSURF_RULE_FILE="$HOME/.windsurf/rules/global.md"
     CODEX_RULE_FILE="$HOME/.codex/AGENTS.md"
-    CURSOR_RULE_FILE="$HOME/.cursor/rules/lotus.mdc"
-    AIDER_RULE_FILE="$HOME/.aider.conf.yml"
 
     if ! confirm_global_rule_overwrite \
-        "$GEMINI_RULE_FILE" \
         "$CLAUDE_RULE_FILE" \
-        "$OPENCODE_RULE_FILE" \
-        "$WINDSURF_RULE_FILE" \
-        "$CODEX_RULE_FILE" \
-        "$CURSOR_RULE_FILE" \
-        "$AIDER_RULE_FILE"; then
+        "$CODEX_RULE_FILE"; then
         exit 1
     fi
-
-    mkdir -p ~/.gemini/antigravity/skills
-    backup_if_exists "$GEMINI_RULE_FILE"
-    cp "$CORE_AGENTS" "$GEMINI_RULE_FILE"
-    copy_lotus_skills ~/.gemini/antigravity/skills "${MANAGED_OFFICIAL_SKILLS[@]}"
-    echo "  Antigravity & Gemini CLI configured"
 
     mkdir -p ~/.claude/skills
     backup_if_exists "$CLAUDE_RULE_FILE"
     cp "$CORE_AGENTS" "$CLAUDE_RULE_FILE"
     copy_lotus_skills ~/.claude/skills "${MANAGED_OFFICIAL_SKILLS[@]}"
     echo "  Claude Code configured"
-
-    mkdir -p ~/.config/opencode
-    backup_if_exists "$OPENCODE_RULE_FILE"
-    cp "$CORE_AGENTS" "$OPENCODE_RULE_FILE"
-    echo "  OpenCode CLI configured"
-
-    mkdir -p ~/.windsurf/rules
-    backup_if_exists "$WINDSURF_RULE_FILE"
-    cp "$CORE_AGENTS" "$WINDSURF_RULE_FILE"
-    echo "  Windsurf Cascade configured"
 
     mkdir -p ~/.codex/skills
     backup_if_exists "$CODEX_RULE_FILE"
@@ -370,34 +299,13 @@ if [ "$GLOBAL" -eq 1 ]; then
     done
     echo "  Codex CLI configured (rules + Lotus-only compatible skills)"
 
-    mkdir -p ~/.cursor/rules
-    backup_if_exists "$CURSOR_RULE_FILE"
-    cat > "$CURSOR_RULE_FILE" <<CURSOR_EOF
----
-description: Lotus GStack Engineering Protocol - Global rules and workflow standards
-globs:
-alwaysApply: true
----
-
-$(cat "$CORE_AGENTS")
-CURSOR_EOF
-    echo "  Cursor configured"
-
-    backup_if_exists "$AIDER_RULE_FILE"
-    cat <<EOF > "$AIDER_RULE_FILE"
-read:
-  - CONVENTIONS.md
-  - AGENTS.md
-EOF
-    echo "  Aider AI configured"
-
     echo "  Installing official gstack upstream..."
     if ! LOTUS_GSTACK_PROFILE="$GSTACK_PROFILE" bash "$MANAGED_GSTACK_INSTALLER"; then
         echo "Official gstack installation failed. Lotus rules were written, but slash skills were not fully installed." >&2
         exit 1
     fi
     verify_managed_gstack_install
-    echo "  Official gstack configured for Claude/Codex/OpenCode/Cursor"
+    echo "  Official gstack configured for Claude/Codex"
 
     echo ""
     echo -e "\033[0;32mGlobal installation completed successfully!\033[0m"
@@ -410,7 +318,7 @@ EOF
     echo "  - Official gstack is managed at ~/.gstack/repos/gstack and kept auto-updatable."
     echo "  - Official gstack top-level exposure profile: $GSTACK_PROFILE"
     echo "  - Hidden official gstack skills stay in ~/.gstack/repos/gstack/.agents/skills and can still be routed by AGENTS.md."
-    echo "  - Slash skills live in host-specific global skills folders such as ~/.codex/skills, ~/.claude/skills, ~/.cursor/skills, and ~/.config/opencode/skills."
+    echo "  - Slash skills live in the managed global skills folders ~/.claude/skills and ~/.codex/skills."
 fi
 
 if [ -n "$PROJECT" ]; then
@@ -438,7 +346,7 @@ if [ "$GLOBAL" -eq 0 ] && [ -z "$PROJECT" ]; then
     echo -e "\033[0;36mLotus Installer\033[0m"
     echo "--------------------"
     echo "Usage:"
-    echo "  ./install.sh --global                            (Install global rules to all IDE/CLI folders)"
+    echo "  ./install.sh --global                            (Install global rules to the managed Claude/Codex folders)"
     echo "  ./install.sh --global --gstack-profile core     (Default curated official gstack top-level set)"
     echo "  ./install.sh --global --gstack-profile full     (Expose the full official gstack top-level set)"
     echo "  ./install.sh --global --yes                     (Overwrite existing global configs without prompting)"
