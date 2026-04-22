@@ -17,6 +17,14 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.9] - 2026-04-22
+
+### Changed
+
+- Lotus global install now manages only Claude Code and Codex global paths; Gemini, OpenCode, Cursor, Windsurf, and Aider are no longer written during `install.ps1 -Global` / `install.sh --global`
+- Managed official gstack setup and host-skill sync now run only for Claude/Codex, matching the narrowed installer scope
+- README and `README_CN.md` now present `core/AGENTS.md` as the single source of truth for manual global-rule import in any non-managed host
+
 ## [1.1.8] - 2026-04-22
 
 ### Added
