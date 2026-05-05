@@ -1,9 +1,9 @@
 {
   "repo": "garrytan/gstack",
   "branch": "main",
-  "version": "1.1.1.0",
-  "commit": "e3c961d00f24334066b4caeb57634c012a346c00",
-  "commit_date": "2026-04-18T15:58:59Z",
-  "commit_subject": "fix(ship): detect + repair VERSION/package.json drift in Step 12 (v1.1.1.0) (#1063)",
-  "tracked_at_utc": "2026-04-19T00:00:00Z"
+  "version": "1.26.3.0",
+  "commit": "db9447c3339950bb0506c547e5b3225f5def3854",
+  "commit_date": "2026-05-04T16:29:48Z",
+  "commit_subject": "v1.26.3.0 feat: /sync-gbrain skill + native code-surface orchestrator (#1314)",
+  "tracked_at_utc": "2026-05-05T14:23:33Z"
 }
