@@ -12,17 +12,13 @@ CODEX_EXCLUDED_SKILLS=("btw" "loop")
 MANAGED_OFFICIAL_SKILLS=("gstack")
 HIDDEN_TOP_LEVEL_SKILLS=(
     "brandkit"
-    "full-output-enforcement"
     "gstack-plan-ceo-review"
     "gstack-plan-design-review"
     "gstack-plan-eng-review"
-    "imagegen-frontend-mobile"
-    "imagegen-frontend-web"
     "imagegen"
     "openai-docs"
     "plugin-creator"
     "skill-creator"
-    "ios-ui-centering-fix"
     "skill-installer"
 )
 HIDDEN_CLAUDE_GSTACK_ALIASES=(
@@ -46,12 +42,16 @@ OBSOLETE_LOTUS_SKILLS=(
     "gsap-utils"
     "high-end-visual-design"
     "image-to-code"
+    "imagegen-frontend-mobile"
+    "imagegen-frontend-web"
     "industrial-brutalist-ui"
+    "ios-ui-centering-fix"
     "minimalist-ui"
     "mobile-agent-bridge"
     "powerup"
     "redesign-existing-projects"
     "stitch-design-taste"
+    "full-output-enforcement"
     "web-to-design-md"
 )
 CORE_EXPOSED_GSTACK_SKILLS=(
@@ -712,7 +712,7 @@ if [ "$GLOBAL" -eq 1 ]; then
         echo "  - Install Git, bash, and bun, then re-run ./install.sh --global to install the full official gstack runtime."
     fi
     echo "  - Official gstack top-level exposure profile: $GSTACK_PROFILE"
-    echo "  - Lotus keeps 13 low-frequency skills out of the top-level menu under ~/.codex/hidden-skills/lotus."
+    echo "  - Lotus keeps low-frequency skills out of the top-level menu under ~/.codex/hidden-skills/lotus."
     echo "  - Hidden official gstack skills stay in ~/.gstack/repos/gstack/.agents/skills and can still be routed by AGENTS.md."
     echo "  - Slash skills live in the managed global skills folders ~/.claude/skills and ~/.codex/skills."
 fi

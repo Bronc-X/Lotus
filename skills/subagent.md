@@ -1,94 +1,16 @@
 ---
 name: subagent
-description: 把可并行任务拆给子 Agent 并汇总结论或补丁。
+description: 用户明确要求子 Agent、多 Agent 或并行委派时，拆分独立任务并汇总结果。
 ---
 
-# Subagent 子 Agent 管理 (@subagent)
+# Subagent
 
-> 灵感来源：Claude Code CLI 的 `/agents` 命令。该命令允许创建、管理和调度多个独立的子 Agent 来并行工作。
+Delegate only work that is independent enough to avoid duplicate reading and conflicting edits. Keep the main task’s scope, permissions, and safety boundaries unchanged.
 
-当你被要求触发 `@subagent` 时，进入"多 Agent 编排模式"。帮助用户将复杂任务拆分为多个独立的子任务，并为每个子任务定义专门的 Agent 角色。
+- Give each sub-agent one bounded deliverable, the minimum context it needs, and a concise return format.
+- Use parallel agents for independent research, logs, modules, or reviews; keep coupled decisions and overlapping files with one owner.
+- Do not ask multiple agents to inspect the same evidence unless the user explicitly wants independent review.
+- Treat returned claims as inputs to verify. The primary agent owns integration, conflict resolution, validation, and the final answer.
+- Stop or redirect an agent whose work becomes redundant or leaves scope.
 
-## 核心概念
-
-### 什么是子 Agent？
-- 一个子 Agent 就是一个**独立的 AI 执行上下文**
-- 它有自己的系统提示、工具权限和上下文窗口
-- 子 Agent 的工作不会污染主对话的上下文
-- 把噪音隔离到子进程里，主线保持清净
-
-### 为什么需要子 Agent？
-- **上下文隔离**：搜索代码库、分析日志等"脏活"交给子 Agent，不浪费主线的上下文窗口
-- **并行加速**：多个子 Agent 可以同时工作，缩短总执行时间
-- **专业分工**：给每个 Agent 分配专门的角色和权限，避免"万能型"提示的低效
-
-## 工作流程
-
-### 1. 任务分析
-当用户请求 `@subagent` 时，先分析当前任务，识别可以独立拆分的子任务：
-
-```
-📋 任务拆分方案
-━━━━━━━━━━━━━━━━
-🎯 主任务：[用户的原始任务]
-
-拆分为以下子 Agent：
-
-🤖 Agent A：[角色名称]
-   职责：[具体职责]
-   权限：[只读/读写/限制性 bash]
-   预计时间：[估算]
-
-🤖 Agent B：[角色名称]
-   职责：[具体职责]
-   权限：[只读/读写/限制性 bash]
-   预计时间：[估算]
-
-是否按此方案执行？
-```
-
-### 2. 常用 Agent 模板
-
-#### 🔍 Research Agent（调研 Agent）
-- 职责：搜索代码库、阅读文档、收集信息
-- 权限：只读
-- 输出：结构化的调研报告
-
-#### 🧪 Test Agent（测试 Agent）
-- 职责：运行测试套件、分析覆盖率、报告失败项
-- 权限：终端执行（只限测试命令）
-- 输出：测试结果摘要
-
-#### 📝 Review Agent（审查 Agent）
-- 职责：代码审查、安全扫描、风格检查
-- 权限：只读
-- 输出：审查意见列表
-
-#### 🏗️ Build Agent（构建 Agent）
-- 职责：执行构建、检查编译错误、验证产物
-- 权限：终端执行（只限构建命令）
-- 输出：构建状态报告
-
-### 3. 结果汇总
-所有子 Agent 完成后，在主线汇总结果：
-
-```
-📊 Agent 汇总报告
-━━━━━━━━━━━━━━━━━━
-
-🤖 Agent A [角色名]：✅ 完成
-   关键发现：[摘要]
-
-🤖 Agent B [角色名]：✅ 完成
-   关键发现：[摘要]
-
-💡 综合建议：
-[基于所有子 Agent 结果的统一建议]
-```
-
-## 核心规则
-
-- 每个子 Agent 的上下文独立，不要在主对话中展开子 Agent 的完整工作过程
-- 只在主线展示子 Agent 的**最终输出结果**
-- 如果平台不原生支持子 Agent，则用"角色切换 + 分段执行"的方式模拟
-- 子 Agent 适合**有界的、读多写少的任务**；持续性的、跨领域的复杂任务应保留在主线
+Completion means delegated outputs have been received or explicitly accounted for, integrated without overwriting unrelated work, and validated as part of the parent task.

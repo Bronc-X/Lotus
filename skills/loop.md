@@ -1,6 +1,6 @@
 ---
 name: loop
-description: 会话内按指定间隔轮询任务，关闭会话后停止。
+description: 用户使用 loop 或 @loop 要求在当前会话内定时轮询时使用。
 ---
 
 # Loop 定时循环 (@loop)

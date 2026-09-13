@@ -18,4 +18,4 @@
 ## Development Constraints
 
 - Build commands: `npm run dev`, `npm run build`
-- Always verify build after significant changes.
+- For code changes, run the narrowest relevant check; include `npm run build` when compilation or bundling may be affected.

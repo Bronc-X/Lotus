@@ -20,17 +20,13 @@ CLAUDE_GSTACK_SKILLS=(
 
 HIDDEN_TOP_LEVEL_SKILLS=(
   "brandkit"
-  "full-output-enforcement"
   "gstack-plan-ceo-review"
   "gstack-plan-design-review"
   "gstack-plan-eng-review"
-  "imagegen-frontend-mobile"
-  "imagegen-frontend-web"
   "imagegen"
   "openai-docs"
   "plugin-creator"
   "skill-creator"
-  "ios-ui-centering-fix"
   "skill-installer"
 )
 
@@ -191,31 +187,31 @@ test_codex_conversion_with_stubbed_gstack() {
   [ -f "$tmp/home/.codex/skills/image-2/scripts/image2_newapi.py" ] || fail "missing image-2 newapi fallback"
   [ -f "$tmp/home/.codex/skills/image-2/runtime.example.json" ] || fail "missing image-2 runtime example"
   [ ! -e "$tmp/home/.codex/skills/image-2/runtime.local.json" ] || fail "image-2 local runtime should not be installed from repo"
-  assert_file_contains "$tmp/home/.codex/skills/ai-progress-workspace/SKILL.md" "# AI Progress Workspace"
-  assert_file_contains "$tmp/home/.codex/skills/ai-progress-workspace/SKILL.md" "  - WebSearch"
-  assert_file_contains "$tmp/home/.codex/skills/taste-skill/SKILL.md" "# Taste Skill: Codex Visual Frontend Entry Point"
-  assert_file_contains "$tmp/home/.codex/skills/taste-skill/SKILL.md" "references/full-rules.md"
-  [ -f "$tmp/home/.codex/skills/taste-skill/references/full-rules.md" ] ||
-    fail "taste-skill full rules reference missing"
-  [ -f "$tmp/home/.codex/skills/taste-skill/references/image-first-workflow.md" ] ||
-    fail "taste-skill image-first reference missing"
+  assert_file_contains "$tmp/home/.codex/skills/ai-progress-workspace/SKILL.md" "# AI progress workspace"
+  assert_file_contains "$tmp/home/.codex/skills/ai-progress-workspace/SKILL.md" "references/event-contract.md"
+  assert_file_contains "$tmp/home/.codex/skills/taste-skill/SKILL.md" "# Taste Skill"
+  assert_file_contains "$tmp/home/.codex/skills/taste-skill/SKILL.md" "references/web-design.md"
+  [ -f "$tmp/home/.codex/skills/taste-skill/references/web-design.md" ] ||
+    fail "taste-skill web design reference missing"
+  [ -f "$tmp/home/.codex/skills/taste-skill/references/visual-concepts.md" ] ||
+    fail "taste-skill visual concepts reference missing"
   [ ! -e "$tmp/home/.codex/skills/taste-skill.md" ] ||
     fail "taste-skill should be installed as a package, not a flat legacy file"
-  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "# Agent Training Loop"
-  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "Use only when the user explicitly invokes"
+  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "# Agent training loop"
+  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "Use only when explicitly invoked"
   assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "  - Bash"
   assert_file_contains "$tmp/home/.codex/skills/baseline-packager/SKILL.md" "# Baseline Packager"
   assert_file_contains "$tmp/home/.codex/skills/baseline-packager/SKILL.md" "Do not default to Playwright"
   assert_file_contains "$tmp/home/.codex/skills/mini-investigate/SKILL.md" "# Minimal Bug Fix"
-  assert_file_contains "$tmp/home/.codex/skills/test-driven-development/SKILL.md" "# Test-Driven Development"
-  assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "## Overview"
-  assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "One information need gets one primary skill"
+  assert_file_contains "$tmp/home/.codex/skills/test-driven-development/SKILL.md" "# Test-driven development"
+  assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "## Route"
+  assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "One information need gets one primary route"
   assert_file_contains "$tmp/home/.codex/skills/anysearch/runtime.conf" "scripts/anysearch_cli"
   [ -f "$tmp/home/.codex/skills/anysearch/scripts/anysearch_cli.py" ] || fail "missing Codex anysearch CLI"
   [ ! -e "$tmp/home/.codex/skills/anysearch/.env" ] || fail "Codex anysearch .env should not be installed"
-  assert_file_contains "$tmp/home/.codex/skills/agent-reach/SKILL.md" "Platform-native retrieval router"
+  assert_file_contains "$tmp/home/.codex/skills/agent-reach/SKILL.md" "Retrieve supplied URLs and platform-native content"
   assert_file_contains "$tmp/home/.codex/skills/agent-reach/SKILL.md" "一个信息需求只选一个主 Skill"
-  assert_file_contains "$tmp/home/.claude/skills/anysearch/SKILL.md" "## Overview"
+  assert_file_contains "$tmp/home/.claude/skills/anysearch/SKILL.md" "## Route"
   assert_file_contains "$tmp/home/.claude/skills/anysearch/runtime.conf" "scripts/anysearch_cli"
   [ -f "$tmp/home/.claude/skills/anysearch/scripts/anysearch_cli.py" ] || fail "missing Claude anysearch CLI"
   [ ! -e "$tmp/home/.claude/skills/anysearch/.env" ] || fail "Claude anysearch .env should not be installed"
@@ -224,6 +220,10 @@ test_codex_conversion_with_stubbed_gstack() {
       "recording/SKILL.md" \
       "recording/scripts/qa_recording_project.ps1" \
       "recording/assets/templates/brand-profile.json" \
+      "executive-sow-pricing/SKILL.md" \
+      "executive-sow-pricing/references/cost-model.md" \
+      "codex-history-bridge/SKILL.md" \
+      "codex-history-bridge/scripts/inspect_history.py" \
       "workflow/SKILL.md" \
       "workflow/scripts/self_test.py" \
       "workflow/assets/workflow-pack/WORKFLOW_SPEC.json.template"; do
@@ -231,12 +231,10 @@ test_codex_conversion_with_stubbed_gstack() {
         fail "missing $host Skill package file: $relative_path"
     done
   done
-  assert_file_contains "$tmp/home/.codex/AGENTS.md" "版本：v1.4"
-  assert_file_contains "$tmp/home/.codex/AGENTS.md" "先想清楚，再写代码"
-  assert_file_contains "$tmp/home/.codex/AGENTS.md" "简单优先"
-  assert_file_contains "$tmp/home/.codex/AGENTS.md" "手术式修改"
-  assert_file_contains "$tmp/home/.codex/AGENTS.md" "目标驱动闭环"
-  assert_file_contains "$tmp/home/.codex/AGENTS.md" "一个信息需求、一个主 skill"
+  assert_file_contains "$tmp/home/.codex/AGENTS.md" "版本：v2.0"
+  assert_file_contains "$tmp/home/.codex/AGENTS.md" "只读取完成任务需要的项目规则"
+  assert_file_contains "$tmp/home/.codex/AGENTS.md" "安全的本地读取、编辑、构建、测试"
+  assert_file_contains "$tmp/home/.codex/AGENTS.md" "任务只有在以下工作完成后才算结束"
   assert_file_contains "$tmp/home/.claude/skills/gsap/SKILL.md" "# GSAP"
   [ ! -e "$tmp/home/.claude/skills/gsap.md" ] || fail "Claude should not keep legacy flat gsap.md"
 

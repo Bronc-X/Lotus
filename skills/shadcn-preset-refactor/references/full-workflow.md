@@ -1,17 +1,4 @@
----
-name: shadcn-preset-refactor
-description: 安全应用 shadcn preset，迁移视觉系统且保留业务行为。
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
-  - AskUserQuestion
----
-
-# Shadcn Preset Refactor
+# Shadcn preset refactor workflow
 
 ## Goal
 

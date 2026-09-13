@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex History Bridge"
+  short_description: "查找或恢复本地 Codex 历史任务"
+  default_prompt: "使用 $codex-history-bridge 查找或恢复这个本地 Codex 历史任务。"

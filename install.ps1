@@ -20,17 +20,13 @@ $CodexExcludedSkills = @("btw", "loop")
 $ManagedOfficialSkills = @("gstack")
 $HiddenTopLevelSkills = @(
     "brandkit",
-    "full-output-enforcement",
     "gstack-plan-ceo-review",
     "gstack-plan-design-review",
     "gstack-plan-eng-review",
-    "imagegen-frontend-mobile",
-    "imagegen-frontend-web",
     "imagegen",
     "openai-docs",
     "plugin-creator",
     "skill-creator",
-    "ios-ui-centering-fix",
     "skill-installer"
 )
 $HiddenClaudeGstackAliases = @(
@@ -54,12 +50,16 @@ $ObsoleteLotusSkills = @(
     "gsap-utils",
     "high-end-visual-design",
     "image-to-code",
+    "imagegen-frontend-mobile",
+    "imagegen-frontend-web",
     "industrial-brutalist-ui",
+    "ios-ui-centering-fix",
     "minimalist-ui",
     "mobile-agent-bridge",
     "powerup",
     "redesign-existing-projects",
     "stitch-design-taste",
+    "full-output-enforcement",
     "web-to-design-md"
 )
 $OfficialGstackInstalled = $false
@@ -788,7 +788,7 @@ if ($Global) {
         Write-Host "  - Install Git for Windows, then re-run install.ps1 -Global to install the full official gstack runtime."
     }
     Write-Host "  - Official gstack top-level exposure profile: $GstackProfile"
-    Write-Host "  - Lotus keeps 13 low-frequency skills out of the top-level menu under ~/.codex/hidden-skills/lotus."
+    Write-Host "  - Lotus keeps low-frequency skills out of the top-level menu under ~/.codex/hidden-skills/lotus."
     Write-Host "  - Hidden official gstack skills stay in ~/.gstack/repos/gstack/.agents/skills and can still be routed by AGENTS.md."
     Write-Host "  - Slash skills live in the managed global skills folders ~/.claude/skills and ~/.codex/skills."
 }

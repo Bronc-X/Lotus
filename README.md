@@ -5,27 +5,10 @@
 如果你不想亲自碰命令行，把这段交给 AI 编码助手：
 
 ```text
-请在本机安装最新版 Lotus，并验证全局规则、顶层 skills 和 Lotus 插件组合已经对当前宿主生效。
-
-1. 记录当前目录的绝对路径。
-2. 将 https://github.com/Bronc-X/Lotus.git 克隆到一个长期保存目录。
-3. 判断当前操作系统。
-4. 运行全局安装：
-   - Windows PowerShell: install.ps1 -Global -Force
-   - macOS/Linux: bash install.sh --global --yes
-5. 验证全局规则和 skills 已写入：
-   - Codex: ~/.codex/AGENTS.md 和 ~/.codex/skills
-   - Claude Code: ~/.claude/CLAUDE.md 和 ~/.claude/skills
-6. 确认 Lotus 自带 skills 和默认 gstack 顶层 skills 存在，并确认 Lotus 隐藏清单中的 13 个低频 skills 不在顶层菜单。
-7. 如果当前宿主是 Codex，添加仓库根目录为 Lotus marketplace，并安装需要的插件：
-   - lotus-daloopa@lotus
-   - build-ios-apps@lotus（仅在需要 iOS 工作流时安装）
-8. 验证 Daloopa 只出现一个顶层入口 `daloopa`，其内部仍能路由九个金融分析工作流。
-9. 告诉我是否需要重启宿主或开启新会话。
-10. 如果失败，给出失败命令、错误原文、已写入的 fallback/bootstrap 入口和下一步修复建议。
+请从 https://github.com/Bronc-X/Lotus.git 安装或更新 Lotus 到一个长期保存目录，然后运行适合当前系统的全局安装器。验证当前宿主的全局规则、Lotus skills 和默认 gstack 入口实际可用；只安装我需要的可选插件。安全的本地检查和修复可以直接执行。若检查失败，修复后重试；仍受阻时给出失败证据和下一步。
 ```
 
-Lotus 是一套给 AI 编码助手安装规矩、技能和一点良心的全局工程协议。它不会让模型突然变成圣人，但会让它在动手前先说清目标，在 debug 时先找根因，在交付时拿证据说话。若一个 agent 声称“我大概懂了”，Lotus 会递给它一张契约，让它把“大概”兑换成可验证结果。
+Lotus 为 Codex 和 Claude Code 提供一组精简的全局规则、任务型 skills 和可选插件。
 
 它做三件事：
 
@@ -33,18 +16,14 @@ Lotus 是一套给 AI 编码助手安装规矩、技能和一点良心的全局�
 2. 安装 Lotus 自带 skills。
 3. 从官方 [garrytan/gstack](https://github.com/garrytan/gstack) 安装并同步默认顶层 gstack skills。
 
-Lotus 仓库不内置 gstack 快照。凡是 gstack 能力，官方上游 `garrytan/gstack` 是唯一真源。Lotus 的工作是把这些能力安顿好，让它们在你每个新项目里都像准时的账房先生一样出现。
+Lotus 仓库不内置 gstack 快照；官方上游 `garrytan/gstack` 是唯一真源。
 
-## 为什么存在
+## 目标
 
-AI 编码最常见的坏习惯并不神秘：
-
-- 它会替你做沉默假设。
-- 它会把 50 行能解决的问题修成一座小城。
-- 它会顺手改旁边的代码，还说这是“改进”。
-- 它会说“修好了”，但不给复现、证据和回归验证。
-
-Lotus 的口号很朴素：少猜，少改，少装腔；多定位，多契约，多验证。
+- 只加载当前任务需要的规则和文档。
+- 保留用户已有改动并限制修改范围。
+- 允许 Agent 自主执行安全的本地实现和验证。
+- 用实际运行结果定义完成，而不是停在第一版实现。
 
 ## Lotus 工作协议
 
@@ -57,40 +36,13 @@ Lotus 的全局规则真源在 [core/AGENTS.md](core/AGENTS.md)。全局安装�
 
 其他宿主不由 Lotus 安装器自动写入全局路径。如果该宿主支持手动全局规则，请直接导入 [core/AGENTS.md](core/AGENTS.md)。
 
-### 四条护栏
+### 核心规则
 
-1. 先想清楚，再写代码：先确认目标、边界、关键假设和成功标准。
-2. 简单优先：只实现当前问题需要的最小方案，不提前抽象。
-3. 手术式修改：只改与目标直接相关的文件、函数和行。
-4. 目标驱动闭环：把任务变成可验证目标和明确契约，再实现并验证。
-
-### Debug 规则
-
-Debug 不许从“我猜这里坏了”开始。它从症状开始，一层层拆：
-
-1. 沿入口、调用链、数据形状、状态变化和副作用收敛到最小位置。
-2. 修复前先拆原因树，若还有“不知道为什么”，继续往下拆。
-3. 每个主要判断都要有日志、测试、代码路径、状态快照、网络响应、构建错误或复现步骤支撑。
-4. 补丁落在能解释问题的最小范围。
-5. 用原始复现路径证明症状消失，再做回归验证。
-
-### Agentic Coding 契约
-
-非平凡任务开始前，agent 要形成轻量契约：
-
-| 契约项 | 含义 |
-|---|---|
-| 目标 | 用户可观察到什么变化，什么算完成 |
-| 边界 | 哪些文件、模块、行为在范围内，哪些不碰 |
-| 做法 | 准备用哪类最小方案，不展开无关重构 |
-| 验收 | 用什么测试、构建、复现步骤或静态检查证明完成 |
-| 失败方式 | 若无法完成，给出卡点、证据和下一步 |
-
-用户不该操心“具体每一刀怎么切”。用户负责目标和契约，AI 负责拆解、执行、验证和交代。
-
-### 代码语言优先
-
-能写进代码、类型、测试、schema、断言、路由表或配置契约的规则，不只写在自然语言里。自然语言会在转述中掉零件，代码里的契约比较不爱说谎。
+- 只读取任务相关的项目规则、Skill 和文档。
+- 安全的本地读取、编辑、构建、测试和修复可直接执行。
+- 保留已有改动，只修改当前目标所需范围。
+- 重要删除、生产变更、外部发布、付费和新凭据使用仍需明确授权。
+- 完成需要实现、运行相关检查、检查结果、修复失败并重新验证。
 
 ## 快速安装
 
@@ -198,14 +150,16 @@ C:\Dev\Lotus\install.ps1 -Global -GstackProfile design
 
 | Skill | 用途 |
 |---|---|
-| `anysearch` | 实时搜索、垂直领域检索、批量搜索和 URL 内容提取 |
-| `agent-reach` | 互联网能力路由器，覆盖网页、搜索、YouTube、RSS、V2EX、B站和需登录态的社交平台 |
+| `anysearch` | 当前网页事实、新闻和股票、CVE、DOI 等结构化标识符检索 |
+| `agent-reach` | 用户给定 URL、GitHub、视频、RSS、播客和平台原生内容检索 |
 | `codebase-memory-mcp` | 代码库记忆与图谱检索，支持索引、结构搜索、调用路径和架构追踪 |
 | `recording` | 将录音整理为可追溯内容母库，并生产播客、文章、视频、社交、知识库和商业资产 |
+| `executive-sow-pricing` | 为 AI / FDE 项目制作老板可决策的 SOW、报价和 PPT / Word 交付物 |
+| `codex-history-bridge` | 查找或恢复跨 ChatGPT 与第三方 provider 配置的本地 Codex 历史任务 |
 | `workflow` | 把已跑通项目蒸馏成有证据、可版本化、可复用的工作流或 Skill |
-| `test-driven-development` | 严格红绿重构，先写失败测试再写实现 |
-| `frontend-design` | 前端审美与交互质量约束 |
-| `taste-skill` | 前端审美与实现质量约束，强化布局、字体、动效、间距和组件完成度 |
+| `test-driven-development` | 在用户或项目明确要求时执行红绿重构 |
+| `frontend-design` | 功能型 Web 应用界面、响应式和交互状态实现 |
+| `taste-skill` | 高质量营销网站、作品集和编辑型页面设计与实现 |
 | `ios-codex-preview` | 为 iOS / SwiftUI 项目安装并验证 Codex 侧边浏览器实时预览 |
 | `shadcn-preset-refactor` | 用 shadcn/create preset 做无损视觉改造 |
 | `image-2` | GPT Image 2 生图与改图入口 |
@@ -226,22 +180,7 @@ C:\Dev\Lotus\install.ps1 -Global -GstackProfile design
 全局安装后，请打开一个新的宿主会话，把下面提示词复制给 AI 助手：
 
 ```text
-请验证 Lotus 是否已经在当前宿主全局生效，而不是只存在于磁盘上的 Lotus 仓库中。
-
-1. 判断你当前运行在哪个宿主中，例如 Codex、Claude Code 或其他宿主。
-2. 读取当前宿主对应的全局规则文件：
-   - Codex: ~/.codex/AGENTS.md
-   - Claude Code: ~/.claude/CLAUDE.md
-3. 确认文件顶部附近存在 Lotus 四条护栏：
-   - 先想清楚，再写代码
-   - 简单优先
-   - 手术式修改
-   - 目标驱动闭环
-4. 确认文件包含 Agentic Coding 契约、Debug 规则和代码语言优先。
-5. 检查当前宿主的全局 skills 目录，并确认默认 5 个 gstack 顶层 skills 存在。
-6. 告诉我当前会话是否已经加载这些全局规则和 skills。
-7. 如果没有加载，告诉我是否需要完全重启宿主或开启新会话。
-8. 如果有缺失，请给出缺失路径、缺失项名称、复现依据和应重新运行的安装命令。
+请验证 Lotus 已在当前宿主生效：检查对应的全局规则文件、Lotus skills 和默认 gstack 入口，确认规则包含按需加载、安全本地自主执行和完整完成标准。若缺失，修复安装并重试；仍失败时给出缺失路径、错误证据和下一步。说明当前会话是否需要重开才能加载新配置。
 ```
 
 这段提示词只负责验证，不能让旧会话临时变成真正的全局会话。真正生效需要满足两个条件：
@@ -383,6 +322,6 @@ GitHub Actions is not permitted to create or approve pull requests.
 
 当前 workflow 已做容错：如果权限没开，会写入 workflow summary，不再因为无法创建 PR 而持续刷失败通知。
 
-## 最后一张便条
+## 范围
 
-Lotus 不保证 AI 永不犯错。那种保证一般写在漂亮广告里，旁边还站着一位收费很准时的人。Lotus 只做更可靠的一件事：让 agent 在犯错前先暴露假设，在动手前先写契约，在交付前先拿证据。许多工程事故到这里就不好意思继续发生了。
+Lotus 提供可维护的默认规则和工作流，不替代项目自己的技术约束、测试或人工业务决策。

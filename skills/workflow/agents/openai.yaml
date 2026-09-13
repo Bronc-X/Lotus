@@ -1,6 +1,6 @@
 interface:
   display_name: "工作流蒸馏器"
-  short_description: "把真实跑通项目复盘成最短、安全、可验证、可复用的工作流"
-  default_prompt: "使用 $workflow 把这个已跑通项目蒸馏成有证据、可复用的工作流，并单独验证最短性声明。"
+  short_description: "把已跑通项目固化为可验证工作流"
+  default_prompt: "使用 $workflow 把这个已跑通项目蒸馏成有证据、可复用的工作流。"
 policy:
   allow_implicit_invocation: true

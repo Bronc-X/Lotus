@@ -1,0 +1,4 @@
+interface:
+  display_name: "老板 SOW 与报价方案"
+  short_description: "生成老板可决策的 SOW 与报价"
+  default_prompt: "使用 $executive-sow-pricing 根据现有需求和证据生成可核算、可验收的 SOW 与报价方案。"

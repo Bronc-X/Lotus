@@ -1,49 +1,20 @@
 # Coding Conventions
 
-> This file is referenced by Aider via `.aider.conf.yml` and can be used by any tool that supports a `CONVENTIONS.md` file.
-> Full workflow rules are in `AGENTS.md`.
+Use the repository's existing language, formatter, linter, test commands, naming, and module boundaries. This file supplies fallbacks only when a project has no more specific convention.
 
-## General
+## Code
 
-- Use TypeScript strict mode where applicable
-- Prefer `const` over `let`; never use `var`
-- Use async/await over raw Promises
-- Every `catch` block must have user-visible feedback (no silent failures)
+- Prefer the smallest change that preserves nearby behavior and style.
+- In TypeScript projects that already use strict mode, keep new code type-safe and avoid unexplained escape hatches.
+- Handle errors at the layer that owns recovery or user feedback; do not swallow failures.
+- Do not commit credentials, machine-specific absolute paths, stray debug output, or unexplained placeholders.
 
-## Naming
+## User-facing behavior
 
-- Files: `kebab-case.ts` for utilities, `PascalCase.tsx` for React components
-- Variables/functions: `camelCase`
-- Constants: `UPPER_SNAKE_CASE`
-- Interfaces/Types: `PascalCase`, prefixed with `I` only when disambiguating
+- New asynchronous paths should expose relevant running, success, failure, and empty states.
+- New interactive controls should have usable keyboard/focus behavior and clear disabled or pending feedback where applicable.
+- New responsive layouts should be checked at the viewports they claim to support.
 
-## Error Handling
+## Verification
 
-- Every loading state has a corresponding loaded/error state
-- Every list/table has an empty state message
-- Every button click has visual feedback (loading/disabled/animation)
-
-## Code Hygiene
-
-- No `console.log` in production code
-- No `TODO` / `FIXME` / `HACK` in committed code
-- No hardcoded file paths or API keys
-- No `any` type in TypeScript
-
-## DRY
-
-- Extract to a component/function after 3+ repetitions
-- Shared utilities go in `lib/` or `utils/`
-- Shared UI patterns go in `components/ui/`
-
-## Testing
-
-- Run `npm run build` before every commit
-- Run `npm test` if test suite exists
-- Check for residual debug code before PR
-
-## Accessibility
-
-- All interactive elements have hover and focus styles
-- All grid layouts degrade gracefully on narrow screens
-- All images have alt text
+Run the narrowest existing checks that cover the changed behavior. Add broader builds or tests when the change can affect compilation, integration, packaging, or deployment. Fix failures caused by the change and rerun the affected checks before completion.

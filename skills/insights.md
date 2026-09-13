@@ -1,6 +1,6 @@
 ---
 name: insights
-description: 复盘工作习惯和摩擦点，提炼可执行改进建议。
+description: 用户要求复盘近期工作习惯或使用摩擦时，提炼可执行改进建议。
 ---
 
 # Insights 习惯回顾 (@insights)

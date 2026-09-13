@@ -1,13 +1,6 @@
 ---
 name: agent-reach
-description: >
-  Platform-native retrieval router for 小红书, X/Twitter, B站, Reddit, V2EX,
-  LinkedIn jobs, YouTube, GitHub, podcasts, 雪球, RSS, and supplied URLs. Also
-  uses Exa selectively for English technical documentation, official examples,
-  or hard semantic discovery. Use anysearch instead for routine current web/news/
-  fact lookup and structured vertical identifiers. Never invoke both for the same
-  information need by default. Not for content transformation or write actions
-  such as posting, commenting, or liking.
+description: Retrieve supplied URLs and platform-native content from social, video, GitHub, podcast, RSS, and selected technical-search sources.
 metadata:
   openclaw:
     homepage: https://github.com/Panniantong/Agent-Reach

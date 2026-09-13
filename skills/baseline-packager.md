@@ -1,6 +1,6 @@
 ---
 name: baseline-packager
-description: 把已验证行为固化为基线，防止后续改动回归。
+description: 用户要求固化已验证行为时，创建可重复运行的回归基线。
 risk: medium
 source: lotus
 date_added: "2026-05-11"

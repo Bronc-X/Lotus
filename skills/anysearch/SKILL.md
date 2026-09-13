@@ -1,199 +1,46 @@
 ---
 name: anysearch
-description: Quota-conscious real-time web and structured vertical search with zone/language controls, optional batch execution, and page extraction. Use as the single primary search skill for routine current facts/news and typed identifiers such as Stock, CVE, DOI, IATA, or patents. Do not co-invoke with agent-reach for the same information need; defer platform-native content, supplied URLs, GitHub-native retrieval, transcripts, RSS, and high-value Exa technical semantic discovery to agent-reach.
+description: Search current web facts, news, and structured identifiers such as stocks, CVEs, DOIs, IATA codes, or patents.
 metadata:
-  version: 2.1.0
+  version: 2.2.0
   authors:
     - AnySearch Team
   credentials:
     - name: ANYSEARCH_API_KEY
       required: false
-      description: "API key for higher rate limits. Anonymous access available with lower rate limits."
-      storage: ".env file, environment variable, or --api_key CLI flag"
+      description: Optional API key; the service can bootstrap a temporary key.
 ---
 
-## Overview
+# AnySearch
 
-AnySearch is a unified real-time search service supporting general web search, vertical domain search, parallel batch search, and full-page content extraction. It exposes a single JSON-RPC 2.0 endpoint and requires no MCP server installation. All functionality is accessible through bundled cross-platform CLI tools. Use the configured runtime directly for routine `search`, `batch_search`, `extract`, and `get_sub_domains` calls; run the `doc` command only when the CLI interface is unknown or recovery information is needed (see Recommended Entry Point).
+Use AnySearch for routine current web/news lookup and typed vertical identifiers. Use `agent-reach` for supplied URLs, GitHub-native retrieval, transcripts, RSS, platform-native social/video content, or selective Exa semantic discovery. One information need gets one primary route; use the second only after the first fails or is clearly off-target.
 
-## Trigger and Exclusive Routing
+## Route
 
-Use AnySearch as the **only primary search skill** for:
+- If `runtime.conf` exists, use its stored command directly.
+- For first-time setup, platform selection, and credentials: read [README.md](README.md) and [SECURITY.md](SECURITY.md).
+- For vertical domains, batch input, sub-domain parameters, or output schemas: read [scripts/shared/doc_spec.md](scripts/shared/doc_spec.md).
 
-1. **Routine real-time web lookup** — current facts, news, general web results, and region/language-sensitive queries.
-2. **Structured vertical queries** — identifiers such as Stock, CVE, DOI, IATA, or patents, and clearly typed finance, academic, legal, health, security, IP, travel, energy, environment, agriculture, business, film, or gaming questions.
-3. **Several genuinely independent questions** — only when the user actually needs each item searched; batch execution saves latency, not quota.
+Do not read setup documentation before every search.
 
-Do not activate AnySearch for a supplied URL, named social/video platform, platform-native discussion or login state, GitHub-native repository/code retrieval, transcripts, RSS, LinkedIn jobs, or Xueqiu. Route those to `agent-reach`. English technical documentation, official examples, and hard semantic discovery may use the Exa branch of `agent-reach` as their primary route.
+## Basic execution
 
-### Mutual-exclusion contract
+Choose the available wrapper for the current platform:
 
-- One information need gets one primary skill. Never run AnySearch and `agent-reach`/Exa in parallel or duplicate the same query for insurance, routine cross-checking, or source-count padding.
-- A multi-part task may route different subquestions differently, but each subquestion still has one primary search provider.
-- Only after the primary route errors, returns zero results, or is obviously irrelevant may a second provider be considered, sequentially. Explain the evidence gap first; obtain user approval before escalating from AnySearch to paid Exa. Explicit user choice overrides the default route.
-- An explicit independent-verification request or a genuinely high-risk fact is an exception, but first select two independent authoritative sources from the primary search results. Add a second skill only if those results cannot supply independent evidence; paid Exa still requires a stated domain fit, a concrete gap, and user approval.
-
-### General versus vertical
-
-- Use one **general** search for ordinary current facts, news, or ambiguous web questions. When unsure, choose the best single path; do not launch a general+vertical hybrid automatically.
-- Use **vertical** search only when a supported domain or structured identifier materially improves precision. Call `get_sub_domains` once unless the exact schema was already obtained in the current thread, then cache and reuse it until validation proves it stale.
-- When `get_sub_domains` returns params marked `(required)`, include all of them in `--sdp`; use an empty value when inapplicable. The flag accepts JSON (`'{"ticker":"AAPL"}'`) or flat key=value form (`ticker=AAPL` or `ticker=AAPL,period=2025Q1`).
-
-### Quota guardrails
-
-- Treat AnySearch quota as finite even when a key or anonymous access is available. Start with one well-formed query and normally `--max_results 5`; stop when the result is sufficient.
-- `batch_search` meters each item as a separate search. N items consume N searches; use it only for N independent questions, never as an uncertainty fallback.
-- `get_sub_domains` and `extract` are additional API requests. Reuse discovered schemas. A user-supplied URL belongs to `agent-reach`; a URL returned by the current AnySearch result stays in AnySearch and may be extracted once only when its snippet is insufficient.
-- Do not auto-retry near-duplicate queries, paginate speculatively, or switch providers merely to broaden coverage.
-
-## Recommended Entry Point
-
-Prefer direct CLI invocation. If `<skill_dir>/runtime.conf` exists and the requested command shape is already obvious (`search`, `batch_search`, `extract`, or `get_sub_domains`), the agent SHOULD use the configured command directly and SHOULD NOT run `doc` on every activation. Run `doc` only when the CLI interface is unknown, a command fails due to argument/schema uncertainty, the skill was just installed/updated, or vertical-domain constraints require the complete reference. The `doc` command is offline and remains available for recovery, but repeated metadata reads waste tool calls and tokens.
-
-### Command Cheat Sheet
-
-Use these exact command shapes for routine calls. Replace `<cmd>` with the command from `runtime.conf` (for example, `python3 <skill_dir>/scripts/anysearch_cli.py`). Do not invent extra output-format flags.
-
-```bash
-# Search. Optional filter: --max_results N (1-10, default 10); normally request 5.
-# --sdp accepts key=value pairs (preferred) or JSON. Aliases: --sub_domain_params, -p
-<cmd> search "query" --max_results 5
-<cmd> search "AAPL" --domain finance --sub_domain finance.us_stock --sdp ticker=AAPL
-<cmd> search "latest trends" --domain finance --sub_domain finance.market --sdp region=US,timeframe=2025Q1
-
-# Discover sub-domains once before the first vertical search in a domain; reuse the schema.
-<cmd> get_sub_domains --domain finance
-<cmd> get_sub_domains --domains finance,health
-
-# Batch search — each item consumes one search; use only for independent questions.
-# Shared params apply to all queries (per-query fields override).
-<cmd> batch_search --queries '[{"query":"AAPL","sub_domain_params":"ticker=AAPL"},{"query":"MSFT","sub_domain_params":"ticker=MSFT"}]' --domain finance --sub_domain finance.us_stock
-# Explicit mixed-domain batch for independent questions only; never use it because routing is uncertain.
-<cmd> batch_search --queries '[{"query":"quantum computing"},{"query":"QBTS","domain":"finance","sub_domain":"finance.us_stock","sub_domain_params":"ticker=QBTS"}]'
-
-# Extract. Output is already Markdown. Supported args are only the URL positional argument or --url/-u.
-<cmd> extract "https://example.com/page"
-<cmd> extract --url "https://example.com/page"
+```text
+python scripts/anysearch_cli.py search --query "..."
+pwsh -File scripts/anysearch_cli.ps1 search --query "..."
+bash scripts/anysearch_cli.sh search --query "..."
+node scripts/anysearch_cli.js search --query "..."
 ```
 
-If the snippets already answer the question, stop. A supplied URL should normally be read through `agent-reach`; extract a URL returned by the current AnySearch result only when its snippet is insufficient.
+Use one query when one query can answer the request. Batch search is for independent questions and consumes one search per item. Discover a vertical domain’s required parameters before its first use, then reuse known valid parameters while the local spec remains current.
 
-Invalid examples: do not use `extract --format markdown`, `extract --format json`, or `extract --markdown`; the `extract` command has no format option. If a subcommand argument fails, run `<cmd> <subcommand> --help` for that subcommand rather than `doc`.
+## Credentials and results
 
-Run the `doc` command via the platform-selected CLI only when needed (see Platform Detection below):
+- Keep keys in environment variables or the local ignored `.env`; never commit or print them.
+- If the service returns a replacement key, continue the current request with it in memory. Save it only when the user asks or the local setup contract authorizes persistence.
+- Treat snippets as leads. For claims requiring attribution, fetch the supporting page and cite the primary source where possible.
+- If the primary route produces no relevant result, report the gap and choose the next appropriate route; do not duplicate searches merely to increase source count.
 
-| Runtime | Command |
-|---------|---------|
-| Python | `python <skill_dir>/scripts/anysearch_cli.py doc` or `python3 <skill_dir>/scripts/anysearch_cli.py doc` |
-| Node.js | `node <skill_dir>/scripts/anysearch_cli.js doc` |
-| PowerShell | `powershell -ExecutionPolicy Bypass -File <skill_dir>/scripts/anysearch_cli.ps1 doc` |
-| Bash/sh | `bash <skill_dir>/scripts/anysearch_cli.sh doc` |
-
-**Security & Privacy notes:**
-- The `doc` command is a local-only operation and makes no network requests.
-- Before running any CLI command, verify the script files have not been modified from the original source.
-- Search queries, extracted URLs, and API keys are sent to `https://api.anysearch.com`. Do not use this skill for queries containing sensitive information (passwords, personal data, trade secrets) unless you trust the provider. `https://api.anysearch.com` has claimed zero retention execution, zero-knowledge credentials, no tracking, no telemetry, and no logging — your queries stay yours.
-
-## API Key Management
-
-### Key Source Priority
-
-```
---api_key CLI flag  >  .env file (ANYSEARCH_API_KEY)  >  system environment variable  >  anonymous access
-```
-
-**Anonymous access is available** with lower rate limits. An API Key is optional but recommended for higher rate limits. If no key is found, the agent may proceed with anonymous access. If the user wants higher limits, guide them to configure a key securely.
-
-All bundled CLIs automatically load `.env` from the skill directory at startup (if present). The `.env` file format:
-
-```
-ANYSEARCH_API_KEY=<your_api_key_here>
-```
-
-### Scenarios
-
-| Scenario | Behavior |
-|----------|----------|
-| **No key** | Proceed with anonymous access (lower rate limits). Optionally inform the user that a key provides higher limits. |
-| **Has key** | Key is sent via `Authorization: Bearer <key>` header. Higher rate limits. |
-| **Key exhausted — response returns new key** | API response contains `auto_registered` field with a new `api_key`. Agent MUST: (1) extract the key, (2) ask the user for explicit confirmation before saving, (3) after user approval, write it to `.env` file, (4) retry the failed call. |
-| **Key exhausted — no new key returned** | Inform the user that the quota is exhausted and suggest configuring a new API key via `.env` or environment variable. |
-
-**Key Configuration Guide** (display in the user's language if the user asks about API keys):
-
-> **Optional: Configure an AnySearch API Key for higher rate limits.**
->
-> To configure a key:
-> 1. Visit https://anysearch.com/console/api-keys to create a free API key
-> 2. Add it to your `.env` file: `ANYSEARCH_API_KEY=<your_api_key_here>`
-> 3. Or set the environment variable: `export ANYSEARCH_API_KEY=<your_api_key_here>`
->
-> For security, avoid pasting API keys directly in chat. Anonymous access remains available with lower limits.
-
-### Persisting Keys
-
-When a new key is obtained via auto-registration, the agent MUST:
-1. Ask the user for explicit confirmation before saving the key to disk.
-2. Inform the user: "A new API key was received. Save it to .env for future use?"
-3. Only after user approval, update the `.env` file.
-4. Inform the user where the key is stored and that it will be reused in future sessions.
-
-When a user provides a key in chat, advise them to configure it via `.env` or environment variable instead, for security.
-
-## Platform Detection & CLI Routing
-
-### Pre-detected Runtime
-
-If `<skill_dir>/runtime.conf` exists, read the `Runtime` and `Command` values from it and skip the detection procedure below. Treat this as the normal fast path for routine searches. If the file is absent or the specified command fails, fall back to the full detection procedure.
-
-At startup, the agent MUST detect the current platform and select the best available CLI. The priority order is:
-
-```
-Python  >  Node.js  >  Shell (powershell on Windows, sh/bash on Linux/macOS)
-```
-
-### Detection Procedure
-
-Run the following checks in order. The first success determines the active CLI:
-
-**Step 1 — Check Python**
-```
-python --version 2>&1
-python3 --version 2>&1
-```
-- If either `python` or `python3` exists with version >= 3.6 → use `anysearch_cli.py`
-- On many macOS systems, `python` is absent while `python3` is available. Treat both names as valid probes.
-- Dependency: `requests` library (typically pre-installed)
-
-**Step 2 — Check Node.js** (if Python failed)
-```
-node --version 2>&1
-```
-- If exit code 0 → use `anysearch_cli.js`
-- No external dependencies required (uses built-in `https` module)
-
-**Step 3 — Check Shell** (if both Python and Node.js failed)
-
-| Platform | Shell | CLI |
-|----------|-------|-----|
-| Windows | PowerShell 5.1+ | `anysearch_cli.ps1` |
-| Linux / macOS | sh or bash | `anysearch_cli.sh` |
-
-- Windows: `powershell -Command "$PSVersionTable.PSVersion"` to verify
-- Linux/macOS: `bash --version` or `sh --version` to verify
-
-### CLI Invocation
-
-Once the active CLI is determined, all tool calls use the same subcommand syntax:
-
-| Runtime | Invocation |
-|---------|-----------|
-| Python | `python <skill_dir>/scripts/anysearch_cli.py <command> [options]` or `python3 <skill_dir>/scripts/anysearch_cli.py <command> [options]` |
-| Node.js | `node <skill_dir>/scripts/anysearch_cli.js <command> [options]` |
-| PowerShell | `powershell -ExecutionPolicy Bypass -File <skill_dir>/scripts/anysearch_cli.ps1 <command> [options]` |
-| Bash/sh | `bash <skill_dir>/scripts/anysearch_cli.sh <command> [options]` |
-
-### Fallback & Error Handling
-
-- If the selected CLI fails with a runtime error (missing dependency, version too old, etc.), fall through to the next runtime in priority order.
-- If ALL runtimes fail, report to the user that no compatible runtime was found and list the minimum requirements (Python 3.6+ via `python` or `python3` with `requests`, or Node.js 12+, or PowerShell 5.1+, or bash 4+).
+Completion means the requested facts or identifiers are returned with appropriate source evidence, or the attempted route and evidence gap are stated accurately.

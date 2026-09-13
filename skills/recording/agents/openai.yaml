@@ -1,4 +1,4 @@
 interface:
   display_name: "Recording"
-  short_description: "把连续录音整理成证据母库，并生成播客、文章、视频和发布资产"
-  default_prompt: "使用 $recording 把一批录音整理成可追溯的内容母库，并按需生成多种内容资产。"
+  short_description: "从录音建立可追溯内容母库"
+  default_prompt: "使用 $recording 整理这些录音，并只生成我选择的内容资产。"

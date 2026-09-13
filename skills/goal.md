@@ -1,6 +1,6 @@
 ---
 name: goal
-description: 管理长期目标、当前阶段、阻塞点和下一步行动。
+description: 用户要求创建、查看、完成或标记受阻的长期 Codex goal 时使用。
 risk: medium
 source: lotus
 date_added: "2026-05-23"

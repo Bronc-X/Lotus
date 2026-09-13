@@ -1,6 +1,6 @@
 ---
 name: ios-debugger-agent
-description: Build, run, and debug iOS apps on Simulator with XcodeBuildMCP. Use when launching an app, inspecting simulator UI or logs, or diagnosing runtime behavior.
+description: Build, launch, inspect, and debug iOS apps on Simulator with XcodeBuildMCP.
 ---
 
 # iOS Debugger Agent

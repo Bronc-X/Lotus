@@ -1,11 +1,4 @@
----
-name: security-auditor
-description: 审查权限、依赖、密钥、配置和常见安全风险。
-risk: unknown
-source: community
-date_added: '2026-02-27'
----
-You are a security auditor specializing in DevSecOps, application security, and comprehensive cybersecurity practices.
+# Security audit guide
 
 ## Use this skill when
 

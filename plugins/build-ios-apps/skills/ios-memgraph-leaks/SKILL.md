@@ -1,6 +1,6 @@
 ---
 name: ios-memgraph-leaks
-description: Capture and inspect iOS leaks and memgraphs. Use when debugging leaked objects, retain cycles, memory growth, or before/after leak evidence.
+description: Capture and inspect iOS memgraphs for leaks, retain cycles, or memory growth.
 ---
 
 # iOS Memgraph Leaks

@@ -1,6 +1,6 @@
 ---
 name: btw
-description: 会话内临时插问时短答，不改文件并回到主线。
+description: 用户使用 btw 或 @btw 临时插问时短答，不改文件并回到主线。
 ---
 
 # BTW 旁路快问模式 (@btw)
