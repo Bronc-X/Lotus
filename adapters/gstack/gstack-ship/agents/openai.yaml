@@ -1,0 +1,6 @@
+interface:
+  display_name: "gstack-ship"
+  short_description: "执行用户明确要求的提交、推送、PR 或版本交付步骤。"
+  default_prompt: "使用 $ship 完成我指定的任务范围。"
+policy:
+  allow_implicit_invocation: true

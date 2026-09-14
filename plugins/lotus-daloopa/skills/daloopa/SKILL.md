@@ -1,7 +1,6 @@
 ---
 name: daloopa
-description: |
-  Daloopa 金融分析总入口。根据任务按需路由到九个内部工作流，不在顶层菜单重复展开。
+description: 使用 Daloopa 数据制作财务模型、财报分析或投资研究材料。
 ---
 
 # Daloopa Router
@@ -28,10 +27,12 @@ If the request genuinely spans multiple deliverables, select the smallest set of
 
 ## Execution Contract
 
+Workflow references describe full deliverable templates. For narrower requests, execute only the relevant sections. Fixed slide counts, scenario counts, lookback windows, and visual templates are defaults unless the user or data contract requires them; do not expand the assignment to fill a template. Citation, data provenance, and calculation consistency remain required.
+
 1. Read the selected workflow reference completely before taking task actions.
-2. Follow every direct reference named by that workflow, resolving paths relative to the `references/` directory.
+2. Read supporting references only when their stated condition applies; resolve paths relative to the workflow file.
 3. Use the Daloopa app/MCP tools when available. If they are unavailable, run the setup workflow or explain the exact missing connection.
-4. Preserve Daloopa citation requirements and the shared `data-access.md` and `design-system.md` conventions.
+4. Preserve Daloopa citation and data-access requirements. Load design-system guidance only for formatted deliverables, not a connection or factual lookup.
 5. Keep the internal workflow names out of the top-level skill menu; they are implementation details behind this router.
 
 The nine workflow references are vendored from the Daloopa plugin and retain their original licenses and attribution.

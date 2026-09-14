@@ -1,6 +1,6 @@
 ---
 name: security-auditor
-description: Audit a codebase or change for authentication, authorization, secrets, injection, dependency, configuration, or data-protection risks.
+description: 执行明确要求的安全审查，或调查具体漏洞与信任边界风险。
 ---
 
 # Security auditor

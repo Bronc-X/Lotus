@@ -1,6 +1,6 @@
 ---
 name: workflow
-description: Turn a completed, evidence-backed execution into a reusable, versioned workflow or Codex Skill.
+description: 将用户要求固化的已验证执行记录整理为可复用工作流或 Skill。
 ---
 
 # Workflow

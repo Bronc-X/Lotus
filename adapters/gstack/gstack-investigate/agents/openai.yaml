@@ -1,0 +1,6 @@
+interface:
+  display_name: "gstack-investigate"
+  short_description: "定位原因不明、反复出现或跨模块的软件故障。"
+  default_prompt: "使用 $investigate 完成我指定的任务范围。"
+policy:
+  allow_implicit_invocation: true

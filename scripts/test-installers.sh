@@ -51,6 +51,7 @@ copy_repo_fixture() {
   cp "$ROOT/install.ps1" "$fixture/install.ps1"
   cp -R "$ROOT/core" "$fixture/core"
   cp -R "$ROOT/skills" "$fixture/skills"
+  cp -R "$ROOT/adapters" "$fixture/adapters"
   mkdir -p "$fixture/scripts"
 }
 
@@ -183,7 +184,7 @@ test_codex_conversion_with_stubbed_gstack() {
   if grep -q "^allowed-tools:" "$tmp/home/.codex/skills/image-2/SKILL.md"; then
     fail "image-2 should not restrict Codex native image tools with allowed-tools"
   fi
-  assert_file_contains "$tmp/home/.codex/skills/image-2/SKILL.md" "image_gen"
+  assert_file_contains "$tmp/home/.codex/skills/image-2/SKILL.md" "references/fallback.md"
   [ -f "$tmp/home/.codex/skills/image-2/scripts/image2_newapi.py" ] || fail "missing image-2 newapi fallback"
   [ -f "$tmp/home/.codex/skills/image-2/runtime.example.json" ] || fail "missing image-2 runtime example"
   [ ! -e "$tmp/home/.codex/skills/image-2/runtime.local.json" ] || fail "image-2 local runtime should not be installed from repo"
@@ -198,19 +199,18 @@ test_codex_conversion_with_stubbed_gstack() {
   [ ! -e "$tmp/home/.codex/skills/taste-skill.md" ] ||
     fail "taste-skill should be installed as a package, not a flat legacy file"
   assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "# Agent training loop"
-  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "Use only when explicitly invoked"
+  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "name: agent-training-loop"
   assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "  - Bash"
-  assert_file_contains "$tmp/home/.codex/skills/baseline-packager/SKILL.md" "# Baseline Packager"
-  assert_file_contains "$tmp/home/.codex/skills/baseline-packager/SKILL.md" "Do not default to Playwright"
-  assert_file_contains "$tmp/home/.codex/skills/mini-investigate/SKILL.md" "# Minimal Bug Fix"
+  assert_file_contains "$tmp/home/.codex/skills/baseline-packager/SKILL.md" "name: baseline-packager"
+  assert_file_contains "$tmp/home/.codex/skills/mini-investigate/SKILL.md" "name: mini-investigate"
   assert_file_contains "$tmp/home/.codex/skills/test-driven-development/SKILL.md" "# Test-driven development"
   assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "## Route"
   assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "One information need gets one primary route"
   assert_file_contains "$tmp/home/.codex/skills/anysearch/runtime.conf" "scripts/anysearch_cli"
   [ -f "$tmp/home/.codex/skills/anysearch/scripts/anysearch_cli.py" ] || fail "missing Codex anysearch CLI"
   [ ! -e "$tmp/home/.codex/skills/anysearch/.env" ] || fail "Codex anysearch .env should not be installed"
-  assert_file_contains "$tmp/home/.codex/skills/agent-reach/SKILL.md" "Retrieve supplied URLs and platform-native content"
-  assert_file_contains "$tmp/home/.codex/skills/agent-reach/SKILL.md" "一个信息需求只选一个主 Skill"
+  cmp "$ROOT/skills/agent-reach/SKILL.md" "$tmp/home/.codex/skills/agent-reach/SKILL.md" || fail 'agent-reach content changed during install'
+  cmp "$ROOT/adapters/gstack/gstack-ship/SKILL.md" "$tmp/home/.codex/skills/gstack-ship/SKILL.md" || fail 'gstack adapter missing'
   assert_file_contains "$tmp/home/.claude/skills/anysearch/SKILL.md" "## Route"
   assert_file_contains "$tmp/home/.claude/skills/anysearch/runtime.conf" "scripts/anysearch_cli"
   [ -f "$tmp/home/.claude/skills/anysearch/scripts/anysearch_cli.py" ] || fail "missing Claude anysearch CLI"
@@ -231,7 +231,7 @@ test_codex_conversion_with_stubbed_gstack() {
         fail "missing $host Skill package file: $relative_path"
     done
   done
-  assert_file_contains "$tmp/home/.codex/AGENTS.md" "版本：v2.0"
+  cmp "$ROOT/core/AGENTS.md" "$tmp/home/.codex/AGENTS.md" || fail 'global rules differ'
   assert_file_contains "$tmp/home/.codex/AGENTS.md" "只读取完成任务需要的项目规则"
   assert_file_contains "$tmp/home/.codex/AGENTS.md" "安全的本地读取、编辑、构建、测试"
   assert_file_contains "$tmp/home/.codex/AGENTS.md" "任务只有在以下工作完成后才算结束"

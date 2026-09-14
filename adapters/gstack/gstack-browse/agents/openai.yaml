@@ -1,0 +1,6 @@
+interface:
+  display_name: "gstack-browse"
+  short_description: "使用已安装的 gstack 浏览器检查网页、交互或渲染结果。"
+  default_prompt: "使用 $browse 完成我指定的任务范围。"
+policy:
+  allow_implicit_invocation: true

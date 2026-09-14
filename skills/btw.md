@@ -1,43 +1,8 @@
 ---
 name: btw
-description: 用户使用 btw 或 @btw 临时插问时短答，不改文件并回到主线。
+description: 用户用 btw 或 @btw 临时插问时，短答后返回主线。
 ---
 
-# BTW 旁路快问模式 (@btw)
-
-> 灵感来源：Claude Code CLI 的 `/btw` 命令。该命令允许用户在不中断主任务、不污染对话历史的情况下，快速获得一个旁路回答。
-
-当你被要求触发 `@btw` 时，进入"旁路模式"。用户正在主线任务中临时岔出一个不相关的问题，你需要快速、精准地回答它，然后**无缝回到原来的任务**。
-
-## 核心规则
-
-### 1. 不修改任何代码
-- 在 `@btw` 模式下，**绝对不要**创建、修改或删除任何文件。
-- 这是一次纯粹的知识问答或概念澄清，不是执行指令。
-
-### 2. 不打断主线
-- 回答完毕后，主动声明："BTW 回答完毕，继续主线任务。"
-- 不要在回答中引入新的任务分支或待办事项。
-
-### 3. 极度简练
-- 回答控制在 3-5 句话以内。
-- 如果问题复杂，给出核心结论 + 一个参考链接或关键词，供用户后续深挖。
-- 禁止长篇大论。
-
-### 4. 上下文感知
-- 你可以利用当前对话已有的上下文來回答问题（例如用户刚才讨论的代码、架构决策等）。
-- 但回答本身不应改变主线任务的方向。
-
-## 使用场景举例
-
-- 用户正在重构一个组件，突然问："btw，React 19 的 use() hook 和 useEffect 的区别是什么？"
-- 用户正在调试 API，突然问："btw，HTTP 429 状态码是什么意思？"
-- 用户正在写测试，突然问："btw，vitest 和 jest 哪个更快？"
-
-## 输出格式
-
-```
-💬 BTW: [简短精准的回答]
-
-↩️ 回到主线。
-```
+# BTW
+Answer the side question briefly using relevant context. Do not create, edit, or delete files for this side question.
+Then return to unfinished main work. No fixed sentence count, output template, or new task is required. Do not claim the answer is excluded from conversation history.

@@ -1,6 +1,6 @@
 ---
 name: executive-sow-pricing
-description: Create executive SOWs and pricing proposals for AI or FDE projects when scope, economics, acceptance, and decision-ready PPT or Word outputs are required.
+description: 为 AI/FDE 项目编写面向决策者的工作范围与报价方案。
 ---
 
 # Executive SOW and pricing
@@ -17,9 +17,11 @@ Load only the applicable references. Use the presentation or document skill sepa
 
 ## Proposal contract
 
-Before drafting, build a compact requirement matrix covering desired business results, decision owner, authoritative source, scope, deliverables, timeline, pricing, exclusions, accepted wording, and facts that need current evidence. Resolve conflicting revisions in favor of the user’s latest explicit instruction.
+For a full proposal, build a compact requirement matrix covering desired business results, decision owner, authoritative source, scope, deliverables, timeline, pricing, exclusions, accepted wording, and facts that need current evidence. Resolve conflicting revisions in favor of the user’s latest explicit instruction.
 
-Open with the decision:
+For targeted edits, use only the affected requirements; do not rebuild the full proposal or create unrequested PPT/Word outputs.
+
+A full proposal should explain the decision:
 
 1. What business result changes and why it matters now.
 2. How the operating workflow produces that result.

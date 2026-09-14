@@ -1,6 +1,6 @@
 ---
 name: codex-history-bridge
-description: Find or resume local Codex tasks across ChatGPT and third-party provider configurations, including missing-provider and config.toml failures.
+description: 查找本地 Codex 旧对话，或诊断恢复时的 provider 与配置错误。
 ---
 
 # Codex history bridge

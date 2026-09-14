@@ -1,6 +1,6 @@
 ---
 name: brandkit
-description: Create a brand identity system, logo directions, or presentation-ready brand boards when the user requests visual identity work.
+description: 设计品牌标识、视觉体系或品牌展示板。
 ---
 
 # Brandkit

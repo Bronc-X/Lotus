@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Implement or improve functional web application UI when layout, hierarchy, responsive behavior, or interaction states are part of the task.
+description: 设计或改进仪表盘、表单、表格等功能型网页界面。
 ---
 
 # Frontend design

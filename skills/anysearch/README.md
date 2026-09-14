@@ -152,7 +152,7 @@ echo "Runtime: Bash" > <skill_dir>/runtime.conf
 echo "Command: bash <skill_dir>/scripts/anysearch_cli.sh" >> <skill_dir>/runtime.conf
 ```
 
-**Important:** Runtime preferences are stored in `runtime.conf`, NOT in SKILL.md. The agent reads `runtime.conf` on skill load to determine the active CLI. If the file is missing or corrupted, the agent falls back to the Platform Detection procedure in SKILL.md. If `runtime.conf` already exists, replace it instead of appending.
+**Important:** Runtime preferences are stored in `runtime.conf`, NOT in SKILL.md. Read it for the active CLI; if missing or invalid, use the platform setup in this README. Change an existing runtime preference only during requested setup, preserving unrelated settings.
 
 ### Routine agent usage
 

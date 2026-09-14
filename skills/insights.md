@@ -1,60 +1,11 @@
 ---
 name: insights
-description: 用户要求复盘近期工作习惯或使用摩擦时，提炼可执行改进建议。
+description: 根据用户指定的工作记录复盘重复摩擦与改进机会。
 ---
 
-# Insights 习惯回顾 (@insights)
-
-> 灵感来源：Claude Code CLI 的 `/insights` 命令。该命令分析过去 30 天的使用数据，生成一份交互式 HTML 报告。
-
-当你被要求触发 `@insights` 时，进入"回顾分析模式"。回顾当前项目或会话的历史交互，生成一份结构化的使用习惯报告。
-
-## 分析维度
-
-### 1. 使用统计
-- 最常执行的操作类型（debug、新功能、重构、UI 调整）
-- 代码修改频率最高的文件/模块
-- 平均每个任务的对话轮次
-
-### 2. 工作流模式
-- 你是否经常跳过 Plan 模式直接编码？
-- 你是否有"反复 debug 同一类问题"的循环？
-- 你最常用的 Lotus skill 是哪些？
-
-### 3. 摩擦点识别
-- 哪些环节经常卡住或需要反复修改？
-- 有没有可以通过自动化消除的重复操作？
-- 有没有未被使用但可能帮到你的功能？
-
-### 4. 优化建议
-- 推荐可以添加到 `AGENTS.md` / `CLAUDE.md` 的自定义规则
-- 推荐可以减少摩擦的自定义命令或 Skill
-- 基于使用模式的工作流改进建议
-
-## 输出格式
-
-```
-📊 Insights 使用习惯报告
-━━━━━━━━━━━━━━━━━━━━━━━━
-
-📈 使用概览
-[统计数据摘要]
-
-🔄 工作流模式
-[模式识别结果]
-
-🚧 摩擦点
-[识别出的痛点]
-
-💡 优化建议
-[具体的改进措施，可直接复制使用]
-
-↩️ 回顾完毕。继续前进！
-```
-
-## 核心规则
-
-- 只读分析，不修改任何代码
-- 所有数据本地分析，不发送到外部
-- 建议要具体、可操作，不要泛泛而谈
-- 如果缺乏足够的历史数据，坦诚告知用户
+# Insights
+Review only the project or history the user placed in scope. This is read-only unless changes are separately requested.
+Identify recurring friction using concrete episodes: repeated fixes, unclear acceptance, unnecessary tool calls, or failed handoffs. Distinguish observed patterns from hypotheses.
+Use counts only when the source supports them; say when records are incomplete. Do not infer that skipping planning or using fewer skills is inherently a problem.
+Recommend the smallest improvement tied to evidence. Prefer removing redundant rules over automatically adding global instructions. Do not send private logs to external services.
+Return the main findings and actionable changes without a prescribed dashboard or decorative template.

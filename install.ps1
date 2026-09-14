@@ -773,6 +773,23 @@ if ($Global) {
     Hide-TopLevelSkills -TargetDir $ClaudeSkills -HostGroup "claude"
     Hide-TopLevelSkills -TargetDir $CodexSkills -HostGroup "codex" -IncludeCodexSystem
 
+    if ($OfficialGstackInstalled) {
+        $adapterRoot = Join-Path $RepoRoot "adapters\gstack"
+        if (Test-Path -LiteralPath $adapterRoot) {
+            Get-ChildItem -LiteralPath $adapterRoot -Directory | ForEach-Object {
+                $target = Join-Path $CodexSkills $_.Name
+                if (Test-Path -LiteralPath (Join-Path $target "SKILL.md")) {
+                    Copy-Item -LiteralPath (Join-Path $_.FullName 'SKILL.md') -Destination (Join-Path $target 'SKILL.md') -Force
+                    $references = Join-Path $_.FullName 'references'
+                    if (Test-Path -LiteralPath $references) {
+                        New-Item -ItemType Directory -Path (Join-Path $target 'references') -Force | Out-Null
+                        Copy-Item -Path (Join-Path $references '*') -Destination (Join-Path $target 'references') -Recurse -Force
+                    }
+                }
+            }
+        }
+    }
+
     Write-Host ""
     Write-Host "Global installation completed successfully!" -ForegroundColor Green
     Write-Host "If any existing configs were overwritten, .bak backups have been created." -ForegroundColor Yellow

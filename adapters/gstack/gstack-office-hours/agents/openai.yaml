@@ -1,0 +1,6 @@
+interface:
+  display_name: "gstack-office-hours"
+  short_description: "用户要求梳理产品需求、商业假设或方案取舍时使用。"
+  default_prompt: "使用 $office-hours 完成我指定的任务范围。"
+policy:
+  allow_implicit_invocation: true

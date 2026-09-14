@@ -1,6 +1,6 @@
 ---
 name: taste-skill
-description: Design or redesign premium marketing sites, portfolios, and editorial web experiences when distinctive visual direction and implementation are required.
+description: 设计或重设计需要鲜明视觉方向的营销网站、作品集或编辑型页面。
 ---
 
 # Taste Skill

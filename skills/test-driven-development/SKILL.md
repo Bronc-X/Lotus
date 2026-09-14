@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: Use red-green-refactor when the user or project explicitly requires test-first implementation.
+description: 用户或项目明确要求测试先行时，执行红绿重构。
 ---
 
 # Test-driven development

@@ -21,4 +21,4 @@ The real gstack runtime is now the official upstream project:
 
 ## Source of Truth
 
-When there is any difference between Lotus and upstream gstack, follow upstream gstack.
+Upstream remains the source of runtime binaries and tool mechanics. Lotus maintains concise Codex invocation adapters in `adapters/gstack/`; their task scope and routing replace upstream prompt scaffolding for the covered entrypoints. Do not preload both versions. Standalone upstream updates may restore generated prompts; rerun the Lotus skill sync to reapply adapters.

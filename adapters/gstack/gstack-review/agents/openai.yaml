@@ -1,0 +1,6 @@
+interface:
+  display_name: "gstack-review"
+  short_description: "审查用户指定的代码差异或 PR，查找可证实的缺陷与回归风险。"
+  default_prompt: "使用 $review 完成我指定的任务范围。"
+policy:
+  allow_implicit_invocation: true

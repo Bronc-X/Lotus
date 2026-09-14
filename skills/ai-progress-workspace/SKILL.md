@@ -1,6 +1,6 @@
 ---
 name: ai-progress-workspace
-description: Build AI products whose progress UI is driven by real tool events and structured artifact changes.
+description: 为长运行 AI 任务实现真实事件驱动的进度界面和可编辑产物。
 ---
 
 # AI progress workspace

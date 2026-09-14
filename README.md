@@ -16,7 +16,15 @@ Lotus 为 Codex 和 Claude Code 提供一组精简的全局规则、任务型 sk
 2. 安装 Lotus 自带 skills。
 3. 从官方 [garrytan/gstack](https://github.com/garrytan/gstack) 安装并同步默认顶层 gstack skills。
 
-Lotus 仓库不内置 gstack 快照；官方上游 `garrytan/gstack` 是唯一真源。
+Lotus 不内置 gstack 运行时快照；运行组件来自 `garrytan/gstack`。`adapters/gstack/` 为已安装的常用 Codex 入口提供精简调用规则，不替换上游二进制和脚本，也不自动启用隐藏技能。
+
+仅同步本机已安装的 Lotus skills（不修改 API、模型、权限、插件缓存或菜单开关）：
+
+```powershell
+./scripts/sync-codex-skills.ps1
+```
+
+同步前会在 Codex 的 backups 目录保存被替换文件和恢复清单。仅更新已存在的技能，未安装的可选插件不会因此安装。独立运行上游 gstack 更新可能覆盖入口；之后重新同步即可恢复 Lotus 适配。
 
 ## 目标
 

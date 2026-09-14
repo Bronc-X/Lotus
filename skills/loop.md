@@ -1,62 +1,13 @@
 ---
 name: loop
-description: 用户使用 loop 或 @loop 要求在当前会话内定时轮询时使用。
+description: 用户用 loop 或 @loop 要求定期检查任务状态时使用。
 ---
 
-# Loop 定时循环 (@loop)
-
-> 灵感来源：Claude Code CLI 的 `/loop` 命令。设置会话内的定时循环任务，自动执行周期性检查或操作。
-
-当你被要求触发 `@loop` 时，进入"定时循环模式"。
-
-## 使用方法
-
-用户会以以下格式给出指令：
-- `@loop 5m 检查部署状态`
-- `@loop 10m 运行测试套件`
-- `@loop 2m 检查构建是否完成`
-
-## 核心规则
-
-### 1. 解析用户指令
-- 提取执行间隔（如 `5m` = 5 分钟，`1h` = 1 小时）
-- 提取要执行的任务描述
-- 如果用户没有指定间隔，默认建议 5 分钟
-
-### 2. 安全约束
-- 循环是**会话内的**——明确告知用户，关闭当前会话后循环自动停止
-- 不创建系统级的 cron job 或守护进程
-- 对于可能产生副作用的操作（如部署），每次执行前确认
-- 建议设置最大执行次数或过期时间（默认建议 3 小时）
-
-### 3. 执行逻辑
-- 每次执行时，清晰报告当前状态
-- 如果检测到目标条件已满足（如构建完成），自动停止循环并通知用户
-- 如果连续 3 次执行结果完全相同，向用户建议是否继续
-
-### 4. 适合的场景
-- 轮询部署/构建状态
-- 监控 PR 审查进度
-- 定期运行 lint 或测试
-- 等待外部依赖就绪
-
-### 5. 不适合的场景
-- 需要持久运行超过当前会话的任务（建议使用系统 cron）
-- 需要高频率执行（<1 分钟）的操作（建议使用 watch 命令）
-
-## 输出格式
-
-```
-🔄 Loop 已设置
-━━━━━━━━━━━━━━
-⏰ 间隔：每 X 分钟
-📋 任务：[任务描述]
-⏱️ 预计过期：[时间]
-🛑 取消方式：输入「停止循环」
-
---- 第 1 次执行 ---
-[执行结果]
-
---- 第 2 次执行（X 分钟后） ---
-[执行结果]
-```
+# Loop
+Extract the target, interval, stopping condition, and notification preference from the request.
+Use the host's supported monitoring or scheduling mechanism. For an explicitly session-only wait, use supported waits and explain its lifetime; do not promise persistence the host cannot provide.
+- Do not create system cron jobs or background daemons as a substitute for an available host mechanism.
+- Unchanged state is normal. Do not stop or ask to continue merely because several checks return the same result.
+- Notify on completion, meaningful change, actionable failure, or requested updates; remain quiet otherwise.
+- Repeated checking does not authorize repeated deployment, publication, purchases, or destructive actions. Preserve the granted scope and verify authorization before external effects.
+Stop at the user's condition or cancellation. If scheduling is unavailable, state that limitation instead of claiming the loop was installed.

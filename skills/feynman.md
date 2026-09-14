@@ -1,6 +1,6 @@
 ---
 name: feynman
-description: 用户点名 feynman，或要求向非技术听众解释复杂机制时，用白话和例子说明。
+description: 向非技术听众用白话和例子解释复杂机制。
 ---
 
 # Feynman

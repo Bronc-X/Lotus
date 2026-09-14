@@ -1,6 +1,6 @@
 ---
 name: shadcn-preset-refactor
-description: Apply a shadcn preset to an existing frontend while preserving routes, behavior, data flow, and user changes.
+description: 将指定 shadcn preset 应用于现有前端，保留业务行为。
 ---
 
 # Shadcn preset refactor

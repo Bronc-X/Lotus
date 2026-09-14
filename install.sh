@@ -697,6 +697,20 @@ if [ "$GLOBAL" -eq 1 ]; then
     hide_top_level_skills ~/.claude/skills "claude"
     hide_top_level_skills ~/.codex/skills "codex" 1
 
+    if [ "$OFFICIAL_GSTACK_INSTALLED" -eq 1 ]; then
+        for adapter in "$REPO_ROOT"/adapters/gstack/*; do
+            [ -d "$adapter" ] || continue
+            target="$HOME/.codex/skills/$(basename "$adapter")"
+            if [ -f "$target/SKILL.md" ]; then
+                cp "$adapter/SKILL.md" "$target/SKILL.md"
+                if [ -d "$adapter/references" ]; then
+                    mkdir -p "$target/references"
+                    cp -R "$adapter/references"/. "$target/references"/
+                fi
+            fi
+        done
+    fi
+
     echo ""
     echo -e "\033[0;32mGlobal installation completed successfully!\033[0m"
     echo -e "\033[0;33mIf any existing configs were overwritten, .bak backups have been created.\033[0m"

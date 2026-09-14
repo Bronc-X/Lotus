@@ -1,0 +1,6 @@
+interface:
+  display_name: "gstack-qa"
+  short_description: "按用户要求验证网页流程并修复发现的范围内问题。"
+  default_prompt: "使用 $qa 完成我指定的任务范围。"
+policy:
+  allow_implicit_invocation: true

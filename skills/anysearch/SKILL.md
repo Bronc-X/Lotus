@@ -1,6 +1,6 @@
 ---
 name: anysearch
-description: Search current web facts, news, and structured identifiers such as stocks, CVEs, DOIs, IATA codes, or patents.
+description: 检索实时网页事实、新闻或股票、CVE、DOI 等结构化标识符。
 metadata:
   version: 2.2.0
   authors:

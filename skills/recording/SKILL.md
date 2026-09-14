@@ -1,6 +1,6 @@
 ---
 name: recording
-description: Turn recorded conversations into a traceable content library and selected podcast, article, video, social, knowledge, or commercial assets.
+description: 将录音整理为可追溯内容母库，并制作用户选定的内容资产。
 ---
 
 # Recording

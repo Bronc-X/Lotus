@@ -1,6 +1,6 @@
 ---
 name: polanyi-tacit
-description: 用户要求分析复杂代码中的隐性业务约束、惯例或组织知识时使用。
+description: 分析复杂代码中未明说的业务约束与隐性惯例。
 ---
 
 # Polanyi tacit analysis

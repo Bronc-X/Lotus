@@ -1,6 +1,6 @@
 ---
 name: subagent
-description: 用户明确要求子 Agent、多 Agent 或并行委派时，拆分独立任务并汇总结果。
+description: 用户明确要求并行委派时拆分独立子任务并汇总。
 ---
 
 # Subagent

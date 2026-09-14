@@ -9,11 +9,11 @@ Use this skill to prove iOS leaks from a live simulator process or an existing `
 
 ## Core Workflow
 
-1. Build, launch, and drive the exact flow that should release objects.
+1. For a new capture, build, launch, and drive the exact flow that should release objects. For an existing memgraph, start with analysis; no launch is needed.
 2. Capture a memgraph from the running simulator process with `scripts/capture_sim_memgraph.sh`.
 3. Summarize leaks with `scripts/summarize_memgraph_leaks.py`.
 4. For each app-owned leaked type, inspect ownership with `leaks --traceTree=<address> <file.memgraph>` and grouped leak evidence.
-5. Make the smallest root-cause patch, then recapture the same flow on the same simulator when possible.
+5. Only when fixes are requested, make the smallest root-cause patch and recapture a comparable flow. Analysis alone does not authorize edits.
 6. Report proof: before/after leak counts, disappeared root types, remaining leaks, memgraph paths, and test/build results.
 
 Do not claim a leak fix from a smaller memgraph alone. A credible fix explains the ownership path that kept the object alive and shows that the same path or type disappears after the patch.

@@ -18,7 +18,7 @@ Read these references as needed:
 ## Core workflow
 
 ### 1) Start with actions, not screens
-- Identify the 1-3 highest-value actions that should work outside the app UI.
+- Identify the requested high-value actions that should work outside the app UI.
 - Prefer verbs like compose, open, find, filter, continue, inspect, or start.
 - Do not mirror the entire app navigation tree as intents.
 
@@ -46,7 +46,7 @@ Read these references as needed:
 
 ## Strong defaults
 
-- Prefer a dedicated intents target or module for the system-facing layer.
+- Keep the system-facing layer isolated within the existing structure; add a dedicated target only when required.
 - Keep intent types thin; business logic should stay in app services or domain models.
 - Keep app entities small and display-friendly.
 - Use `AppEnum` for fixed app choices such as tabs, modes, or visibility levels before reaching for a full entity type.
