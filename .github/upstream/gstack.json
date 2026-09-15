@@ -1,9 +1,9 @@
 {
   "repo": "garrytan/gstack",
   "branch": "main",
-  "version": "1.1.1.0",
-  "commit": "e3c961d00f24334066b4caeb57634c012a346c00",
-  "commit_date": "2026-04-18T15:58:59Z",
-  "commit_subject": "fix(ship): detect + repair VERSION/package.json drift in Step 12 (v1.1.1.0) (#1063)",
-  "tracked_at_utc": "2026-04-19T00:00:00Z"
+  "version": "1.87.3.0",
+  "commit": "85b8c038fc0002a1549789ea018e924c1d335de4",
+  "commit_date": "2026-09-15T20:53:58Z",
+  "commit_subject": "v1.87.3.0 fix: bind review evidence to the reviewed tree (#2875)",
+  "tracked_at_utc": "2026-09-15T21:19:34Z"
 }
