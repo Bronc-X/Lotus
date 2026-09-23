@@ -2,6 +2,14 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
 $fixture=Join-Path ([IO.Path]::GetTempPath()) ('lotus-sync-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path "$fixture/skills/recording/scripts","$fixture/skills/gstack-ship","$fixture/skills/unrelated" -Force | Out-Null
+foreach ($voiceSkill in @('ai-podcast','toni-voice')) {
+    New-Item -ItemType Directory -Path "$fixture/skills/$voiceSkill/scripts","$fixture/skills/$voiceSkill/assets" -Force | Out-Null
+    'old voice skill' | Set-Content "$fixture/skills/$voiceSkill/SKILL.md"
+    'old code' | Set-Content "$fixture/skills/$voiceSkill/scripts/synthesize.py"
+    'private voice asset' | Set-Content "$fixture/skills/$voiceSkill/assets/voice.pt"
+    'private voice profile' | Set-Content "$fixture/skills/$voiceSkill/voice.json"
+    'private machine paths' | Set-Content "$fixture/skills/$voiceSkill/runtime.json"
+}
 'old recording' | Set-Content "$fixture/skills/recording/SKILL.md"
 'runtime sentinel' | Set-Content "$fixture/skills/recording/scripts/local-only.ps1"
 'private runtime sentinel' | Set-Content "$fixture/skills/recording/runtime.local.json"
@@ -11,10 +19,17 @@ New-Item -ItemType Directory -Path "$fixture/skills/gstack-ship/agents" | Out-Nu
 'unrelated' | Set-Content "$fixture/skills/unrelated/SKILL.md"
 'config sentinel' | Set-Content "$fixture/config.toml"
 $protected=@('config.toml','skills/unrelated/SKILL.md','skills/recording/runtime.local.json','skills/recording/scripts/local-only.ps1')
+foreach ($voiceSkill in @('ai-podcast','toni-voice')) {
+    $protected += @("skills/$voiceSkill/assets/voice.pt", "skills/$voiceSkill/voice.json", "skills/$voiceSkill/runtime.json")
+}
 $hashes=@{}
 foreach($p in $protected){$hashes[$p]=(Get-FileHash "$fixture/$p").Hash}
 & "$PSScriptRoot/sync-codex-skills.ps1" -CodexRoot $fixture
 foreach($p in $protected){if((Get-FileHash "$fixture/$p").Hash -ne $hashes[$p]){throw "Protected file changed: $p"}}
+foreach ($voiceSkill in @('ai-podcast','toni-voice')) {
+    if ((Get-FileHash "$fixture/skills/$voiceSkill/scripts/synthesize.py").Hash -ne
+        (Get-FileHash "$repo/skills/$voiceSkill/scripts/synthesize.py").Hash) { throw 'Voice script not synchronized' }
+}
 foreach($pair in @(@('skills/recording/SKILL.md','skills/recording/SKILL.md'),@('adapters/gstack/gstack-ship/SKILL.md','skills/gstack-ship/SKILL.md'))){
  if((Get-FileHash "$repo/$($pair[0])").Hash -ne (Get-FileHash "$fixture/$($pair[1])").Hash){throw 'Sync mismatch'}
 }

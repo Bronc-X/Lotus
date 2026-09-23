@@ -1,0 +1,9 @@
+{
+  "jobs": [
+    {
+      "language": "zh",
+      "text_file": "script/spoken.txt",
+      "output": "audio/episode-v1.wav"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+runtime.json
+runtime.local.json
+voice.json
+voices/
+outputs/
+*.pt
+*.wav
+*.mp3
+*.m4a
+*.env

@@ -1,0 +1,5 @@
+runtime.json
+voice.json
+assets/
+__pycache__/
+*.pyc

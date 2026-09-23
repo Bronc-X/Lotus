@@ -312,6 +312,21 @@ copy_lotus_skill_packages() {
         fi
 
         local target_skill_dir="$target_dir/$skill_name"
+        # Overlay voice workflow files; never remove local voice assets/configuration.
+        if [ "$skill_name" = "ai-podcast" ] || [ "$skill_name" = "toni-voice" ]; then
+            mkdir -p "$target_skill_dir"
+            while IFS= read -r -d '' source_file; do
+                local relative="${source_file#"$skill_dir/"}"
+                local target_file="$target_skill_dir/$relative"
+                mkdir -p "$(dirname "$target_file")"
+                if [ -f "$target_file" ]; then
+                    cp "$target_file" "$target_file.lotus.bak"
+                fi
+                cp "$source_file" "$target_file"
+            done < <(find "$skill_dir" -type f -print0)
+            echo "    Updated voice skill package, preserving private files: $skill_name"
+            continue
+        fi
         local saved_runtime=""
         local had_runtime=0
         if [ -f "$target_skill_dir/runtime.local.json" ]; then

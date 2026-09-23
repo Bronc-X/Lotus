@@ -1,0 +1,4 @@
+interface:
+  display_name: "Toni Voice"
+  short_description: "用已确认的 Toni 声线制作单人播客、视频画外音和中英文口播"
+  default_prompt: "使用 $toni-voice，将我提供的内容制作成自然的单人播客或视频画外音。"

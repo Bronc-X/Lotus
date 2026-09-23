@@ -36,8 +36,11 @@ Get-ChildItem (Join-Path $repo 'skills') -Directory | ForEach-Object {
     $target = Join-Path $skillRoot $_.Name
     if ((Test-Path (Join-Path $_.FullName 'SKILL.md')) -and (Test-Path (Join-Path $target 'SKILL.md'))) {
         $package = $_.FullName
+        $voicePackage = $_.Name -in @('ai-podcast', 'toni-voice')
         Get-ChildItem $package -Recurse -File | Where-Object {
-            $_.Extension -in @('.md','.yaml','.yml') -and $_.FullName -notmatch '[\\/](__pycache__|node_modules)[\\/]'
+            ($_.Extension -in @('.md','.yaml','.yml') -or
+                ($voicePackage -and ($_.Extension -in @('.py','.ps1') -or $_.Name -like '*.example.json'))) -and
+                $_.FullName -notmatch '[\\/](__pycache__|node_modules)[\\/]'
         } | ForEach-Object { Add-File $_.FullName (Join-Path $target $_.FullName.Substring($package.Length + 1)) }
     }
 }

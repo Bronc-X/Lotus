@@ -323,6 +323,21 @@ function Copy-LotusSkillPackages {
         }
 
         $destination = Join-Path $TargetDir $skillName
+        # Voice packages keep private enrollment and per-machine files in place.
+        if ($skillName -in @('ai-podcast', 'toni-voice')) {
+            $packageRoot = $_.FullName
+            Get-ChildItem -LiteralPath $packageRoot -Recurse -File | ForEach-Object {
+                $relative = $_.FullName.Substring($packageRoot.Length + 1)
+                $targetFile = Join-Path $destination $relative
+                New-Item -ItemType Directory -Path (Split-Path $targetFile -Parent) -Force | Out-Null
+                if (Test-Path -LiteralPath $targetFile) {
+                    Copy-Item -LiteralPath $targetFile -Destination ($targetFile + '.lotus.bak') -Force
+                }
+                Copy-Item -LiteralPath $_.FullName -Destination $targetFile -Force
+            }
+            Write-Host "    Updated voice skill package, preserving private files: $skillName"
+            return
+        }
         $localRuntime = Join-Path $destination "runtime.local.json"
         $savedLocalRuntime = $null
         if (Test-Path $localRuntime) {

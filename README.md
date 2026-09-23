@@ -161,6 +161,8 @@ C:\Dev\Lotus\install.ps1 -Global -GstackProfile design
 | `anysearch` | 当前网页事实、新闻和股票、CVE、DOI 等结构化标识符检索 |
 | `agent-reach` | 用户给定 URL、GitHub、视频、RSS、播客和平台原生内容检索 |
 | `codebase-memory-mcp` | 代码库记忆与图谱检索，支持索引、结构搜索、调用路径和架构追踪 |
+| `ai-podcast` | 原声克隆、材料解析、单人口播合成、QA 与平台分发；支持 CPU 与 Mac |
+| `toni-voice` | 更新后的 Toni 配音流程；个人声线资产和机器配置需本地提供 |
 | `recording` | 将录音整理为可追溯内容母库，并生产播客、文章、视频、社交、知识库和商业资产 |
 | `executive-sow-pricing` | 为 AI / FDE 项目制作老板可决策的 SOW、报价和 PPT / Word 交付物 |
 | `codex-history-bridge` | 查找或恢复跨 ChatGPT 与第三方 provider 配置的本地 Codex 历史任务 |
@@ -182,6 +184,12 @@ C:\Dev\Lotus\install.ps1 -Global -GstackProfile design
 | `insights` | 使用习惯回顾与优化建议 |
 | `subagent` | 子 Agent 管理与并行任务编排 |
 | `goal` | 长期任务目标管理，优先路由到宿主原生 Goal 能力 |
+
+## AI podcast 与声音配置
+
+使用 `$ai-podcast` 从人工录音、开源 OmniVoice 声音克隆开始，解析内容、整理单人口播稿、合成和检查音频，最后按具体授权登录平台分发。已确认声线或稿件可以直接接续。Windows/Linux 无 GPU 使用 CPU；Apple Silicon 提供 MPS 路线，仍需目标机短样测试。
+
+`toni-voice` 是更新后的专用声线执行规则，仓库不含原声、声音提示、私人文风语料、账号或机器配置。已安装的个人资产在更新时保留。首次使用请让 Agent 读取对应 Skill，配置本地模型与 voice profile；安装 Skill 不会自动下载模型，也不会自动发布节目。
 
 ## 安装后验证
 

@@ -1,0 +1,18 @@
+{
+  "repository_path": "../OmniVoice",
+  "model_path": "../models/OmniVoice",
+  "model_revision": "c5fdb5ccb189668d56333f77ba2629f4cd7535f4",
+  "device": "auto",
+  "dtype": "auto",
+  "num_step": 32,
+  "seed": 42,
+  "cpu_threads": 4,
+  "max_batch_size": 1,
+  "gap_seconds": 0.12,
+  "target_rms_db": -20,
+  "peak_ceiling_db": -1,
+  "postprocess_output": false,
+  "edge_trim_threshold": 0.001,
+  "edge_margin_seconds": 0.08,
+  "edge_fade_seconds": 0.005
+}
