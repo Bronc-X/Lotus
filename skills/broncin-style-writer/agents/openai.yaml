@@ -1,0 +1,4 @@
+interface:
+  display_name: "broncin 风格写手"
+  short_description: "按本人思考方式与文体习惯写作，保留锋芒、节奏和真实判断过程"
+  default_prompt: "使用 $broncin-style-writer，按我的思考方式和文风创作或修改这篇文章。"

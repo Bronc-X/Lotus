@@ -1,4 +1,4 @@
-"""Pinned Toni voice; local CUDA synthesis with resumable paragraph checkpoints."""
+"""Pinned Brian voice; local CUDA synthesis with resumable paragraph checkpoints."""
 import argparse
 import hashlib
 import json
@@ -37,7 +37,7 @@ def prompt_profiles(voice):
         if name not in ('narration','question'):
             raise ValueError(f'Unknown voice reference: {name}')
         if not isinstance(profile,dict) or profile.get('asset') not in voice['assets']:
-            raise ValueError(f'Voice reference has no approved asset hash: {name}')
+            raise ValueError(f'Voice reference has no recorded asset hash: {name}; encode the Brian source reference first.')
     return default,prompts
 
 def normalize_job(job,base,default_reference='narration',available_references=('narration','question')):
@@ -105,7 +105,7 @@ def main():
     cfg=read(a.runtime)
     validate_runtime_numbers(cfg)
     voice=read(ROOT/'voice.json')
-    require_voice_identity(voice,'toni')
+    require_voice_identity(voice,'brian')
     default_reference,profiles=prompt_profiles(voice)
     postprocess_output=cfg.get('postprocess_output',False)
     if not isinstance(postprocess_output,bool):raise ValueError('postprocess_output must be a boolean.')

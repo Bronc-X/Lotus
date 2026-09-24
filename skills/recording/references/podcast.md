@@ -29,6 +29,8 @@
 
 仅当项目 `brand-profile` 为 DeepEvolutions 时使用。每期第一段、恰好一次、独立为 `INTRO / OWNER / WARM_IDENT`。
 
+内置文字是项目初始化模板。已有项目优先读取其现行 `brand-profile` 与用户最近确认的片头，不用此历史模板覆盖已确认的新稿；更换片头后按实际音频重新计算章节与 OUTLINE。
+
 用户原文必须原样保存：
 
 ```text

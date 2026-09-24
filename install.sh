@@ -313,13 +313,19 @@ copy_lotus_skill_packages() {
 
         local target_skill_dir="$target_dir/$skill_name"
         # Overlay voice workflow files; never remove local voice assets/configuration.
-        if [ "$skill_name" = "ai-podcast" ] || [ "$skill_name" = "toni-voice" ]; then
+        if [ "$skill_name" = "ai-podcast" ] || [ "$skill_name" = "toni-voice" ] || [ "$skill_name" = "brian-voice" ] || [ "$skill_name" = "broncin-style-writer" ]; then
             mkdir -p "$target_skill_dir"
             while IFS= read -r -d '' source_file; do
                 local relative="${source_file#"$skill_dir/"}"
+                case "$relative" in
+                    SKILL.md|.gitignore|agents/openai.yaml|scripts/*.py|scripts/*.ps1) ;;
+                    references/content-script.md|references/distribution.md|references/validation.md|references/voice-runtime.md|assets/jobs.example.json|assets/runtime.example.json) [ "$skill_name" = "ai-podcast" ] || continue ;;
+                    *) continue ;;
+                esac
                 local target_file="$target_skill_dir/$relative"
                 mkdir -p "$(dirname "$target_file")"
                 if [ -f "$target_file" ]; then
+                    cmp -s "$source_file" "$target_file" && continue
                     cp "$target_file" "$target_file.lotus.bak"
                 fi
                 cp "$source_file" "$target_file"

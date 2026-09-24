@@ -18,6 +18,8 @@ Read only the references needed for the current stage:
 
 Do not load every branch guide. If the request is only audio cleanup, trimming, transcoding, device setup, live voice, or ordinary copy editing without recording evidence, this workflow does not apply.
 
+For a fully synthesized single-host episode from documents or an approved script, use `ai-podcast` directly when available. A short human recording used only as a voice reference does not require a Recording content-library project.
+
 ## Invariants
 
 - Treat the only copy of an original recording as read-only. Record its size and SHA-256 before processing; derived audio belongs in a work directory.
@@ -26,7 +28,7 @@ Do not load every branch guide. If the request is only audio cleanup, trimming, 
 - Unconfirmed people stay anonymous and evidence-only. Text quotation, original audio, voice sampling, synthesis, avatar use, upload, and public release are separate permissions.
 - Restricted `EXISTENCE_ONLY` segments may record existence and range only; do not transcribe, summarize, embed, label, or leak them through filenames.
 - “Continue” advances only the selected branch and already-authorized step. It does not add assets, accounts, uploads, or publication rights.
-- Before any public write, freeze a release candidate and obtain confirmation bound to the exact content, platform, account, files, and hashes. A changed candidate needs new confirmation.
+- Before any public write, freeze a release candidate and verify that existing user authorization covers its content, platform, account and action. Record the actual candidate hashes with that evidence. Reuse matching authorization; ask only when the current candidate or target is not covered. Never invent an approval event or infer public rights from local production alone.
 
 ## Entry points
 

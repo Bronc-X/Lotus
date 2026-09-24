@@ -2,7 +2,7 @@
 
 ## 可复用基线与设备选择
 
-当前适配接口：OmniVoice 源码 `08be0b4ccbac3e13e374e86fbfead4b4cac343e2`，模型 `c5fdb5ccb189668d56333f77ba2629f4cd7535f4`。使用已有声线时以它的当前 profile 为准，不自动升级或降低采样步骤。脚本校验代码版本、profile 声明的模型版本和声音资产哈希；模型目录必须是该版本的已核实下载，runtime 中填写版本字符串本身不能证明模型字节正确。
+当前脚本测试过的适配接口：OmniVoice 源码 `08be0b4ccbac3e13e374e86fbfead4b4cac343e2`，模型 `c5fdb5ccb189668d56333f77ba2629f4cd7535f4`。使用已有声线时以它的当前 profile 为准，不自动升级、改设备或降低采样步骤；如要迁移运行环境，另建 runtime 和试听候选，原 profile 与获批母带不覆盖。脚本校验代码版本、profile 声明的模型版本和声音资产哈希；模型目录必须是该版本的已核实下载，runtime 中填写版本字符串本身不能证明模型字节正确。
 
 | 电脑 | runtime.device | dtype | 行为 |
 |---|---|---|---|
@@ -10,9 +10,9 @@
 | Apple Silicon Mac | mps | float32 起步 | OmniVoice 原生 MPS 路线，音频 tokenizer 由上游放 CPU；本 Skill 尚无 Mac 实机验收 |
 | Intel Mac | cpu | float32 | 先检查所选 Python/PyTorch 是否有当前系统架构的可用包；不能安装时不宣称可运行 |
 | NVIDIA GPU | cuda:0 | float16 | 单段一批，保留已批准参数 |
-| 任意支持的设备 | auto | auto | 启动时按 CUDA→MPS→CPU 选择，写入结果；中途不静默换设备 |
+| 新建 profile 的可用设备 | auto | auto | 启动时按 CUDA→MPS→CPU 选择，写入结果；已有固定声线不使用 auto 静默换设备 |
 
-MPS 内存不足或算子报错时保留记录，给新任务显式设 cpu、float32 和新输出路径再试。Intel Mac 缺兼容依赖或电脑内存不足时，可在用户已有且授权的远程电脑上运行同一 profile；不默认上传原声到公共 Space 或租用收费 GPU。没有任何可用运行环境时交付稿件及任务包，准确报告音频尚未生成。
+MPS 内存不足或算子报错时保留记录；新建声线可用 cpu、float32 和新输出路径再试，已有固定声线则先查其设备要求。Intel Mac 缺兼容依赖或电脑内存不足时，可在用户已有且授权的远程电脑上运行，但仍须验证对应声线在该环境的短样；不默认上传原声到公共 Space 或租用收费 GPU。没有任何可用运行环境时交付稿件及任务包，准确报告音频尚未生成。
 
 ## 环境安装
 
@@ -52,7 +52,7 @@ python <skill>/scripts/clone_voice.py --runtime runtime.json --reference referen
 
 切点来自实际录音，不照抄示例数值。音量小先区分增益低与信噪比差；放大不会去掉混响。低信噪比应重录。程序创建新目录、原声副本、prompt、来源哈希、精确转录和候选 profile，不覆盖既有版本。
 
-生成短样通过基本运行检查后，再生成可比较的 40–60 秒试听；用户选定后在本地 profile 记录选择原话、样本哈希、语言、参数与 `listening_verified_languages`。不得程序自行填“用户已批准”。多种提示用独立 `narration` / `question` 资产，按语义指定；当前 Toni 两份提示直接复用，不需要再编码。
+生成短样通过基本运行检查后，再生成可比较的试听；用户选定后在本地 profile 记录选择原话、样本哈希、语言、参数与 `listening_verified_languages`。不得程序自行填“用户已批准”。多种提示用独立资产，按段落意图指定；已获准的原声提示直接复用，不重复编码。
 
 ## profile → 连续播客
 
@@ -62,7 +62,7 @@ python <skill>/scripts/synthesize.py --runtime runtime.json --voice-profile voic
 python <skill>/scripts/synthesize.py --runtime runtime.json --voice-profile voices/my-voice-v1/voice.json --jobs-file jobs.json
 ```
 
-复用 Toni 时 `--voice-profile` 指向当前 toni-voice 的私有 `voice.json`；用它的 runtime 复制出 CPU/Mac 配置，补 `model_revision` 并只替换设备、精度和机器路径。原文件保持不变。
+复用已有专用声线时 `--voice-profile` 指向该声线的私有 `voice.json`；runtime 要满足它的设备、精度和模型要求。确需跨设备迁移，先得到新短样并单独记录听审结果，不能把旧平台上的批准自动继承。
 
 `elapsed_seconds / duration_seconds` 是此次短样的实时率，首次含加载成本。用它估算长稿等待时间并说明误差；不是对所有电脑的速度承诺。默认每段 1 批、32 步、种子 42+段序。正常语速分段，完整句边界优先；大段拆成约 10–25 秒便于局部修复。
 
@@ -80,3 +80,9 @@ ffprobe -v error -show_format -show_streams release/episode-v1.mp3
 另检查 MP3 实际时长和听感，剔除工程绝对路径等不应随成品发布的标签。母版不覆盖。
 
 依据：[OmniVoice 官方 README 与 Python API](https://github.com/k2-fsa/OmniVoice)、[固定源码 MPS tokenizer 路由](https://github.com/k2-fsa/OmniVoice/blob/08be0b4ccbac3e13e374e86fbfead4b4cac343e2/omnivoice/models/omnivoice.py)、[模型](https://huggingface.co/k2-fsa/OmniVoice)。部署时核对依赖支持，原生 Mac 性能仍需目标机实测。
+
+## 输出与续做保护
+
+输出会同时占用同名 `.wav`、`.json`、`.txt`、临时文件和 `.parts` 缓存目录，必须与输入稿件、任务清单和配置分开。脚本会在写入前检查冲突；不要绕过报错来覆盖源文件。相同输出使用 `.lock` 排他锁，进程异常退出后先核对原进程已结束，再处理遗留锁。
+
+脚本实现、运行环境、声音或参数变化会使旧缓存失效；此时换一个输出文件名继续，保留旧母带。技术生成成功仍需内容核对与实际试听，不能自动继承其他声线或设备的批准。

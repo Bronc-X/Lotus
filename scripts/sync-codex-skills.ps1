@@ -36,12 +36,24 @@ Get-ChildItem (Join-Path $repo 'skills') -Directory | ForEach-Object {
     $target = Join-Path $skillRoot $_.Name
     if ((Test-Path (Join-Path $_.FullName 'SKILL.md')) -and (Test-Path (Join-Path $target 'SKILL.md'))) {
         $package = $_.FullName
-        $voicePackage = $_.Name -in @('ai-podcast', 'toni-voice')
+        $packageName = $_.Name
+        $voicePackage = $packageName -in @('ai-podcast', 'toni-voice', 'brian-voice')
+        $scriptPackage = $voicePackage -or $packageName -eq 'lieflat-less-ai-tone'
         Get-ChildItem $package -Recurse -File | Where-Object {
             ($_.Extension -in @('.md','.yaml','.yml') -or
-                ($voicePackage -and ($_.Extension -in @('.py','.ps1') -or $_.Name -like '*.example.json'))) -and
+                ($scriptPackage -and ($_.Extension -in @('.py','.ps1') -or $_.Name -like '*.example.json'))) -and
                 $_.FullName -notmatch '[\\/](__pycache__|node_modules)[\\/]'
-        } | ForEach-Object { Add-File $_.FullName (Join-Path $target $_.FullName.Substring($package.Length + 1)) }
+        } | ForEach-Object {
+            $relative = $_.FullName.Substring($package.Length + 1)
+            $portable = $relative.Replace('\','/')
+            if ($packageName -eq 'broncin-style-writer' -and $portable -notin @('SKILL.md','agents/openai.yaml')) { return }
+            if ($voicePackage) {
+                $publicFile = $portable -in @('SKILL.md','agents/openai.yaml') -or $portable -match '^scripts/[^/]+\.(py|ps1)$' -or
+                    ($packageName -eq 'ai-podcast' -and $portable -in @('references/content-script.md','references/distribution.md','references/validation.md','references/voice-runtime.md','assets/jobs.example.json','assets/runtime.example.json'))
+                if (-not $publicFile) { return }
+            }
+            Add-File $_.FullName (Join-Path $target $relative)
+        }
     }
 }
 Get-ChildItem (Join-Path $repo 'skills') -Filter '*.md' -File | Where-Object BaseName -NotIn @('gstack','btw','loop') | ForEach-Object {

@@ -324,13 +324,19 @@ function Copy-LotusSkillPackages {
 
         $destination = Join-Path $TargetDir $skillName
         # Voice packages keep private enrollment and per-machine files in place.
-        if ($skillName -in @('ai-podcast', 'toni-voice')) {
+        if ($skillName -in @('ai-podcast', 'toni-voice', 'brian-voice', 'broncin-style-writer')) {
             $packageRoot = $_.FullName
             Get-ChildItem -LiteralPath $packageRoot -Recurse -File | ForEach-Object {
                 $relative = $_.FullName.Substring($packageRoot.Length + 1)
+                $portable = $relative.Replace('\','/')
+                $publicFile = $portable -in @('SKILL.md','.gitignore','agents/openai.yaml') -or
+                    $portable -match '^scripts/[^/]+\.(py|ps1)$' -or
+                    ($skillName -eq 'ai-podcast' -and $portable -in @('references/content-script.md','references/distribution.md','references/validation.md','references/voice-runtime.md','assets/jobs.example.json','assets/runtime.example.json'))
+                if (-not $publicFile) { return }
                 $targetFile = Join-Path $destination $relative
                 New-Item -ItemType Directory -Path (Split-Path $targetFile -Parent) -Force | Out-Null
                 if (Test-Path -LiteralPath $targetFile) {
+                    if ((Get-FileHash -LiteralPath $_.FullName).Hash -eq (Get-FileHash -LiteralPath $targetFile).Hash) { return }
                     Copy-Item -LiteralPath $targetFile -Destination ($targetFile + '.lotus.bak') -Force
                 }
                 Copy-Item -LiteralPath $_.FullName -Destination $targetFile -Force

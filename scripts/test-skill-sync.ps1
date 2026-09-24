@@ -2,7 +2,7 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
 $fixture=Join-Path ([IO.Path]::GetTempPath()) ('lotus-sync-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path "$fixture/skills/recording/scripts","$fixture/skills/gstack-ship","$fixture/skills/unrelated" -Force | Out-Null
-foreach ($voiceSkill in @('ai-podcast','toni-voice')) {
+foreach ($voiceSkill in @('ai-podcast','toni-voice','brian-voice')) {
     New-Item -ItemType Directory -Path "$fixture/skills/$voiceSkill/scripts","$fixture/skills/$voiceSkill/assets" -Force | Out-Null
     'old voice skill' | Set-Content "$fixture/skills/$voiceSkill/SKILL.md"
     'old code' | Set-Content "$fixture/skills/$voiceSkill/scripts/synthesize.py"
@@ -18,15 +18,20 @@ New-Item -ItemType Directory -Path "$fixture/skills/gstack-ship/agents" | Out-Nu
 "interface:`n  display_name: old`n  short_description: old`n  default_prompt: old`n  icon_small: ./custom.png`npolicy:`n  allow_implicit_invocation: false" | Set-Content "$fixture/skills/gstack-ship/agents/openai.yaml"
 'unrelated' | Set-Content "$fixture/skills/unrelated/SKILL.md"
 'config sentinel' | Set-Content "$fixture/config.toml"
+New-Item -ItemType Directory -Path "$fixture/skills/broncin-style-writer/references" -Force | Out-Null
+'old writer' | Set-Content "$fixture/skills/broncin-style-writer/SKILL.md"
+'private writing profile' | Set-Content "$fixture/skills/broncin-style-writer/references/style-profile.md"
+'private source text' | Set-Content "$fixture/skills/broncin-style-writer/references/evidence.md"
 $protected=@('config.toml','skills/unrelated/SKILL.md','skills/recording/runtime.local.json','skills/recording/scripts/local-only.ps1')
-foreach ($voiceSkill in @('ai-podcast','toni-voice')) {
+foreach ($voiceSkill in @('ai-podcast','toni-voice','brian-voice')) {
     $protected += @("skills/$voiceSkill/assets/voice.pt", "skills/$voiceSkill/voice.json", "skills/$voiceSkill/runtime.json")
 }
+$protected += @('skills/broncin-style-writer/references/style-profile.md','skills/broncin-style-writer/references/evidence.md')
 $hashes=@{}
 foreach($p in $protected){$hashes[$p]=(Get-FileHash "$fixture/$p").Hash}
 & "$PSScriptRoot/sync-codex-skills.ps1" -CodexRoot $fixture
 foreach($p in $protected){if((Get-FileHash "$fixture/$p").Hash -ne $hashes[$p]){throw "Protected file changed: $p"}}
-foreach ($voiceSkill in @('ai-podcast','toni-voice')) {
+foreach ($voiceSkill in @('ai-podcast','toni-voice','brian-voice')) {
     if ((Get-FileHash "$fixture/skills/$voiceSkill/scripts/synthesize.py").Hash -ne
         (Get-FileHash "$repo/skills/$voiceSkill/scripts/synthesize.py").Hash) { throw 'Voice script not synchronized' }
 }

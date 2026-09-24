@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brian Voice"
+  short_description: "使用用户指定的 Brian 原声制作独立声线的播客、画外音与中英文口播"
+  default_prompt: "使用 $brian-voice，将我提供的稿件制作成 Brian 声线的播客或画外音。"

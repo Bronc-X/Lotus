@@ -1,4 +1,4 @@
 interface:
   display_name: "AI podcast"
-  short_description: "从原声克隆、内容解析和口播合成到平台分发，支持 CPU 与 Mac"
-  default_prompt: "使用 $ai-podcast，把我的素材做成本人声线的单人播客，并按我指定的平台分发。"
+  short_description: "把资料和获准声线做成单人口播播客，并生成可核对的发布包"
+  default_prompt: "使用 $ai-podcast，把这份材料做成单人口播播客；我会提供有使用权限的声线或原声。"
