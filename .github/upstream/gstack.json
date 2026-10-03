@@ -1,9 +1,9 @@
 {
   "repo": "garrytan/gstack",
   "branch": "main",
-  "version": "1.1.1.0",
-  "commit": "e3c961d00f24334066b4caeb57634c012a346c00",
-  "commit_date": "2026-04-18T15:58:59Z",
-  "commit_subject": "fix(ship): detect + repair VERSION/package.json drift in Step 12 (v1.1.1.0) (#1063)",
-  "tracked_at_utc": "2026-04-19T00:00:00Z"
+  "version": "1.91.16.0",
+  "commit": "ac20ef1e1380248fcaeea337d39f5fd2b04b7a3b",
+  "commit_date": "2026-10-03T14:54:09Z",
+  "commit_subject": "v1.91.16.0 fix: safe installs and upgrades, skills start everywhere, truthful completion (parallel wave) (#3014)",
+  "tracked_at_utc": "2026-10-03T21:13:00Z"
 }
