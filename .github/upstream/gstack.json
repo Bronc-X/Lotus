@@ -1,9 +1,9 @@
 {
   "repo": "garrytan/gstack",
   "branch": "main",
-  "version": "1.1.1.0",
-  "commit": "e3c961d00f24334066b4caeb57634c012a346c00",
-  "commit_date": "2026-04-18T15:58:59Z",
-  "commit_subject": "fix(ship): detect + repair VERSION/package.json drift in Step 12 (v1.1.1.0) (#1063)",
-  "tracked_at_utc": "2026-04-19T00:00:00Z"
+  "version": "1.91.80.0",
+  "commit": "d2b4ca5d1a355fbb4a21d9c574b8d6a11ca5f962",
+  "commit_date": "2026-10-11T05:35:30Z",
+  "commit_subject": "v1.91.80.0 fix(eval-plan): price the default eval-arms tier (claude-opus-5-5, gpt-6.1-sol) (#3124)",
+  "tracked_at_utc": "2026-10-11T05:44:36Z"
 }
