@@ -1,9 +1,9 @@
 {
   "repo": "garrytan/gstack",
   "branch": "main",
-  "version": "1.1.1.0",
-  "commit": "e3c961d00f24334066b4caeb57634c012a346c00",
-  "commit_date": "2026-04-18T15:58:59Z",
-  "commit_subject": "fix(ship): detect + repair VERSION/package.json drift in Step 12 (v1.1.1.0) (#1063)",
-  "tracked_at_utc": "2026-04-19T00:00:00Z"
+  "version": "1.91.364.0",
+  "commit": "088bfc5914f8001a3d49b3a0c35d6f7cb800268c",
+  "commit_date": "2026-10-31T11:29:20Z",
+  "commit_subject": "v1.91.364.0 fix: pregate --policy-from head only adds lanes, and timeout_s reaches preflight and finish (GST-419, GST-420) (#3676)",
+  "tracked_at_utc": "2026-10-31T12:25:28Z"
 }
