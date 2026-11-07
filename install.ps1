@@ -60,7 +60,13 @@ $ObsoleteLotusSkills = @(
     "redesign-existing-projects",
     "stitch-design-taste",
     "full-output-enforcement",
-    "web-to-design-md"
+    "web-to-design-md",
+    "agent-training-loop",
+    "insights",
+    "polanyi-tacit",
+    "baseline-packager",
+    "test-driven-development",
+    "ios-codex-preview"
 )
 $OfficialGstackInstalled = $false
 $GstackBootstrapInstalled = $false
@@ -469,13 +475,9 @@ $body
         "auto-build" { "Bash, Read" }
         "btw" { "Read, AskUserQuestion" }
         "feynman" { "Read, AskUserQuestion" }
-        "polanyi-tacit" { "Read, AskUserQuestion" }
         "powerup" { "Read, AskUserQuestion" }
-        "insights" { "Read, Bash, Grep, Glob" }
         "ai-progress-workspace" { "Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion, WebSearch" }
         "loop" { "Bash, Read, AskUserQuestion" }
-        "agent-training-loop" { "Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion" }
-        "baseline-packager" { "Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion" }
         "mini-investigate" { "Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion" }
         "conversion-copywriter" { "Read, AskUserQuestion" }
         "subagent" { "Bash, Read, Write, Edit, Grep, Glob, AskUserQuestion" }

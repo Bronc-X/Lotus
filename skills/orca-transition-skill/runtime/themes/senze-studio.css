@@ -1,0 +1,30 @@
+/* Senze Studio: ink, warm paper, electric blue.
+ * surface <-> surface-2 are warm neutrals and may morph.
+ * accent <-> accent-soft are blue tones and may morph.
+ * t-label: compact editorial labels. t-mono: technical annotations.
+ * s-outline: thin blue outline used for reference boundaries. s-ink: dark foundation.
+ */
+:root {
+  --bg:#121820;
+  --surface:#F3F0E9;
+  --surface-2:#E4E0D7;
+  --text:#F3F0E9;
+  --text-dim:#7E8999;
+  --text-on-surface:#18202A;
+  --accent:#566AF0;
+  --accent-soft:#DEE3FC;
+  --radius-s:2px;
+  --radius-m:4px;
+  --radius-l:4px;
+  --font:"Microsoft YaHei","PingFang SC",sans-serif;
+  --font-mono:"Aptos Mono","Consolas","Microsoft YaHei","PingFang SC",monospace;
+}
+.t-display {font-family:var(--font);font-weight:600;line-height:1.13;letter-spacing:-0.055em;}
+.t-metric {font-family:var(--font-mono);font-weight:500;letter-spacing:-0.065em;}
+.t-h1 {font-weight:650;letter-spacing:-0.035em;line-height:1.16;}
+.t-h2 {font-weight:600;letter-spacing:-0.025em;line-height:1.25;}
+.t-body {font-weight:400;line-height:1.48;}
+.t-label {font-family:var(--font);font-size:28px;font-weight:500;line-height:1.4;letter-spacing:0.035em;}
+.t-mono {font-family:var(--font-mono);font-size:28px;font-weight:400;line-height:1.4;letter-spacing:0.025em;}
+.s-outline {background:transparent;border:2px solid var(--accent);box-sizing:border-box;}
+.s-ink {background:var(--bg);border-radius:var(--radius-s);}

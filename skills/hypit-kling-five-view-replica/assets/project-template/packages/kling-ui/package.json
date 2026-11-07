@@ -1,0 +1,8 @@
+{
+  "name": "@portrait/kling-ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./author.mjs",
+  "hypit": { "activation": "./activation.mjs" }
+}

@@ -28,3 +28,6 @@ __pycache__/
 
 # Per-machine skill secrets
 runtime.local.json
+
+# Third-party audio is obtained from the recorded sources on the target machine.
+skills/video-shotcraft/assets/audio/**/*.mp3

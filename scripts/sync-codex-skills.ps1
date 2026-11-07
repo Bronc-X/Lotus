@@ -39,8 +39,9 @@ Get-ChildItem (Join-Path $repo 'skills') -Directory | ForEach-Object {
         $packageName = $_.Name
         $voicePackage = $packageName -in @('ai-podcast', 'toni-voice', 'brian-voice')
         $scriptPackage = $voicePackage -or $packageName -eq 'lieflat-less-ai-tone'
+        $fullPublicPackage = -not $voicePackage -and $packageName -ne 'broncin-style-writer'
         Get-ChildItem $package -Recurse -File | Where-Object {
-            ($_.Extension -in @('.md','.yaml','.yml') -or
+            ($fullPublicPackage -or $_.Extension -in @('.md','.yaml','.yml') -or
                 ($scriptPackage -and ($_.Extension -in @('.py','.ps1') -or $_.Name -like '*.example.json'))) -and
                 $_.FullName -notmatch '[\\/](__pycache__|node_modules)[\\/]'
         } | ForEach-Object {

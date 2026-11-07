@@ -1,0 +1,997 @@
+#!/usr/bin/env python3
+"""Build a deterministic, reviewable semantic motion plan for HyperFrames.
+
+The planner selects one hero motion per scene and binds supporting motions to
+approved narration/caption anchors. It deliberately writes status=draft; the
+calling workflow must review the plan and approve it before storyboard/render.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import re
+from pathlib import Path
+from typing import Any
+
+from profile_config import (
+    get_in,
+    load_resolved_profile,
+    resolve_layout_policy,
+    resolve_motion_preset,
+)
+
+
+IGNORED_RE = re.compile(r"[\s，。！？；：、,.!?;:‘’“”（）()—｜·\-]")
+TIER_RANK = {"low": 0, "medium": 1, "high": 2}
+
+ROLE_PATTERNS: dict[str, re.Pattern[str]] = {
+    "definition": re.compile(r"(?:是什么|指的是|就是|定义|意味着|可以理解为|本质是|称为|(?i:\bis defined as\b|\brefers to\b|\bmeans\b))"),
+    "process": re.compile(r"(?:步骤|流程|工作流|先.+再|首先|然后|接着|依次|第[一二三四五六七八九十0-9]+步|(?i:\bfirst\b|\bnext\b|\bthen\b|\bworkflow\b|\bprocess\b))"),
+    "comparison": re.compile(r"(?:对比|相比|区别|不同|不是.+而是|前者|后者|一边.+另一边|VS|vs\.?|优于|劣于|(?i:\bhowever\b|\bwhereas\b|\bunlike\b|\bdifference\b))"),
+    "metric": re.compile(r"(?:\d+(?:\.\d+)?(?:小时|分钟|秒|天|周|倍|个|条|%|％)?|[零一二两三四五六七八九十百千万]{2,}(?:小时|分钟|秒|天|周|倍|%|％)|(?:两|半)(?:小时|分钟|秒|天|周|倍)|从.+到.+|提升|降低|压到|增长|减少)"),
+    "warning": re.compile(r"(?:不要|不能|避免|警惕|注意|小心|风险|坑|错误|失败|误区|问题在于|别把|别让|(?i:\bdo not\b|\bdon't\b|\bavoid\b|\bwarning\b|\brisk\b|\bfailure\b))"),
+    "demo": re.compile(r"(?:代码|命令|终端|界面|按钮|点击|打开|安装|输入|运行|API|函数|配置|文件|插件|(?i:\bcode\b|\bcommand\b|\bterminal\b|\bclick\b|\binstall\b|\bfile\b|\bplugin\b))"),
+    "hierarchy": re.compile(r"(?:层级|结构|组成|分类|关系|架构|节点|系统|模块|核心|连接|网络|(?i:\bhierarchy\b|\bstructure\b|\barchitecture\b|\bnode\b|\bsystem\b|\bmodule\b))"),
+    "example": re.compile(r"(?:例如|比如|举个例子|案例|场景|有人|有一种|假设|(?i:\bfor example\b|\bfor instance\b|\bcase\b|\bsuppose\b))"),
+    "conclusion": re.compile(r"(?:所以|因此|总之|总结|关键是|本质上|记住|真正的|真正是|最终|结论|才是|才能|(?i:\btherefore\b|\bin summary\b|\bin conclusion\b|\bthe key is\b|\bremember\b))"),
+    "hook": re.compile(r"(?:为什么|你有没有|是不是|竟然|真正的问题|越.+越|很多人|大多数人|如果.+会怎样|(?i:\bwhy\b|\bdid you know\b|\bwhat if\b|\bthe real question\b))"),
+}
+
+
+def load_json(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def stable_index(seed: int, key: str, count: int) -> int:
+    if count <= 0:
+        raise ValueError("stable_index requires at least one candidate")
+    value = hashlib.sha256(f"{seed}:{key}".encode("utf-8")).hexdigest()
+    return int(value[:12], 16) % count
+
+
+def normalize(text: str) -> str:
+    return IGNORED_RE.sub("", text).lower()
+
+
+def effective_chars(text: str) -> int:
+    return len(normalize(text))
+
+
+def clamp(value: int, low: int, high: int) -> int:
+    return max(low, min(high, value))
+
+
+def load_scenes(data: Any) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    metadata = data if isinstance(data, dict) else {}
+    source = data if isinstance(data, list) else data.get("scenes", [])
+    if not isinstance(source, list) or not source:
+        raise ValueError("scenes JSON must contain a non-empty scenes list")
+    scenes: list[dict[str, Any]] = []
+    for index, item in enumerate(source, start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"scene {index} must be an object")
+        scene_id = str(item.get("id", f"{index:02d}")).strip()
+        text = str(item.get("text", "")).strip()
+        if not scene_id or not text:
+            raise ValueError(f"scene {index} is missing id or text")
+        scenes.append({**item, "id": scene_id, "text": text})
+    return metadata, scenes
+
+
+def classify_scene(
+    scene: dict[str, Any], index: int, total: int, cta_text: str
+) -> tuple[str, str, float]:
+    explicit = str(scene.get("semantic_role") or scene.get("motion_role") or "").strip()
+    if explicit:
+        return explicit, "scene explicitly declares semantic_role/motion_role", 1.0
+
+    title = str(scene.get("title", ""))
+    kicker = str(scene.get("kicker", ""))
+    visual = str(scene.get("visual", ""))
+    text = str(scene.get("text", ""))
+    headline = f"{title}。{kicker}"
+    scores = {
+        role: float(len(pattern.findall(text))) + float(len(pattern.findall(headline))) * 2.25
+        for role, pattern in ROLE_PATTERNS.items()
+    }
+    visual_hints = {
+        "definition": ("definition", "concept"),
+        "process": ("process", "workflow", "pipeline", "loop", "steps", "investigation"),
+        "comparison": ("comparison", "compare", "versus", "split"),
+        "metric": ("metric", "goal", "stat", "number", "target"),
+        "warning": ("warning", "risk", "error", "pitfall"),
+        "demo": ("demo", "code", "terminal", "interface", "ui"),
+        "hierarchy": ("hierarchy", "network", "system", "rules", "lenses", "copies"),
+        "example": ("example", "case"),
+        "conclusion": ("conclusion", "summary", "human-value", "outro"),
+        "hook": ("hook", "gap", "question"),
+    }
+    visual_normalized = visual.lower().replace("_", "-")
+    for role, hints in visual_hints.items():
+        if any(hint in visual_normalized for hint in hints):
+            scores[role] += 3.0
+    if index == 0:
+        scores["hook"] += 2.25 if re.search(r"[？?]|为什么|越.+越", headline) else 1.5
+    if index == total - 1:
+        scores["conclusion"] += 1.75
+    if cta_text and cta_text in text:
+        if effective_chars(text.replace(cta_text, "")) <= 18:
+            return "cta", "scene is primarily the configured CTA", 0.98
+        scores["conclusion"] += 0.75
+    if re.search(r"[？?]", text):
+        scores["hook"] += 0.5 if index == 0 else 0.15
+    if not any(scores.values()):
+        return "statement", "no stronger semantic pattern matched; use conservative statement recipe", 0.55
+
+    ordered = sorted(scores.items(), key=lambda item: (-item[1], item[0]))
+    role, best = ordered[0]
+    second = ordered[1][1] if len(ordered) > 1 else 0.0
+    confidence = min(0.96, 0.62 + max(0.0, best - second) * 0.09 + min(best, 3.0) * 0.05)
+    reason = f"matched {role} semantic cues (score={best:.2f}, runner-up={second:.2f})"
+    return role, reason, round(confidence, 3)
+
+
+def allowed_candidates(
+    ids: list[str], primitives: dict[str, Any], max_tier: str,
+    allowed_ids: set[str] | None = None, fallback: str = "semantic-card-reveal",
+) -> list[str]:
+    ceiling = TIER_RANK[max_tier]
+    values = [
+        item for item in ids
+        if item in primitives
+        and (not allowed_ids or item in allowed_ids)
+        and TIER_RANK.get(str(primitives[item].get("tier")), 99) <= ceiling
+    ]
+    if allowed_ids and fallback not in allowed_ids:
+        raise ValueError(f"motion profile does not allow its fallback primitive: {fallback}")
+    return values or [fallback]
+
+
+def primitive_spec(primitive_id: str, primitives: dict[str, Any], costs: dict[str, float]) -> dict[str, Any]:
+    spec = primitives[primitive_id]
+    cost_name = str(spec.get("cost", "support"))
+    return {
+        "id": primitive_id,
+        "tier": spec.get("tier", "low"),
+        "motion_cost": float(costs.get(cost_name, 0.5)),
+        "fallback_chain": fallback_chain(primitive_id, primitives),
+        "seek_safe": True,
+        "loop": False,
+    }
+
+
+def fallback_chain(primitive_id: str, primitives: dict[str, Any]) -> list[str]:
+    chain = [primitive_id]
+    seen = {primitive_id}
+    current = primitive_id
+    while current in primitives:
+        nxt = primitives[current].get("fallback")
+        if not nxt or nxt in seen:
+            break
+        chain.append(str(nxt))
+        seen.add(str(nxt))
+        current = str(nxt)
+    if chain[-1] != "static-step":
+        chain.append("static-step")
+    return chain
+
+
+def enforce_rolling_density(
+    plans: list[dict[str, Any]], profile: dict[str, Any], catalog: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Deterministically downgrade beats until every 10-second window fits."""
+    limit = float(profile.get("max_rolling_motion_points_10s", 999.0))
+    primitives = catalog["primitives"]
+    costs = catalog["motion_costs"]
+    allowed = {str(item) for item in profile.get("allowed_primitives", [])}
+    degradations: list[dict[str, Any]] = []
+
+    for _ in range(10000):
+        events = [
+            (float(beat["cue_s"]), scene, beat)
+            for scene in plans
+            for beat in scene.get("beats", [])
+            if isinstance(beat, dict)
+        ]
+        if not events:
+            return degradations
+        peak_points = -1.0
+        peak_start = 0.0
+        peak_events: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
+        for start in sorted({event[0] for event in events}):
+            window = [event for event in events if start <= event[0] < start + 10.0]
+            points = sum(float(event[2].get("motion_cost", 0.0)) for event in window)
+            if points > peak_points + 1e-9:
+                peak_points, peak_start, peak_events = points, start, window
+        if peak_points <= limit + 1e-9:
+            for scene in plans:
+                scene.setdefault("budget", {})["planned_motion_points"] = round(
+                    sum(float(beat.get("motion_cost", 0.0)) for beat in scene.get("beats", [])),
+                    3,
+                )
+            return degradations
+
+        candidates: list[tuple[tuple[Any, ...], dict[str, Any], dict[str, Any], str, float]] = []
+        importance = {"micro": 0, "support": 1, "primary": 2}
+        for cue, scene, beat in peak_events:
+            current_id = str(beat.get("primitive", ""))
+            current_cost = float(beat.get("motion_cost", 0.0))
+            replacement = None
+            replacement_cost = current_cost
+            for candidate_id in fallback_chain(current_id, primitives)[1:]:
+                if allowed and candidate_id not in allowed:
+                    continue
+                candidate_cost = float(primitive_spec(candidate_id, primitives, costs)["motion_cost"])
+                if candidate_cost < current_cost - 1e-9:
+                    replacement, replacement_cost = candidate_id, candidate_cost
+                    break
+            if replacement is None:
+                continue
+            is_cta = str(scene.get("semantic_role", "")) == "cta"
+            key = (
+                1 if is_cta else 0,
+                importance.get(str(beat.get("priority", "support")), 1),
+                -(current_cost - replacement_cost),
+                -cue,
+                str(beat.get("id", "")),
+            )
+            candidates.append((key, scene, beat, replacement, replacement_cost))
+        if not candidates:
+            raise ValueError(
+                f"cannot satisfy rolling motion budget {limit:g}; no lower-cost fallback remains"
+            )
+        _, scene, beat, replacement, replacement_cost = sorted(candidates, key=lambda item: item[0])[0]
+        old_id = str(beat["primitive"])
+        old_cost = float(beat.get("motion_cost", 0.0))
+        cost_name = str(primitives[replacement].get("cost", "support"))
+        new_priority = "primary" if cost_name in {"primary", "high-salience"} else (
+            "support" if cost_name == "support" else "micro"
+        )
+        beat["primitive"] = replacement
+        beat["motion_cost"] = replacement_cost
+        beat["priority"] = new_priority
+        beat["fallback_chain"] = fallback_chain(replacement, primitives)
+        duration = 0.0 if replacement_cost <= 0 else (0.62 if new_priority == "primary" else (0.42 if new_priority == "support" else 0.28))
+        beat["settle_s"] = round(min(float(scene["end_s"]), float(beat["cue_s"]) + duration), 6)
+        change = {
+            "beat_id": beat.get("id"),
+            "from": old_id,
+            "to": replacement,
+            "reason": "rolling-10s-motion-budget",
+            "window_start_s": round(peak_start, 6),
+            "points_before": round(peak_points, 3),
+            "profile_limit": limit,
+            "cost_reduction": round(old_cost - replacement_cost, 3),
+        }
+        beat["degradation"] = change
+        scene.setdefault("degradations", []).append(change)
+        degradations.append({"scene_id": scene.get("id"), **change})
+
+    raise ValueError("rolling motion budget solver exceeded its deterministic iteration limit")
+
+
+def timeline_map(data: Any) -> tuple[dict[str, dict[str, Any]], int, int]:
+    if not isinstance(data, dict) or not isinstance(data.get("scenes"), list):
+        raise ValueError("timeline JSON must contain scenes")
+    sample_rate = int(data.get("sample_rate", 48000))
+    fps = int(data.get("fps", 30))
+    result: dict[str, dict[str, Any]] = {}
+    for item in data["scenes"]:
+        scene_id = str(item.get("id", ""))
+        start = float(item.get("start_s", 0.0))
+        end = float(item.get("end_s", start + float(item.get("duration_s", 0.0))))
+        if not scene_id or end <= start:
+            raise ValueError(f"invalid timeline scene: {scene_id or '<missing id>'}")
+        result[scene_id] = {**item, "start_s": start, "end_s": end}
+    return result, sample_rate, fps
+
+
+def prosody_map(data: Any) -> dict[str, dict[str, Any]]:
+    if not isinstance(data, dict) or not isinstance(data.get("scenes"), list):
+        raise ValueError("prosody JSON must contain scenes")
+    return {str(item.get("id")): item for item in data["scenes"] if isinstance(item, dict)}
+
+
+def words_map(data: Any | None) -> dict[str, list[dict[str, Any]]]:
+    if not isinstance(data, dict):
+        return {}
+    source = data.get("words", [])
+    result: dict[str, list[dict[str, Any]]] = {}
+    for item in source if isinstance(source, list) else []:
+        if not isinstance(item, dict):
+            continue
+        scene_id = str(item.get("scene") or item.get("scene_id") or "")
+        if scene_id:
+            result.setdefault(scene_id, []).append(item)
+    for values in result.values():
+        values.sort(key=lambda item: float(item.get("start", item.get("start_s", 0.0))))
+    return result
+
+
+def proportional_segments(
+    scene: dict[str, Any], prosody: dict[str, Any], start: float, end: float
+) -> list[dict[str, Any]]:
+    segments = prosody.get("segments", []) if isinstance(prosody, dict) else []
+    if not isinstance(segments, list) or not segments:
+        return [{"id": f"{scene['id']}-01", "text": scene["text"], "focus": scene.get("focus", []), "start_s": start, "end_s": end}]
+    weights = [max(1, effective_chars(str(segment.get("text", "")))) for segment in segments]
+    total = sum(weights)
+    cursor = start
+    output: list[dict[str, Any]] = []
+    for index, (segment, weight) in enumerate(zip(segments, weights), start=1):
+        explicit_start = segment.get("start_s")
+        explicit_end = segment.get("end_s")
+        seg_start = float(explicit_start) if explicit_start is not None else cursor
+        seg_end = float(explicit_end) if explicit_end is not None else seg_start + (end - start) * weight / total
+        if index == len(segments):
+            seg_end = end if explicit_end is None else seg_end
+        output.append({
+            **segment,
+            "id": str(segment.get("id", f"{scene['id']}-{index:02d}")),
+            "start_s": max(start, min(seg_start, end)),
+            "end_s": max(start, min(seg_end, end)),
+        })
+        cursor = seg_end
+    return output
+
+
+def word_anchor(term: str, words: list[dict[str, Any]], start_char: int = 0) -> tuple[float, str | None, int, int] | None:
+    if not words or not normalize(term):
+        return None
+    chars: list[str] = []
+    char_to_word: list[int] = []
+    for word_index, word in enumerate(words):
+        normalized = normalize(str(word.get("text", "")))
+        for char in normalized:
+            chars.append(char)
+            char_to_word.append(word_index)
+    haystack = "".join(chars)
+    needle = normalize(term)
+    position = haystack.find(needle, max(0, start_char))
+    if position < 0 and start_char <= 0:
+        position = haystack.find(needle)
+    if position < 0:
+        return None
+    word = words[char_to_word[position]]
+    cue = float(word.get("start", word.get("start_s", 0.0)))
+    occurrence = haystack[: position + 1].count(needle)
+    return cue, str(word.get("id")) if word.get("id") else None, max(1, occurrence), position + len(needle)
+
+
+def semantic_candidates(
+    scene: dict[str, Any], segments: list[dict[str, Any]], words: list[dict[str, Any]],
+    start: float, end: float, cta_text: str
+) -> list[dict[str, Any]]:
+    explicit_visual_beats = scene.get("visual_beats", [])
+    if isinstance(explicit_visual_beats, list) and explicit_visual_beats:
+        if not words:
+            raise ValueError(f"{scene['id']}: visual_beats require caption-word alignment")
+        candidates: list[dict[str, Any]] = []
+        search_cursor = 0
+        for visual_index, visual in enumerate(explicit_visual_beats, start=1):
+            if not isinstance(visual, dict):
+                raise ValueError(f"{scene['id']}: visual_beats[{visual_index}] must be an object")
+            anchor = str(visual.get("anchor") or "").strip()
+            title = str(visual.get("title") or anchor).strip()
+            detail = str(visual.get("detail") or "").strip()
+            slot = int(visual.get("slot", ((visual_index - 1) % 4) + 1))
+            if not anchor or not title:
+                raise ValueError(f"{scene['id']}: visual_beats[{visual_index}] requires anchor and title")
+            if slot not in {1, 2, 3, 4}:
+                raise ValueError(f"{scene['id']}: visual_beats[{visual_index}] slot must be 1..4")
+            match = word_anchor(anchor, words, search_cursor)
+            if not match:
+                raise ValueError(
+                    f"{scene['id']}: visual beat anchor is absent from forced-aligned words: {anchor}"
+                )
+            cue, word_id, occurrence, search_cursor = match
+            candidates.append({
+                "anchor": anchor,
+                "cue_s": max(start, min(cue, end - 0.02)),
+                "cue_source": "caption-word",
+                "sentence_id": str(visual.get("sentence_id") or "") or None,
+                "word_id": word_id,
+                "occurrence": occurrence,
+                "force_visual": True,
+                "force_cta": bool(cta_text and normalize(cta_text) in normalize(anchor)),
+                "visual": {
+                    "title": title,
+                    "detail": detail,
+                    "slot": slot,
+                    "role": str(visual.get("role") or "semantic-focus"),
+                },
+            })
+        return candidates
+
+    first_aligned_word = next(
+        (word for word in words if normalize(str(word.get("text", "")))),
+        None,
+    )
+    if first_aligned_word:
+        first_anchor = str(first_aligned_word.get("text", "")).strip()
+        first_cue = float(first_aligned_word.get("start", first_aligned_word.get("start_s", start)))
+        first_word_id = str(first_aligned_word.get("id")) if first_aligned_word.get("id") else None
+        first_source = "caption-word"
+    else:
+        first_anchor = str(scene.get("text") or scene.get("title") or scene.get("kicker") or "场景建立")[:12]
+        first_cue = start + min(0.08, max(0.0, (end - start) * 0.02))
+        first_word_id = None
+        first_source = "scene-start"
+    candidates: list[dict[str, Any]] = [{
+        "anchor": first_anchor,
+        "cue_s": first_cue,
+        "cue_source": first_source,
+        "sentence_id": None,
+        "word_id": first_word_id,
+        "occurrence": 1,
+        "visual": {
+            "title": str(scene.get("title") or scene.get("kicker") or first_anchor),
+            "detail": "",
+            "slot": 1,
+            "role": "scene-establish",
+        },
+    }]
+    search_cursor = 0
+    seen: set[str] = set()
+    for segment in segments:
+        focus = segment.get("focus", [])
+        terms = [str(term) for term in focus if str(term).strip()] if isinstance(focus, list) else []
+        if not terms:
+            text = str(segment.get("text", "")).strip()
+            terms = [text[: min(18, len(text))]] if text else []
+        for term in terms[:2]:
+            key = normalize(term)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            match = word_anchor(term, words, search_cursor)
+            if match:
+                cue, word_id, occurrence, search_cursor = match
+                source = "caption-word"
+            elif words:
+                # Forced alignment is available, so an unaligned semantic term
+                # is not allowed to create a second, unverifiable timebase.
+                continue
+            else:
+                cue = float(segment.get("start_s", start))
+                word_id = None
+                occurrence = 1
+                source = "prosody-proportional"
+            candidates.append({
+                "anchor": term,
+                "cue_s": max(start, min(cue, end - 0.02)),
+                "cue_source": source,
+                "sentence_id": str(segment.get("id")) if segment.get("id") else None,
+                "word_id": word_id,
+                "occurrence": occurrence,
+            })
+    if cta_text and cta_text in scene["text"]:
+        anchor_term = cta_text[: min(8, len(cta_text))]
+        match = word_anchor(anchor_term, words, search_cursor) or word_anchor(anchor_term, words, 0)
+        candidates.append({
+            "anchor": cta_text,
+            "cue_s": match[0] if match else max(start, end - min(2.4, (end - start) * 0.22)),
+            "cue_source": "caption-word" if match else "prosody-proportional",
+            "sentence_id": segments[-1].get("id") if segments else None,
+            "word_id": match[1] if match else None,
+            "occurrence": match[2] if match else 1,
+            "force_cta": True,
+        })
+    candidates.sort(key=lambda item: (float(item["cue_s"]), str(item["anchor"])))
+    return candidates
+
+
+def select_evenly(candidates: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    if len(candidates) <= limit:
+        return candidates
+    required = [candidate for candidate in candidates if candidate.get("force_cta")]
+    pool = [candidate for candidate in candidates if not candidate.get("force_cta")]
+    slots = max(1, limit - len(required))
+    if slots >= len(pool):
+        chosen = pool
+    elif slots == 1:
+        chosen = [pool[0]]
+    else:
+        indices = sorted({round(i * (len(pool) - 1) / (slots - 1)) for i in range(slots)})
+        chosen = [pool[index] for index in indices]
+    return sorted((chosen + required)[:limit], key=lambda item: float(item["cue_s"]))
+
+
+def configured_rect(
+    box_id: str,
+    role: str,
+    value: Any,
+    *,
+    protected: bool,
+) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError(f"layout.safe_boxes.{role} must be an object")
+    return {
+        "id": box_id,
+        "role": role,
+        "shape": "rect",
+        "x": float(value["x"]),
+        "y": float(value["y"]),
+        "width": float(value["width"]),
+        "height": float(value["height"]),
+        "protected": protected,
+    }
+
+
+def layout_safe_boxes(layout_id: str | None, pipeline_profile: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return profile-defined zones; runtime animation must not measure DOM at tween time."""
+    layout = get_in(pipeline_profile, "layout", {})
+    safe = layout.get("safe_boxes", {}) if isinstance(layout, dict) else {}
+    templates = layout.get("layout_templates", {}) if isinstance(layout, dict) else {}
+    template = templates.get(layout_id, {}) if isinstance(templates, dict) and layout_id else {}
+
+    content_value: Any = safe.get("content")
+    illustration_value: Any = safe.get("illustration")
+    if isinstance(template, dict):
+        content_zone = template.get("content")
+        illustration_zone = template.get("illustration")
+        if isinstance(content_zone, list) and len(content_zone) == 4:
+            content_value = dict(zip(("x", "y", "width", "height"), content_zone))
+        if isinstance(illustration_zone, list) and len(illustration_zone) == 4:
+            illustration_value = dict(zip(("x", "y", "width", "height"), illustration_zone))
+
+    boxes = [
+        configured_rect("scene-title", "title", safe.get("title"), protected=True),
+        configured_rect("content-zone", "content", content_value, protected=False),
+        configured_rect("illustration-zone", "illustration", illustration_value, protected=True),
+        configured_rect("caption-zone", "caption", safe.get("caption"), protected=True),
+    ]
+    avatar = layout.get("avatar_safe_zone", {}) if isinstance(layout, dict) else {}
+    if isinstance(avatar, dict) and avatar.get("enabled"):
+        canvas = layout.get("canvas", {})
+        size = float(avatar["size"])
+        y = float(avatar.get("y", float(canvas["height"]) - float(avatar.get("bottom", 0)) - size))
+        shape = str(avatar.get("shape", "circle"))
+        item: dict[str, Any] = {
+            "id": "avatar-safe-zone",
+            "role": "avatar",
+            "shape": shape,
+            "x": float(avatar.get("x", 0)),
+            "y": y,
+            "protected": True,
+        }
+        if shape == "circle":
+            item["diameter"] = size
+        else:
+            item["width"] = float(avatar.get("width", size))
+            item["height"] = float(avatar.get("height", size))
+        boxes.append(item)
+    return boxes
+
+
+def transition_for(role: str, previous_role: str | None, index: int, grammar: list[str]) -> tuple[str, str]:
+    if index == 0:
+        return "cut", "first content scene follows the fixed title card"
+    if "cinematic-zoom" in grammar:
+        if index == 1:
+            return "cinematic-zoom", "first major content reveal uses the cinematic hero transition"
+        if index == 4 and "domain-warp" in grammar:
+            return "domain-warp", "one later concept peak uses the second and final shader accent"
+        if "blur-crossfade" in grammar:
+            return "blur-crossfade", "non-hero cinematic seams use the stable soft transition"
+    if role in {"conclusion", "cta"} and "blur-crossfade" in grammar:
+        return "blur-crossfade", "wind-down or conclusion needs a softer handoff"
+    if previous_role and role != previous_role and "zoom-through" in grammar and index in {1, 4}:
+        return "zoom-through", "major semantic turn uses the accent transition"
+    if "push-slide" in grammar:
+        return "push-slide", "adjacent tutorial point continues in the primary direction"
+    return grammar[0], "use the profile primary transition"
+
+
+def asset_refs(scene: dict[str, Any], visual_assets: Any) -> list[str]:
+    if not isinstance(visual_assets, dict):
+        return []
+    haystack = normalize(" ".join([
+        str(scene.get("id", "")), str(scene.get("title", "")), str(scene.get("visual", "")), str(scene.get("kicker", ""))
+    ]))
+    refs: list[str] = []
+    for shot in visual_assets.get("shot_list", []):
+        if not isinstance(shot, dict):
+            continue
+        shot_id = str(shot.get("shot_id", ""))
+        if str(shot.get("scene_id", "")) == str(scene.get("id", "")) and shot_id:
+            refs.append(shot_id)
+            continue
+        tokens = [normalize(shot_id), normalize(str(shot.get("meaning", ""))), normalize(str(shot.get("structure", "")))]
+        if any(token and (token in haystack or any(part and part in token for part in re.split(r"[-_]", normalize(str(scene.get("visual", "")))))) for token in tokens):
+            refs.append(shot_id)
+    return list(dict.fromkeys(refs))[:2]
+
+
+def build_scene_plan(
+    scene: dict[str, Any], index: int, total: int, timing: dict[str, Any], prosody: dict[str, Any],
+    words: list[dict[str, Any]], visual_assets: Any, profile_id: str, profile: dict[str, Any],
+    catalog: dict[str, Any], seed: int, previous_role: str | None, previous_hero: str | None,
+    previous_layout: str | None, used_layouts: set[str],
+    sample_rate: int, fps: int, pipeline_profile: dict[str, Any], cta_text: str
+) -> dict[str, Any]:
+    start = float(timing["start_s"])
+    end = float(timing["end_s"])
+    duration = end - start
+    role, reason, confidence = classify_scene(scene, index, total, cta_text)
+    recipes = catalog["semantic_recipes"]
+    if role not in recipes:
+        role = "statement"
+        reason += "; unknown role fell back to statement"
+        confidence = min(confidence, 0.5)
+    recipe = recipes[role]
+    scene_asset_refs = asset_refs(scene, visual_assets)
+    layout_catalog = catalog.get("layout_variants", {})
+    allowed_layout_list = [str(item) for item in profile.get("layout_variants", [])] or list(layout_catalog)
+    allowed_layouts = set(allowed_layout_list)
+    layout_choices = [
+        str(item) for item in recipe.get("layout_candidates", [])
+        if item in layout_catalog and item in allowed_layouts
+        and (not layout_catalog[item].get("requires_asset") or bool(scene_asset_refs))
+    ]
+    if not layout_choices:
+        layout_choices = [
+            item for item in allowed_layout_list
+            if item in layout_catalog
+            and (not layout_catalog[item].get("requires_asset") or bool(scene_asset_refs))
+        ]
+    if not layout_choices:
+        raise ValueError(f"{scene['id']}: no Profile-allowed layout is usable for this scene")
+    first_layout_index = stable_index(seed, f"{scene['id']}:layout", len(layout_choices))
+    rotated_layouts = layout_choices[first_layout_index:] + layout_choices[:first_layout_index]
+    layout_policy = profile.get("layout_policy", {})
+    layout_policy = layout_policy if isinstance(layout_policy, dict) else {}
+    minimum_distinct = int(layout_policy.get("minimum_distinct_layouts_per_episode", 1))
+    forbid_adjacent = bool(layout_policy.get("forbid_adjacent_repeat", True))
+    if len(used_layouts) < minimum_distinct:
+        unused = [
+            item for item in rotated_layouts
+            if item not in used_layouts and (not forbid_adjacent or item != previous_layout)
+        ]
+        layout_id = unused[0] if unused else next(
+            (item for item in rotated_layouts if not forbid_adjacent or item != previous_layout),
+            rotated_layouts[0],
+        )
+    else:
+        layout_id = next(
+            (item for item in rotated_layouts if not forbid_adjacent or item != previous_layout),
+            rotated_layouts[0],
+        )
+    layout_spec = layout_catalog[layout_id]
+    primitives = catalog["primitives"]
+    costs = catalog["motion_costs"]
+    allowed_ids = set(str(item) for item in profile.get("allowed_primitives", [])) or None
+    hero_choices = allowed_candidates(
+        recipe["hero"], primitives, profile["max_primitive_tier"], allowed_ids,
+        "semantic-card-reveal",
+    )
+    hero_choice_index = stable_index(seed, f"{scene['id']}:hero", len(hero_choices))
+    hero_id = hero_choices[hero_choice_index]
+    if previous_hero == hero_id and len(hero_choices) > 1:
+        hero_id = hero_choices[(hero_choice_index + 1) % len(hero_choices)]
+        reason += "; rotated hero candidate to avoid an identical adjacent scene"
+    support_choices = allowed_candidates(
+        recipe["support"], primitives, profile["max_primitive_tier"], allowed_ids,
+        "accent-rule-draw",
+    )
+
+    avg_interval = sum(profile["event_interval_s"]) / 2.0
+    explicit_visual_beats = scene.get("visual_beats", [])
+    if isinstance(explicit_visual_beats, list) and explicit_visual_beats:
+        if len(explicit_visual_beats) > int(profile["max_events_per_scene"]):
+            raise ValueError(
+                f"{scene['id']}: {len(explicit_visual_beats)} visual beats exceed profile max "
+                f"{profile['max_events_per_scene']}"
+            )
+        desired_events = len(explicit_visual_beats)
+    else:
+        desired_events = clamp(round(duration / avg_interval) + 1, 2, int(profile["max_events_per_scene"]))
+    support_min, support_max = [int(value) for value in profile["support_motion_range"]]
+    support_count = clamp(desired_events - 2, support_min, support_max)
+    support_ids: list[str] = []
+    for offset in range(min(support_count, len(support_choices))):
+        candidate = support_choices[(stable_index(seed, f"{scene['id']}:support", len(support_choices)) + offset) % len(support_choices)]
+        if candidate not in support_ids:
+            support_ids.append(candidate)
+
+    segments = proportional_segments(scene, prosody, start, end)
+    semantic = semantic_candidates(scene, segments, words, start, end, cta_text)
+    candidates = semantic if explicit_visual_beats else select_evenly(semantic, desired_events)
+    hero_assigned = False
+    beats: list[dict[str, Any]] = []
+    for beat_index, candidate in enumerate(candidates, start=1):
+        is_cta = bool(candidate.get("force_cta"))
+        if beat_index == 1 and len(candidates) > 1:
+            primitive_id = "accent-rule-draw"
+            priority = "micro"
+        elif is_cta:
+            configured_cta_motion = get_in(
+                pipeline_profile, "layout.follow_cta_animation.motion"
+            )
+            primitive_id = (
+                str(configured_cta_motion)
+                if configured_cta_motion in primitives
+                else hero_id
+            )
+            priority = "primary"
+        elif not hero_assigned:
+            primitive_id = hero_id
+            priority = "primary"
+            hero_assigned = True
+        else:
+            primitive_id = support_ids[(beat_index - 2) % len(support_ids)] if support_ids else "fade-slide"
+            priority = "support"
+        primitive = primitive_spec(primitive_id, primitives, costs)
+        cue = round(float(candidate["cue_s"]), 6)
+        motion_duration = 0.62 if priority == "primary" else (0.42 if priority == "support" else 0.28)
+        settle = round(min(end, cue + motion_duration), 6)
+        visual = candidate.get("visual") if isinstance(candidate.get("visual"), dict) else {
+            "title": str(candidate["anchor"]),
+            "detail": "",
+            "slot": ((beat_index - 1) % 4) + 1,
+            "role": "semantic-focus",
+        }
+        beats.append({
+            "id": f"{scene['id']}-b{beat_index:02d}",
+            "semantic_anchor": candidate["anchor"],
+            "anchor_hash": hashlib.sha256(normalize(str(candidate["anchor"])).encode("utf-8")).hexdigest(),
+            "cue_source": candidate["cue_source"],
+            "sentence_id": candidate.get("sentence_id"),
+            "word_id": candidate.get("word_id"),
+            "occurrence": candidate.get("occurrence", 1),
+            "cue_s": cue,
+            "audio_sample": int(round(cue * sample_rate)),
+            "render_frame": int(round(cue * fps)),
+            "settle_s": settle,
+            "target_ref": f"beat:{scene['id']}:{beat_index:02d}",
+            "visual": visual,
+            "primitive": primitive_id,
+            "priority": priority,
+            "motion_cost": primitive["motion_cost"],
+            "fallback_chain": primitive["fallback_chain"],
+            "seek_safe": True,
+            "loop": False,
+        })
+
+    holds: list[dict[str, Any]] = []
+    for left, right in zip(beats, beats[1:]):
+        gap = float(right["cue_s"]) - float(left["settle_s"])
+        if gap > 4.0:
+            holds.append({
+                "start_s": left["settle_s"],
+                "end_s": right["cue_s"],
+                "semantic_owner": left["id"],
+                "intentional": True,
+                "reason_code": "caption-readability",
+            })
+
+    grammar = list(profile["transition_grammar"])
+    transition_id, transition_reason = transition_for(role, previous_role, index, grammar)
+    transition_spec = catalog["transitions"][transition_id]
+    return {
+        "id": scene["id"],
+        "title": str(scene.get("title", "")),
+        "start_s": round(start, 6),
+        "end_s": round(end, 6),
+        "duration_s": round(duration, 6),
+        "start_audio_sample": int(round(start * sample_rate)),
+        "end_audio_sample": int(round(end * sample_rate)),
+        "start_render_frame": int(round(start * fps)),
+        "end_render_frame": int(round(end * fps)),
+        "semantic_role": role,
+        "selection_reason": reason,
+        "classification_confidence": confidence,
+        "layout_variant": layout_id,
+        "layout_family": layout_spec["family"],
+        "presenter_anchor": layout_spec["presenter_anchor"],
+        "layout_selection_reason": f"semantic role={role}; deterministic rotation; previous={previous_layout or 'none'}",
+        "blueprint": recipe["blueprint"],
+        "safe_boxes": layout_safe_boxes(layout_id, pipeline_profile),
+        "asset_refs": scene_asset_refs,
+        "hero_motion": primitive_spec(hero_id, primitives, costs),
+        "supporting_motions": [primitive_spec(item, primitives, costs) for item in support_ids],
+        "transition_in": {
+            "id": transition_id,
+            "reason": transition_reason,
+            "shader": bool(transition_spec.get("shader")),
+            "fallback_chain": [transition_id, transition_spec.get("fallback")] if transition_spec.get("fallback") else [transition_id],
+            "duration_s": 0.42 if transition_id not in {"cut", "crossfade"} else (0.0 if transition_id == "cut" else 0.5),
+        },
+        "beats": beats,
+        "intentional_holds": holds,
+        "budget": {
+            "planned_events": len(beats),
+            "max_simultaneous_animated_elements": profile["max_simultaneous_animated_elements"],
+            "max_major_camera_moves": profile["max_major_camera_moves_per_scene"],
+            "max_particles": profile["max_particles_per_scene"],
+            "swept_bbox_check_required": True,
+        },
+        "profile_id": profile_id,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scenes", type=Path, required=True)
+    parser.add_argument("--timeline", type=Path, required=True)
+    parser.add_argument("--prosody", type=Path, required=True)
+    parser.add_argument("--visual-assets", type=Path)
+    parser.add_argument("--caption-words", type=Path)
+    parser.add_argument("--catalog", type=Path)
+    parser.add_argument("--profile", help="motion preset; defaults to resolved profile")
+    parser.add_argument("--resolved-profile", type=Path, required=True)
+    parser.add_argument(
+        "--runtime-audit",
+        type=Path,
+        help="Required capability audit for premium-balanced/cinematic profiles.",
+    )
+    parser.add_argument("--seed", type=int, default=20260807)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+
+    script_dir = Path(__file__).resolve().parent
+    pipeline_profile, resolved_profile_path = load_resolved_profile(
+        args.resolved_profile, None, required=True
+    )
+    motion_profile_id = str(
+        args.profile or get_in(pipeline_profile, "motion.default_profile", "basic-stable")
+    )
+    cta_text = str(get_in(pipeline_profile, "episode.final_cta", "") or "").strip()
+    catalog_path = (args.catalog or script_dir.parent / "references/motion-catalog.json").expanduser().resolve()
+    paths = {
+        "scenes": args.scenes.expanduser().resolve(),
+        "timeline": args.timeline.expanduser().resolve(),
+        "prosody": args.prosody.expanduser().resolve(),
+        "resolved_profile": resolved_profile_path,
+    }
+    if args.visual_assets:
+        paths["visual_assets"] = args.visual_assets.expanduser().resolve()
+    if args.caption_words:
+        paths["caption_words"] = args.caption_words.expanduser().resolve()
+    for name, path in {**paths, "catalog": catalog_path}.items():
+        if not path.is_file():
+            raise FileNotFoundError(f"missing {name}: {path}")
+
+    catalog = load_json(catalog_path)
+    if motion_profile_id not in catalog.get("profiles", {}):
+        raise ValueError(f"unknown motion profile: {motion_profile_id}")
+    selectable = get_in(pipeline_profile, "motion.selectable_profiles", [])
+    if isinstance(selectable, list) and selectable and motion_profile_id not in selectable:
+        raise ValueError(f"motion preset is not enabled by resolved profile: {motion_profile_id}")
+    profile = resolve_motion_preset(catalog, pipeline_profile, motion_profile_id)
+    layout_policy = resolve_layout_policy(catalog, pipeline_profile)
+    advanced_profile = motion_profile_id in {"premium-balanced", "cinematic"}
+    runtime_audit: dict[str, Any] | None = None
+    if advanced_profile:
+        if not args.runtime_audit:
+            raise ValueError(
+                f"{motion_profile_id} requires --runtime-audit from an explicit runtime implementation audit"
+            )
+        audit_path = args.runtime_audit.expanduser().resolve()
+        if not audit_path.is_file():
+            raise FileNotFoundError(f"missing runtime audit: {audit_path}")
+        runtime_audit = load_json(audit_path)
+        if not isinstance(runtime_audit, dict):
+            raise ValueError("runtime audit must be a JSON object")
+        if runtime_audit.get("status") != "pass" or runtime_audit.get("profile_id") != motion_profile_id:
+            raise ValueError("runtime audit must pass and match the requested advanced profile")
+        implemented = runtime_audit.get("implemented_primitives")
+        if not isinstance(implemented, list) or not implemented:
+            raise ValueError("runtime audit must list implemented_primitives")
+        paths["runtime_audit"] = audit_path
+    scene_metadata, scenes = load_scenes(load_json(paths["scenes"]))
+    timings, sample_rate, fps_from_timeline = timeline_map(load_json(paths["timeline"]))
+    configured_fps = int(get_in(pipeline_profile, "layout.canvas.fps", fps_from_timeline or 30))
+    fps = int(scene_metadata.get("fps", configured_fps))
+    prosodies = prosody_map(load_json(paths["prosody"]))
+    visual_assets = (
+        load_json(paths["visual_assets"])
+        if "visual_assets" in paths
+        else {"status": "disabled", "shot_list": [], "assets": []}
+    )
+    word_data = load_json(paths["caption_words"]) if "caption_words" in paths else None
+    word_groups = words_map(word_data)
+
+    scene_ids = [scene["id"] for scene in scenes]
+    missing_timing = [scene_id for scene_id in scene_ids if scene_id not in timings]
+    missing_prosody = [scene_id for scene_id in scene_ids if scene_id not in prosodies]
+    if missing_timing or missing_prosody:
+        raise ValueError(f"scene IDs missing from timeline/prosody: timing={missing_timing}, prosody={missing_prosody}")
+
+    plans: list[dict[str, Any]] = []
+    previous_role: str | None = None
+    previous_hero: str | None = None
+    previous_layout: str | None = None
+    used_layouts: set[str] = set()
+    for index, scene in enumerate(scenes):
+        plan = build_scene_plan(
+            scene, index, len(scenes), timings[scene["id"]], prosodies[scene["id"]],
+            word_groups.get(scene["id"], []), visual_assets, motion_profile_id, profile,
+            catalog, args.seed, previous_role, previous_hero, previous_layout, used_layouts,
+            sample_rate, fps, pipeline_profile, cta_text,
+        )
+        plans.append(plan)
+        previous_role = str(plan["semantic_role"])
+        previous_hero = str(plan["hero_motion"]["id"])
+        previous_layout = str(plan["layout_variant"])
+        used_layouts.add(previous_layout)
+
+    density_degradations = enforce_rolling_density(plans, profile, catalog)
+
+    if runtime_audit is not None:
+        implemented = {str(item) for item in runtime_audit["implemented_primitives"]}
+        used = {
+            str(item)
+            for plan in plans
+            for item in (
+                [plan["hero_motion"]["id"]]
+                + [motion["id"] for motion in plan["supporting_motions"]]
+                + [beat["primitive"] for beat in plan["beats"]]
+            )
+        }
+        missing = sorted(used - implemented)
+        if missing:
+            raise ValueError(f"runtime audit does not implement planned primitives: {missing}")
+
+    source_manifest = {
+        name: {"path": str(path), "sha256": file_sha256(path)} for name, path in paths.items()
+    }
+    output = {
+        "schema_version": 1,
+        "status": "draft",
+        "method": "deterministic-semantic-motion-v1",
+        "compiler": {
+            "name": Path(__file__).name,
+            "version": 1,
+            "sha256": file_sha256(Path(__file__).resolve()),
+        },
+        "profile": {
+            "id": motion_profile_id,
+            "catalog_path": str(catalog_path),
+            "catalog_sha256": file_sha256(catalog_path),
+            "description": profile["description"],
+            "budgets": profile,
+            "layout_policy": layout_policy,
+            "runtime_audit_required": advanced_profile,
+        },
+        "configuration": {
+            "id": pipeline_profile.get("profile_id"),
+            "path": str(resolved_profile_path),
+            "sha256": get_in(pipeline_profile, "_meta.profile_sha256"),
+        },
+        "seed": args.seed,
+        "sources": source_manifest,
+        "clock": {"sample_rate": sample_rate, "fps": fps, "rounding": "nearest-frame"},
+        "transition_grammar": profile["transition_grammar"],
+        "global_safe_zones": layout_safe_boxes(None, pipeline_profile),
+        "scenes": plans,
+        "degradations": density_degradations,
+        "review": {
+            "required": True,
+            "approved_by": None,
+            "notes": [
+                "Review semantic roles, anchors, hero/support hierarchy, safe boxes and any review-required holds.",
+                "Set status=approved only after visual-assets and audio boundary gates have passed.",
+            ],
+        },
+    }
+    target = args.output.expanduser().resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"output": str(target), "status": "draft", "profile": motion_profile_id, "scenes": len(plans)}, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

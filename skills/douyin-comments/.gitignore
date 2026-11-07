@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__/
+*.pyc
+# 抓取产物不进仓库
+raw/
+.internal/
+*.mp4

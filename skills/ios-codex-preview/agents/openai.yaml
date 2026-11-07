@@ -1,4 +1,0 @@
-interface:
-  display_name: "iOS Codex Preview Intel"
-  short_description: "搭建 iOS 模拟器实时预览"
-  default_prompt: "使用 $ios-codex-preview 为这个 iOS 应用搭建 Codex Browser 预览和自动重建。"

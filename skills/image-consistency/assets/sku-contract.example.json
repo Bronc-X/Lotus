@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "sku_id": "replace-with-own-sku-id",
+  "version": "v1",
+  "approval": {"status": "DRAFT", "reviewer": null, "approved_at": null},
+  "references": {
+    "identity": {"path": "inputs/identity.png", "sha256": "replace-after-hashing-the-real-file"},
+    "product": {"path": "inputs/product.jpg", "sha256": "replace-after-hashing-the-real-file"}
+  },
+  "must_preserve": [
+    {
+      "id": "replace-with-real-feature-id",
+      "description": "填写商品原图能证实、必须保留的特征",
+      "source_evidence": "填写证据照片和部位"
+    }
+  ],
+  "unknown_or_unverified": ["列出当前素材不能证实的商品事实"],
+  "creative_brief": "填写本次图片用途与构图要求"
+}

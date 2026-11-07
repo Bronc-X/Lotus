@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment and credentials
+.env
+.env.*
+*.pem
+*.key
+
+# Local agent-video configuration (may contain private paths/credentials)
+.agent-video/runtime.local.yaml
+.agent-video/resolved/
+.pipeline/resolved-profile.json
+.pipeline/resolved-profile.sha256
+
+# Models, media, caches and generated output
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.wav
+*.mp3
+*.m4a
+*.aac
+*.flac
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+renders/
+snapshots/
+cache/
+.cache/
+
+# macOS and editors
+.DS_Store
+.idea/
+.vscode/

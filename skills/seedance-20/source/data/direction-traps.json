@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "purpose": "Figurative expressions that video models render literally or drop, and freeze phrases that render people as mannequins. Used by tests/test_front_page_clips.py to keep shipped prompts literal and alive; see references/direct-for-the-model.md.",
+  "traps": {
+    "en": [
+      "his face fell",
+      "her face fell",
+      "the smile goes",
+      "the smile went",
+      "a look that could",
+      "like someone",
+      "as if",
+      "his face darkens",
+      "her face darkens",
+      "the air freezes",
+      "time stands still",
+      "nothing else in the frame moves",
+      "stay still for the whole shot",
+      "does not move",
+      "nobody moves"
+    ],
+    "zh": [
+      "脸沉下来",
+      "脸色难看",
+      "脸色一变",
+      "脸色一沉",
+      "目光如刀",
+      "心里一紧",
+      "空气凝固",
+      "仿佛",
+      "好像在",
+      "不再动",
+      "说完不动",
+      "都不动",
+      "没有人动"
+    ],
+    "ja": [
+      "顔が曇る",
+      "顔が曇り",
+      "目が泳ぐ",
+      "空気が凍る",
+      "まるで",
+      "のように見える",
+      "動かない"
+    ],
+    "ko": [
+      "얼굴이 어두워",
+      "표정이 무너",
+      "분위기가 얼어",
+      "마치 ",
+      "처럼 보인다",
+      "움직이지 않는다"
+    ],
+    "ru": [
+      "лицо потемнело",
+      "лицо вытянулось",
+      "воздух застыл",
+      "как будто",
+      "словно",
+      "не двигается",
+      "никто не двигается"
+    ]
+  }
+}

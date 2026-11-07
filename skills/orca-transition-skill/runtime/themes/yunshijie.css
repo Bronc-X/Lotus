@@ -1,0 +1,19 @@
+/* 云食界 · Ivory / Forest
+ * bg 象牙白；surface 深绿；surface-2 浅绿；accent 草绿；accent-soft 浅草绿。
+ * accent 与 accent-soft 可以互变；surface 与 surface-2 不能互变。
+ * .t-label：24px 短页眉与页脚；.s-outline：变量色描边形状。
+ * 此新主题按 orca themes.md 创建，不改字号档位、布局或动画。
+ */
+@font-face { font-family: "Yunshijie Sans"; src: url("../../../assets/fonts/chinese.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+  --bg: #f6f5ef; --surface: #143f35; --surface-2: #e5ece2;
+  --text: #183b33; --text-dim: #4e665c; --text-on-surface: #f6f5ef;
+  --accent: #b9e36b; --accent-soft: #dcecc0;
+  --radius-s: 8px; --radius-m: 24px; --radius-l: 40px;
+  --font: "Yunshijie Sans", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+.t-display, .t-metric, .t-h1 { font-weight: 650; }
+.t-display { letter-spacing: -0.045em; }
+.t-h2 { font-weight: 550; }
+.t-label { font-family: var(--font); font-size: 24px; font-weight: 500; letter-spacing: .06em; line-height: 1.35; }
+.s-outline { border: 2px solid var(--text-dim); border-radius: var(--radius-m); }

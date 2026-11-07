@@ -1,0 +1,21 @@
+# Generated Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local editor and OS noise
+.DS_Store
+*.swp
+*.swo
+
+# Local agent-client state (running Claude Code in this repository creates it;
+# it is per-machine configuration, never part of the skill)
+.claude/
+
+# Local audit outputs
+*.tmp
+*.log
+
+# Model-in-the-loop evaluator output. Ledgers record prompts, model responses,
+# and judgments, so they are treated as sensitive and never committed.
+eval-runs/

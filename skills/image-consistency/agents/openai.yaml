@@ -1,0 +1,4 @@
+interface:
+  display_name: "生图一致性skill"
+  short_description: "通过第三方图片 API 保持人物与商品一致，先验收样图再批量生成"
+  default_prompt: "使用 $image-consistency，根据当前项目的参考图与商品要求生成一致性图片，并保留质量检查和生成回执。"

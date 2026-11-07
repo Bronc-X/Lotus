@@ -1,0 +1,138 @@
+{
+  "format": "hypit.kling.selected-reference-case@1",
+  "scope": "Historical five-real-photo generation on the right of the selected comparison video",
+  "userSelectedReference": true,
+  "selectedArtifact": {
+    "fileSha256": "8878d6b20f016f52940981764fd085a69889e9f0ed5e95d1682237b9f98f5180",
+    "videoPayloadSha256": "1d8a7e68ff4a9c232c460c0548ffd592c77ea9dfeaee242bd0196437242219b4",
+    "width": 2168,
+    "height": 1984,
+    "frameRate": "24/1",
+    "frameCount": 265,
+    "durationSeconds": 11.041666666666666
+  },
+  "archiveComparison": {
+    "fileSha256": "92d8e28261bbe516567b9a02517c42133772a95950fd95d7ff3272da2346e2c0",
+    "videoPayloadSha256": "1d8a7e68ff4a9c232c460c0548ffd592c77ea9dfeaee242bd0196437242219b4",
+    "sameVideoPayloadAsSelected": true,
+    "wholeFileBytesEqual": false
+  },
+  "left": {
+    "role": "user-supplied previous generation; historical display label was 原始视频",
+    "sha256": "6056f378117050b7f56c145623c2b18d326e77a56e296461ad92dde7077d54ab",
+    "videoPayloadSha256": "503c79edbfe340dea69fbeab2a901a8e0df4880a060e7cab2f8d132e990bd60a"
+  },
+  "right": {
+    "role": "five-photo generation",
+    "sha256": "c34ddf89cc2591aae543a969bf09d3e8b558a9ed0c48c8816cdda3b3ebc3e65a",
+    "videoPayloadSha256": "f21e3c51386eb4fc5a1087c108efa5a191b06e15ddc1a074aeb800e35bf5c1c6",
+    "frameRate": "24/1",
+    "frameCount": 265,
+    "width": 1084,
+    "height": 1912,
+    "provenance": "user-supplied-remux"
+  },
+  "inputs": {
+    "source": {
+      "sha256": "32172c2a1a673b8d06dd8689a8b02c9cbc1756c9423bf0a3abc020ba43e2c98d",
+      "codec": "hevc",
+      "width": 544,
+      "height": 960,
+      "frameRate": "30/1",
+      "frameCount": 325
+    },
+    "sourceUpload": {
+      "sha256": "c8379c88a409d7bbfbe6ec4dbd9da3d2b05210649f3379219014a64fe9fa1a44",
+      "codec": "h264",
+      "width": 720,
+      "height": 1270,
+      "frameRate": "30/1",
+      "frameCount": 325
+    },
+    "identities": [
+      {
+        "order": 1,
+        "port": "front",
+        "sha256": "6be2a3ecf7e1f52ddc5b1da6b036efcf1712b4d7d3555d3d617c7c6a1536aa80"
+      },
+      {
+        "order": 2,
+        "port": "left45",
+        "sha256": "69b2d7850b95416d98b2eb67a757236814898db8e196158ac01ad8595277d5da"
+      },
+      {
+        "order": 3,
+        "port": "right45",
+        "sha256": "800b91aa40d7f4f6cb98ef26af6401c6bad808b0ea51192e30b827183b78baf0"
+      },
+      {
+        "order": 4,
+        "port": "left90",
+        "sha256": "52a0708ce5cd972efa3c39a97ddba4e6f334370d10326d9fc9fe98ffd1c14dc4"
+      },
+      {
+        "order": 5,
+        "port": "right90",
+        "sha256": "50dc4259c8a74dac7fd8a6771fc39e7ea0eeda4dfb48cce238b01d5b423df63e"
+      }
+    ]
+  },
+  "generation": {
+    "service": "Kling browser UI",
+    "model": "Kling 4.0",
+    "mode": "video edit / all-in-one reference",
+    "resolution": "1080p",
+    "durationSecondsShown": 11,
+    "aspect": "adaptive",
+    "count": 1,
+    "historicalApprovedCredits": 158,
+    "historicalCostIsNotFutureAuthorization": true,
+    "seed": null,
+    "identityStrength": null,
+    "maskParameters": null,
+    "unrecordedControlsMustNotBeInvented": true
+  },
+  "prompt": {
+    "path": "../assets/reference-prompt.txt",
+    "textSha256": "c0b182a90566ef04a891f248978834d9ca7a1128d469fefaf736580428213c68",
+    "fileSha256": "91073f0fb04360149b9fe41efaff2da6fb9c73df6e4348e1c09db7a53205f551"
+  },
+  "comparison": {
+    "retime": false,
+    "frameMapping": "left frame n and right frame n at n/24",
+    "audio": "copy left track only",
+    "height": 1912,
+    "canvas": [
+      2168,
+      1984
+    ],
+    "codec": "libx264",
+    "crf": 18,
+    "preset": "medium",
+    "pixelFormat": "yuv420p",
+    "historicalLabels": [
+      "原始视频",
+      "生成视频"
+    ],
+    "coarseLagFrames": [
+      0,
+      0,
+      0
+    ]
+  },
+  "independentOriginalAudioDerivative": {
+    "separateFromComparison": true,
+    "frameRate": "30/1",
+    "frameCount": 325,
+    "historicalRetimeMultiplier": "52/53",
+    "audioPacketPayloadsEqual": true,
+    "audioPacketCount": 469
+  },
+  "evidenceLevel": {
+    "historicalCloudResult": "completed and collected into actual Hypit Result",
+    "selectedSampleBinding": "encoded video payload equality",
+    "newCloudGenerationPerformed": false,
+    "freshCloudReproductionTest": "not performed",
+    "pixelIdenticalCloudRegenerationGuaranteed": false
+  }
+}

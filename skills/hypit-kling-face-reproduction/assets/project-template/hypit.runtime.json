@@ -1,0 +1,13 @@
+{
+  "format": "hypit.runtime-local@1",
+  "dataRoot": ".hypit/runtime-local",
+  "credentials": {},
+  "endpoints": {
+    "kling.ui": {
+      "use": "@portrait/kling-ui",
+      "pool": "kling.ui",
+      "config": { "exchangeRoot": "../../exchange", "pollIntervalMs": 5000 }
+    }
+  },
+  "bindings": { "@portrait/kling-ui@1#edit-video-through-kling-ui": "kling.ui" }
+}

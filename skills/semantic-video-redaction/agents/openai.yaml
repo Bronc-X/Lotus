@@ -1,0 +1,4 @@
+interface:
+  display_name: "打帧提示词"
+  short_description: "本机语义定位、逐帧跟踪与复核，支持跨电脑安装和视频局部打码"
+  default_prompt: "使用 $semantic-video-redaction 对指定视频片段做语义定位、目标跟踪打码和逐帧复核。"

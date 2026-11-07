@@ -1,0 +1,7 @@
+nudenet==3.4.2
+onnxruntime==1.31.0
+opencv-python-headless==4.12.0.88
+numpy==2.2.6
+flatbuffers==25.12.19
+packaging==26.3
+protobuf==7.36.2

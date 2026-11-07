@@ -53,6 +53,12 @@ OBSOLETE_LOTUS_SKILLS=(
     "stitch-design-taste"
     "full-output-enforcement"
     "web-to-design-md"
+    "agent-training-loop"
+    "insights"
+    "polanyi-tacit"
+    "baseline-packager"
+    "test-driven-development"
+    "ios-codex-preview"
 )
 CORE_EXPOSED_GSTACK_SKILLS=(
     "gstack"
@@ -585,13 +591,9 @@ convert_to_codex_skill() {
         auto-build)     allowed_tools="Bash\n  - Read" ;;
         btw)            allowed_tools="Read\n  - AskUserQuestion" ;;
         feynman)        allowed_tools="Read\n  - AskUserQuestion" ;;
-        polanyi-tacit)  allowed_tools="Read\n  - AskUserQuestion" ;;
         powerup)        allowed_tools="Read\n  - AskUserQuestion" ;;
-        insights)       allowed_tools="Read\n  - Bash\n  - Grep\n  - Glob" ;;
         ai-progress-workspace) allowed_tools="Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Bash\n  - AskUserQuestion\n  - WebSearch" ;;
         loop)           allowed_tools="Bash\n  - Read\n  - AskUserQuestion" ;;
-        agent-training-loop) allowed_tools="Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Bash\n  - AskUserQuestion" ;;
-        baseline-packager) allowed_tools="Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Bash\n  - AskUserQuestion" ;;
         mini-investigate) allowed_tools="Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - Bash\n  - AskUserQuestion" ;;
         conversion-copywriter) allowed_tools="Read\n  - AskUserQuestion" ;;
         subagent)       allowed_tools="Bash\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - AskUserQuestion" ;;

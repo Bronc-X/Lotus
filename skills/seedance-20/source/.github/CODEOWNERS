@@ -1,0 +1,23 @@
+# CODEOWNERS — seedance-20 skill library
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# All files owned by Iamemily2050 (@iamemily2050)
+# Pull requests touching these paths will automatically request owner review.
+
+# Global fallback — all files
+*                                          @Emily2040
+
+# Root skill
+/SKILL.md                                  @Emily2040
+
+# All sub-skills
+/skills/                                   @Emily2040
+
+# References
+/references/                               @Emily2040
+
+# Repo metadata
+/LICENSE                                   @Emily2040
+/README.md                                 @Emily2040
+/CHANGELOG.md                              @Emily2040
+/.github/                                  @Emily2040

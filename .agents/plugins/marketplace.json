@@ -16,19 +16,6 @@
         "products": ["CODEX"]
       },
       "category": "Developer Tools"
-    },
-    {
-      "name": "lotus-daloopa",
-      "source": {
-        "source": "local",
-        "path": "./plugins/lotus-daloopa"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL",
-        "products": ["CODEX"]
-      },
-      "category": "Finance"
     }
   ]
 }

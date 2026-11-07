@@ -2,5 +2,5 @@
   "_type": "newapi_channel_conn",
   "url": "https://your-newapi.example.com",
   "key": "set-your-own-key-locally",
-  "model": "gpt-image-2"
+  "model": "gpt-image-2.5-sunburst"
 }

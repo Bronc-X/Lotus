@@ -2,7 +2,7 @@
 """Local newapi fallback for the Lotus image-2 skill.
 
 Reads API settings from runtime.local.json or IMAGE2_NEWAPI_* env vars and calls
-an OpenAI-compatible Images API with gpt-image-2 by default.
+an OpenAI-compatible Images API with GPT Image 2.5 Sunburst by default.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import time
 from typing import Any
 from urllib import error, request
 
-DEFAULT_MODEL = "gpt-image-2"
+DEFAULT_MODEL = "gpt-image-2.5-sunburst"
 DEFAULT_SIZE = "1024x1024"
 DEFAULT_QUALITY = "low"
 DEFAULT_FORMAT = "png"
@@ -170,7 +170,7 @@ def generate(args: argparse.Namespace) -> None:
         print(json.dumps({"endpoint": endpoint(base_url), "payload": preview, "out": str(out)}, ensure_ascii=False, indent=2))
         return
 
-    print("Calling newapi Image API with gpt-image-2 fallback.", file=sys.stderr)
+    print(f"Calling newapi Image API with {payload['model']}.", file=sys.stderr)
     started = time.time()
     result = request_json(endpoint(base_url), api_key, payload, args.timeout)
     elapsed = time.time() - started
@@ -241,7 +241,7 @@ def add_common(parser: argparse.ArgumentParser) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="image-2 newapi fallback for gpt-image-2")
+    parser = argparse.ArgumentParser(description="image-2 newapi fallback for GPT Image 2.5")
     sub = parser.add_subparsers(dest="command", required=True)
 
     gen = sub.add_parser("generate")

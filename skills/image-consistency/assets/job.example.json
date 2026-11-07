@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "template_only_not_loaded_by_cli": true,
+  "job_id": "replace-with-project-job-id",
+  "purpose": "填写本次图片用途与验收要求",
+  "reference_roles": [
+    {"order": 1, "role": "identity", "path": "inputs/identity.png"},
+    {"order": 2, "role": "product", "path": "inputs/product.jpg"}
+  ],
+  "product_facts": [],
+  "must_preserve": [],
+  "allowed_changes": [],
+  "model_id": null,
+  "size": null,
+  "quality": null,
+  "requested_count": 1,
+  "authorization_context": "记录本任务已有的上传/付费范围，不记录凭据",
+  "approved_sample": null,
+  "prompt_file": "image-consistency/job/prompt.txt",
+  "output_directory": "image-consistency/job/output",
+  "review_file": "image-consistency/job/quality-review.json",
+  "approval_criteria": [],
+  "status": "PREPARING"
+}

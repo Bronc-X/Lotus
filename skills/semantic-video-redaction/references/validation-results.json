@@ -1,0 +1,73 @@
+{
+  "version": "1.0.0",
+  "status": "LOCALLY_VALIDATED",
+  "validated_at": "2026-10-23T01:24:39.717183+08:00",
+  "script_sha256": "0915761e60706c1c870ded8769d9bdf9cc4a5e565faa963ad6e0d168b052a506",
+  "bootstrap_sha256": "7a13e49ab9dc8e7493944f79ac858ccc099b0f40ec4b697f1bc5c2604bdae093",
+  "requirements_sha256": "7cc050cb89a11ab6fd9fce55fd8871f70890487429847bfda32669048cdfd20e",
+  "environment": {
+    "os": "Windows",
+    "python": "3.12.10",
+    "ffmpeg": "8.1.2",
+    "onnx_provider": "CPUExecutionProvider"
+  },
+  "checks": [
+    {
+      "case": "python_syntax",
+      "passed": true
+    },
+    {
+      "case": "mismatched_clip_rejected",
+      "passed": true,
+      "exit_code": 1
+    },
+    {
+      "case": "changed_targets_invalidate_qc",
+      "passed": true,
+      "exit_code": 1
+    },
+    {
+      "case": "real_replay_with_audio",
+      "passed": true,
+      "exit_code": 0,
+      "frames": 240,
+      "seconds": 8
+    },
+    {
+      "case": "audio_matches_source_interval",
+      "passed": true,
+      "correlation": 0.9992055580216407
+    },
+    {
+      "case": "unreviewed_render_rejected",
+      "passed": true,
+      "evidence": "Observed CLI exit 1 before first approval: 480 target-frames had no recorded review."
+    }
+  ],
+  "independent_forward_test": {
+    "input": "generated moving marker; FFV1/GBR; no audio",
+    "frames": 24,
+    "seconds": 1,
+    "dimensions": [
+      320,
+      240
+    ],
+    "semantic_match": null,
+    "method": "template",
+    "max_center_error_px": 0,
+    "all_target_frames_visually_reviewed": true,
+    "technical_pass": true,
+    "gbr_regression_fixed_and_retested": true,
+    "additional_yuv_case_passed": true
+  },
+  "fresh_runtime_model_smoke_pass": true,
+  "utf8_files_pass": true,
+  "not_validated": [
+    "macOS hardware",
+    "Linux hardware",
+    "other CPU architectures",
+    "offline wheel installation"
+  ],
+  "user_visual_acceptance": "not separately recorded",
+  "optimization_claim": "UNASSESSED"
+}

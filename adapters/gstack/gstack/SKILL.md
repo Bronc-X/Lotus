@@ -1,10 +1,11 @@
 ---
 name: gstack
-description: 用户明确使用 gstack 或询问其工作流选择时路由。
+description: gstack 统一入口：按需求路由产品规划、网页检查、故障排查、测试、代码审查和交付工作流。
 ---
 
 # Lotus gstack adapter
 This is a Lotus-maintained instruction adapter, not an upstream gstack snapshot. Runtime binaries remain upstream-managed.
+This is the only top-level entry for the suite. Child adapters remain installed as internal references. Read the selected child file directly; do not require its presence in the skill picker, ask the user to invoke a hidden child, or re-enable child entries.
 Route only the requested work:
 - Product discovery or scope tradeoffs: office-hours.
 - Complex root-cause investigation: investigate.

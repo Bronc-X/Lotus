@@ -1,6 +1,0 @@
-interface:
-  display_name: Daloopa
-  short_description: Route nine financial-analysis workflows from one entry
-  default_prompt: Use Daloopa to analyze a public company and choose the right workflow.
-policy:
-  allow_implicit_invocation: true

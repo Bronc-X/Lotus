@@ -1,0 +1,5 @@
+/* 金易堂宣纸：沿用已验收UI/VI；accent与accent-soft可互变。
+surface与surface-2同色系可互变。无新增样式类。 */
+:root { --bg:#f7f1e5; --surface:#fff8ef; --surface-2:#eadccc; --text:#30231d;
+--text-dim:#74665e; --text-on-surface:#30231d; --accent:#b52f25; --accent-soft:#e6c7b6;
+--font:"Microsoft YaHei","Songti SC",serif; --radius-s:8px; --radius-m:24px; --radius-l:40px; }

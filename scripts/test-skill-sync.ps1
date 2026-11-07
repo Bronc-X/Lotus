@@ -2,6 +2,11 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
 $fixture=Join-Path ([IO.Path]::GetTempPath()) ('lotus-sync-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path "$fixture/skills/recording/scripts","$fixture/skills/gstack-ship","$fixture/skills/unrelated" -Force | Out-Null
+New-Item -ItemType Directory -Path "$fixture/skills/diagram-design/assets","$fixture/skills/diagram-design/scripts" -Force | Out-Null
+'old diagram skill' | Set-Content "$fixture/skills/diagram-design/SKILL.md"
+'old gallery' | Set-Content "$fixture/skills/diagram-design/assets/index.html"
+'old checker' | Set-Content "$fixture/skills/diagram-design/scripts/self_check.py"
+'local notes' | Set-Content "$fixture/skills/diagram-design/local-notes.txt"
 foreach ($voiceSkill in @('ai-podcast','toni-voice','brian-voice')) {
     New-Item -ItemType Directory -Path "$fixture/skills/$voiceSkill/scripts","$fixture/skills/$voiceSkill/assets" -Force | Out-Null
     'old voice skill' | Set-Content "$fixture/skills/$voiceSkill/SKILL.md"
@@ -22,7 +27,7 @@ New-Item -ItemType Directory -Path "$fixture/skills/broncin-style-writer/referen
 'old writer' | Set-Content "$fixture/skills/broncin-style-writer/SKILL.md"
 'private writing profile' | Set-Content "$fixture/skills/broncin-style-writer/references/style-profile.md"
 'private source text' | Set-Content "$fixture/skills/broncin-style-writer/references/evidence.md"
-$protected=@('config.toml','skills/unrelated/SKILL.md','skills/recording/runtime.local.json','skills/recording/scripts/local-only.ps1')
+$protected=@('config.toml','skills/unrelated/SKILL.md','skills/recording/runtime.local.json','skills/recording/scripts/local-only.ps1','skills/diagram-design/local-notes.txt')
 foreach ($voiceSkill in @('ai-podcast','toni-voice','brian-voice')) {
     $protected += @("skills/$voiceSkill/assets/voice.pt", "skills/$voiceSkill/voice.json", "skills/$voiceSkill/runtime.json")
 }
@@ -37,6 +42,9 @@ foreach ($voiceSkill in @('ai-podcast','toni-voice','brian-voice')) {
 }
 foreach($pair in @(@('skills/recording/SKILL.md','skills/recording/SKILL.md'),@('adapters/gstack/gstack-ship/SKILL.md','skills/gstack-ship/SKILL.md'))){
  if((Get-FileHash "$repo/$($pair[0])").Hash -ne (Get-FileHash "$fixture/$($pair[1])").Hash){throw 'Sync mismatch'}
+}
+foreach($relative in @('SKILL.md','assets/index.html','scripts/self_check.py','LICENSE')){
+ if((Get-FileHash "$repo/skills/diagram-design/$relative").Hash -ne (Get-FileHash "$fixture/skills/diagram-design/$relative").Hash){throw "Diagram Design sync mismatch: $relative"}
 }
 $backups=@(Get-ChildItem "$fixture/backups" -Directory)
 $ui=Get-Content "$fixture/skills/gstack-ship/agents/openai.yaml" -Raw

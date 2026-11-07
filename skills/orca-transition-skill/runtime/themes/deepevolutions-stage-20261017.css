@@ -1,0 +1,6 @@
+/* DeepEvolutions approved mountain palette. Accent↔accent-soft and surface↔surface-2 only.
+ t-label: small section labels; t-note: sources. */
+@font-face{font-family:'Noto Serif SC';src:url('../NotoSerifSC-VF.woff2')}
+@font-face{font-family:'Noto Sans SC';src:url('../NotoSansSC-VF.woff2')}
+:root{--bg:#000000;--surface:#14161A;--surface-2:#22252A;--text:#F5F2ED;--text-dim:#B4B0AD;--text-on-surface:#F5F2ED;--accent:#D7AB89;--accent-soft:#34271F;--radius-s:0px;--radius-m:0px;--radius-l:0px;--font:'Noto Sans SC','Microsoft YaHei','PingFang SC',sans-serif;--font-serif:'Noto Serif SC','Songti SC',serif;}
+.t-display,.t-h1{font-family:var(--font-serif);font-weight:600;line-height:1.14;letter-spacing:-0.015em}.t-h2{font-family:var(--font);font-weight:500;line-height:1.26}.t-body{font-family:var(--font);line-height:1.45}.t-label{font-family:var(--font);font-size:28px;line-height:1.35;letter-spacing:.04em}.t-note{font-family:var(--font);font-size:24px;line-height:1.35}

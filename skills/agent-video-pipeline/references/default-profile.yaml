@@ -1,0 +1,341 @@
+# 通用中性基线：与外部中性工作区 Profile 合并后提供完整、可校验的行为。
+# 禁止在这里写入姓名、个人 CTA、品牌文案、本机路径或固定第三方 provider。
+# 合并优先级：本文件 < 外部工作区 Profile < runtime.local.yaml < 项目级覆盖。
+profile_version: 1
+profile_id: standard
+
+# 默认不假设语言、受众或个人语气；具体项目应由外部 Profile 覆盖。
+content:
+  language: auto
+  audience: general
+  tone: clear-conversational
+
+# 高成本阶段前的通用节流策略：优先复用缓存，门禁失败后才扩大候选范围。
+production_fast_path:
+  enabled: true
+  planner: scripts/plan_fast_production.py
+  required_before_expensive_stages: true
+  tts_initial_candidates: 1
+  tts_candidate_limit: 3
+  expand_candidates_only_after_gate_failure: true
+  reuse_raw_candidates_when_only_target_cpm_changes: true
+  aligned_stabilization_max_runs: 1
+  hyperframes_full_check_max_runs_before_render: 1
+  dependency_invalidation: downstream-only
+  unchanged_images_default: reuse
+  unchanged_cover_default: reuse
+  gates_runner: scripts/run_gates.py
+  auto_approve: scripts/approve_if_clean.py
+  auto_approve_min_confidence: 0.6
+  layout_extractor: scripts/extract_layout_boxes.js
+  snapshot_check_scene_level_cache: true
+  cache_key_uses_logic_version_not_file_sha: true
+  estimate_calibration_source: pipeline-timings.json
+
+# 通用控制脚本使用的 Python。null 表示由使用者提供已安装 requirements 的环境。
+pipeline_runtime:
+  python: null
+
+# 声音 provider 的运行入口。路径型字段必须由外部 runtime.local.yaml 注入。
+# generator/aligner 是 Skill 内通用 adapter，相对路径以 Skill 根目录为准。
+tts_runtime:
+  generator_python: null
+  model_path: null
+  aligner_python: null
+  generator: scripts/generate_all_voxcpm2.py
+  continuous_engine: scripts/generate_voxcpm2_continuous.py
+  aligner: scripts/align_all_captions.py
+
+# 中性声音与音频质量契约。provider/engine 为 null 时不假定任何 TTS 服务。
+voice:
+  provider: null
+  engine: null
+  target_effective_chinese_chars_per_minute: 300
+  allowed_range: [270, 330]
+  # 快速试跑的名义语速只用于预览，不替代正式允许区间。
+  fast_trial:
+    nominal_target_effective_chinese_chars_per_minute: 330
+    allowed_range: [300, 360]
+    target_is_nominal: true
+  # 默认优先整集连续生成；失败时才退回较长的完整句块。
+  generation_mode: continuous_episode_take
+  episode_as_single_acoustic_take: true
+  candidate_strategy: adaptive_sequential
+  minimum_candidate_seeds: 1
+  candidate_seeds: 1
+  maximum_candidate_seeds: 5
+  candidate_count_is_maximum: true
+  adaptive_early_stop_profile: references/voice-stability-profile.json
+  chunk_fallback_duration_range_s: [45, 60]
+  normalization_scope: master_once
+  global_retime_preferred_range: [0.97, 1.03]
+  global_retime_hard_range: [0.95, 1.05]
+  max_adjacent_chunk_retime_delta: 0.05
+  # 整集只做一次受限动态处理，避免每个 scene 独立处理造成音色跳变。
+  master_dynamics:
+    slow_gain_rider_limit_db: 3.0
+    gain_rider_attack_ms: 250
+    gain_rider_release_ms: 600
+    compressor_max_ratio: 1.4
+    compressor_max_gain_reduction_db: 4.0
+    loudnorm: measured-two-pass
+    integrated_lufs: -16.0
+    true_peak_dbtp: -2.0
+    forbid_scene_then_master_dynamic_loudnorm: true
+    forbid_fixed_low_formant_notch_stack: true
+  # scene 边界的停顿、响度差和峰值硬门禁。
+  boundary_stability:
+    required: true
+    default_gap_s: 0.18
+    allowed_gap_range_s: [0.12, 0.20]
+    edge_fade_s: 0.012
+    max_adjacent_scene_lufs_delta: 1.5
+    max_boundary_rms_delta_db: 2.0
+    max_onset_rms_delta_db: 5.0
+    master_true_peak_ceiling_dbtp: -1.8
+    stabilizer: scripts/stabilize_audio_boundaries.py
+    validator: scripts/validate_audio_boundaries.py
+    report: audio/boundary-qc.json
+    hard_gate_before_captions_and_render: true
+  # 声线稳定性报告必须绑定源文件与 Profile SHA，禁止复用过期 QC。
+  voice_stability:
+    required: true
+    profile: references/voice-stability-profile.json
+    validator: scripts/validate_voice_stability.py
+    report: audio/voice-stability-qc.json
+    reject_stale_hashes: true
+    validate_master_and_final: true
+  # 最终视频混音仍需复验，不能用 master 音频报告代替。
+  final_mix:
+    validate_after_render: true
+    dual_mono_compensation_gain: 0.70710678
+    integrated_lufs_range: [-17.5, -14.5]
+    true_peak_ceiling_dbtp: -1.8
+    validator: scripts/validate_video_output.py
+  prosody: locked-acoustic-baseline-with-semantic-micro-prosody
+  prosody_required: true
+  prosody_status_before_tts: approved
+  # 只允许句内轻微语义变化，整集声学状态保持一致。
+  acoustic_baseline:
+    register: neutral
+    vocal_effort: conversational
+    breath_pressure: natural
+    microphone_distance: consistent
+    timbre_brightness: consistent
+    global_energy: consistent
+    allow_sentence_state_switching: false
+  style_instruction: "Use a clear, natural, consistent conversational narration style."
+  max_emotion_strength: 2
+  rate_range: [0.98, 1.02]
+  pitch_policy: semantic-micro-only
+  audio_master: narration_master.wav
+  sample_rate: 48000
+  channels: 1
+  # 下列声音素材全部属于用户/项目资产，因此中性默认值保持 null。
+  voice_reference_source: null
+  voice_prompt_wav: null
+  voice_reference_wav: null
+  voice_prompt_manifest: null
+  voice_prompt_text: null
+  voice_reference_extract: null
+
+# 动效 catalog 与门禁属于通用标品；外部 Profile 只选择 preset 或覆盖显式策略。
+motion:
+  system_version: 1
+  default_profile: basic-stable
+  selectable_profiles: [basic-stable, clean, premium-balanced, cinematic]
+  advanced_profiles_require_runtime_implementation_audit: true
+  catalog: references/motion-catalog.json
+  guide: references/motion-system.md
+  planner: scripts/plan_semantic_motion.py
+  validator: scripts/validate_semantic_motion.py
+  plan: .hyperframes/semantic-motion.json
+  report: .hyperframes/motion-qc.json
+  layout_manifest: .hyperframes/layout-boxes.json
+  layout_initializer: scripts/init_layout_boxes.py
+  layout_validator: scripts/validate_layout_boxes.py
+  layout_report: .hyperframes/layout-qc.json
+  require_approved_before_storyboard: true
+  # 时间锚点始终跟随最终获批母带，字幕词级时间优先。
+  clock:
+    source: narration_master.wav
+    prefer_caption_word_anchor: true
+    fallback_anchor: approved-prosody-proportional
+    render_fps: 30
+    sample_rate: 48000
+  # 禁止依赖随机数、墙钟或无限循环，确保任意时间点渲染结果一致。
+  determinism:
+    seek_safe: true
+    allow_runtime_random: false
+    allow_wall_clock: false
+    allow_infinite_loop: false
+    hard_kill_scene_boundaries: true
+  # 默认并发以稳定为先；大型项目可以在项目配置中降低或提高。
+  performance:
+    render_concurrency: 2
+    tts_model_concurrency: 1
+    prefer_transform_opacity_svg_clip: true
+    avoid_persistent_blur: true
+  # variants 是可选布局目录；规划器按语义确定性轮换，并非每集强制全部使用。
+  layout_policy:
+    mode: semantic-deterministic-rotation
+    minimum_distinct_layouts_per_episode: 3
+    forbid_adjacent_repeat: true
+    forbid_centered_presenter_default: false
+    presenter_may_be_omitted_for_diagram_scenes: true
+    precompute_geometry: true
+    variants:
+      - host-left-board-right
+      - host-right-board-left
+      - host-upper-corner-canvas
+      - diagram-full-width
+      - editorial-offset
+      - split-evidence
+      - top-strip-process
+      - card-field-corner-visual
+  preset_overrides: {}
+
+# 画布与安全区的通用中性布局。坐标单位为像素，数组格式为 [x, y, width, height]。
+layout:
+  canvas:
+    width: 1920
+    height: 1080
+    fps: 30
+  caption_safe_x_min: 0
+  opening_title_content_only: true
+  # 标题卡只占视觉时间，不应与旁白、字幕或正文内容重叠。
+  opening_title_card:
+    enabled: true
+    position: center
+    reveal_s: 0.2
+    hold_s: 0.6
+    fade_s: 0.2
+    narration_starts_after_fade: true
+    captions_start_after_fade: true
+    scene_content_starts_after_fade: true
+  # 中性默认不生成个人关注动画；外部 Profile 可显式开启。
+  follow_cta_animation:
+    enabled: false
+    intro_inside_title_card: false
+    outro_sync_to_spoken_cta: false
+    motion: null
+    loop: false
+  # 转场由语义动效计划路由；禁用白闪并保证字幕位于转场上层。
+  transition:
+    router: semantic-motion-plan
+    primary: push-slide
+    accent: crossfade
+    soft: crossfade
+    max_duration_s: 0.50
+    visual_preroll_s: 0.12
+    captions_above_transition: true
+    forbid_white_flash: true
+  # 所有标题、字幕和内容框必须先做 bbox 预检与 scene 快照检查。
+  occlusion:
+    enabled: true
+    policy: no-unplanned-overlap
+    protect_title_and_caption: true
+    require_bbox_preflight: true
+    require_scene_snapshot_qa: true
+  safe_boxes:
+    title: {x: 96, y: 64, width: 1510, height: 170}
+    caption: {x: 96, y: 900, width: 1728, height: 152}
+    content: {x: 110, y: 250, width: 760, height: 490}
+    illustration: {x: 960, y: 250, width: 760, height: 500}
+  # 通用布局模板。illustration/content 数组均为 [x, y, width, height]。
+  layout_templates:
+    host-left-board-right:
+      illustration: [110, 300, 360, 440]
+      content: [540, 260, 1180, 580]
+    host-right-board-left:
+      illustration: [1470, 300, 300, 440]
+      content: [100, 260, 1260, 580]
+    host-upper-corner-canvas:
+      illustration: [1480, 250, 250, 360]
+      content: [100, 260, 1280, 580]
+    diagram-full-width:
+      illustration: [300, 250, 950, 430]
+      content: [1280, 260, 440, 540]
+    editorial-offset:
+      illustration: [120, 300, 500, 390]
+      content: [700, 260, 1020, 560]
+    split-evidence:
+      illustration: [1430, 300, 300, 390]
+      content: [100, 260, 1220, 560]
+    top-strip-process:
+      illustration: [1480, 260, 240, 300]
+      content: [100, 260, 1300, 560]
+    card-field-corner-visual:
+      illustration: [1510, 260, 270, 300]
+      content: [100, 260, 1320, 560]
+  # 中性默认不依赖任何插图 Skill；provider 与安装路径必须由外部配置提供。
+  illustration_skill:
+    enabled: false
+    required: false
+    name: null
+    provider: null
+    path: null
+    invocation_scope: optional
+    invocation_stage: after_script_before_storyboard
+    shot_count_range: [0, 8]
+    asset_count_range: [0, 8]
+    allow_episode_skip: true
+    asset_dir: assets/illustrations
+    reuse_existing_local_assets: true
+  # 成片底部默认只放字幕，禁止调试标签、水印或引擎信息泄漏到交付物。
+  bottom_text:
+    captions_only: true
+    show_explanatory_footer: false
+    show_engine_or_timeline_labels: false
+    show_scene_code_watermark: false
+  # 中性默认不预留数字人；启用后规划器必须避开该安全区。
+  avatar_safe_zone:
+    enabled: false
+    x: 0
+    bottom: 0
+    size: 1
+    shape: circle
+    reserve_mode: none
+    show_guide_in_final: false
+
+# 本地视觉资产默认复用；只有用户明确要求时才重新生成。
+images:
+  reuse_existing_local_assets: true
+  regenerate_only_when_explicitly_requested: true
+  cover_force_flag: --force-cover
+  visual_asset_manifest: visual-assets.json
+  visual_asset_validator: scripts/validate_visual_assets.py
+
+# 每集默认独立成立。中性默认没有 CTA，避免把作者偏好写入标品。
+episode:
+  standalone_topic_and_chapter: true
+  allow_cross_episode_reference: false
+  allow_cross_episode_teaser: false
+  final_cta: ""
+  cta_separator: " "
+  independence_validator: scripts/validate_episode_independence.py
+
+# 中性默认不绑定平台；平台列表、品牌文案和标签全部由外部 Profile 提供。
+# 模板变量由 finalizer 安全插值，未知变量会被拒绝。
+publishing:
+  platforms: []
+  cover_style: neutral
+  tags: []
+  copy_templates: {}
+  cover_description_template: "Frame extracted from the final video at {frame_time_s:.3f} seconds. Describe only visible content."
+  alt_text_template: "{title}: {visual_description}"
+  naming_template: "{date}-{slug}"
+
+# 未配置外部交付根目录时，只在项目内部生成交付包。
+delivery:
+  root: null
+  timezone: UTC
+
+# 数字人合成的通用技术默认值；人物位置与品牌外观仍由外部 Profile 控制。
+avatar:
+  compositing:
+    audio_policy: master
+    corner_radius: 24
+    chroma_color: null
+    chroma_similarity: 0.10
+    chroma_blend: 0.08

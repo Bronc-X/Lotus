@@ -1,0 +1,11 @@
+{
+  "reviewer": "填写实际审核人",
+  "candidate_sha256": "填写当前候选图片的 SHA-256",
+  "unknowns_not_claimed": false,
+  "checks": {
+    "replace-with-real-feature-id": {
+      "status": "NEEDS_REVIEW",
+      "evidence_note": "填写与商品原图对照的结果"
+    }
+  }
+}

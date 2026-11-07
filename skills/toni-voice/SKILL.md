@@ -7,18 +7,10 @@ description: 使用用户已确认的 Toni 声线制作单人播客、视频画�
 
 把用户的内容制作成以 Toni 本人声音朗读的可交付音频。主要用途是单人播客、视频画外音和日常口播，声线选择已经完成。
 
-## 私有配置与安装
-
-本公开包同步 2026-09-22 更新后的执行代码和规则，不分发 Toni 原声、prompt、批准试听、个人来源记录或本机路径。安装本包本身不会获得 Toni 的声音；不得把随机声音标成 Toni。
-
-现有机器继续使用本地 `voice.json`、`runtime.json`、`assets/`。新电脑经本人授权私下迁移这些文件并校验哈希；机器路径重新配置。若没有本人资产且用户要建立自己的声音，转 `ai-podcast` 录入新 profile，不冒用 Toni 身份。实际声线版本以本地现行 profile 为准，以下日期仅描述本次同步基线。
-
-包含写稿、发布的完整任务从同目录层级的 `../ai-podcast/SKILL.md` 进入。当前固定声线仍遵守本地 CUDA/float16 要求；用户明确选择跨设备迁移时，另建 runtime 和新试听候选，再记录该设备的听审结果，不能沿用旧设备的听感批准。GPU 故障本身不授权迁移或静默回退。
-
 ## 固定声线
 
 - 使用 **2026-09-22 用户批准的清晰、明亮版本**。听感基准为 `assets/approved-reference.mp3`，对应用户指定的 `新录音参考版.mp3`；无损母版为 `assets/approved-zh.wav`。
-- 长稿听感基准及批准语言以私有 `voice.json` 的 `approved_longform` 为准；中文长稿批准不等于英文已验收。保持真实原声提示，不把合成品再用作克隆来源。
+- 长稿听感基准为用户随后批准的《这件事，为什么该由我们来做》Toni 版（10 分 43 秒），项目路径为 `episodes/2026-09-21-policy-opportunities/releases/v3-toni-brian/reviewed/Toni.mp3`，对应 WAV、真实哈希和生成参数见 `voice.json` 的 `approved_longform`。此项中文听感批准补充原短样；继续使用现有原声提示和参数，不把长稿成品重新编码成克隆来源。
 - `voice.json` 记录此次确认、来源哈希与两份原声提示：默认 `narration` 对应 `assets/voice.pt` 和 `assets/reference.wav`；需要提问、追问或强调的段落可明确选择 `question`，对应 `assets/question.pt` 和 `assets/reference-question.wav`。两者都来自用户本次 60 秒原声，不把合成 MP3 再编码成克隆参考。
 - 中文、英文共用这组本人原声提示；此次听感批准来自中文样本。遗留的 `approved-en.wav` 是旧版历史文件，不作为新版英文已验收的证据。资产生成前逐一校验哈希；历史声线保留备份，不重新进行声线选型。
 - 按用户本次要求合成该声线，不重复询问声线选择或本地合成授权。公开发布、上传外部服务或替别人发言仍由当前任务的授权决定。

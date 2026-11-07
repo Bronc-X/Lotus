@@ -1,0 +1,4 @@
+interface:
+  display_name: "Humanwriter"
+  short_description: "修改标题、网页和产品文案，按具体问题最小改动，保留事实与有效表达"
+  default_prompt: "使用 $humanwriter 修改这些标题、网页或产品文案，去掉空泛表达和汇报腔，保留事实、必要条件与有效原文。"

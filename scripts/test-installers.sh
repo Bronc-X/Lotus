@@ -130,38 +130,6 @@ test_shell_syntax() {
   fi
 }
 
-test_daloopa_plugin_has_single_discoverable_skill() {
-  local plugin="$ROOT/plugins/lotus-daloopa"
-  local skill_count
-  local workflows=(
-    "setup"
-    "build-model"
-    "bull-bear"
-    "capital-allocation"
-    "earnings-flash"
-    "earnings-prep"
-    "ib-deck"
-    "precedent-transactions"
-    "research-note"
-  )
-
-  skill_count="$(find "$plugin/skills" -type f -name SKILL.md | wc -l | tr -d '[:space:]')"
-  [ "$skill_count" = "1" ] || fail "Daloopa should expose one discoverable SKILL.md, found $skill_count"
-
-  for workflow in "${workflows[@]}"; do
-    [ -f "$plugin/skills/daloopa/references/$workflow.md" ] ||
-      fail "missing Daloopa workflow reference: $workflow"
-    assert_file_contains "$plugin/skills/daloopa/SKILL.md" "references/$workflow.md"
-  done
-
-  [ -f "$plugin/skills/daloopa/references/ib-deck-slide-templates.md" ] ||
-    fail "missing flattened IB deck slide templates"
-  [ -f "$plugin/skills/daloopa/references/ib-deck-financial-components.md" ] ||
-    fail "missing flattened IB deck financial components"
-  [ -f "$plugin/skills/daloopa/references/ib-deck-advisory-patterns.md" ] ||
-    fail "missing flattened IB deck advisory patterns"
-}
-
 test_codex_conversion_with_stubbed_gstack() {
   local tmp
   tmp="$(mktemp -d)"
@@ -177,10 +145,18 @@ test_codex_conversion_with_stubbed_gstack() {
   printf 'stale\n' > "$tmp/home/.codex/skills/brandkit/SKILL.md"
   printf 'system\n' > "$tmp/home/.codex/skills/.system/openai-docs/SKILL.md"
   printf 'stale\n' > "$tmp/home/.claude/skills/plan-ceo-review/SKILL.md"
+  local retired_skills=(agent-training-loop insights polanyi-tacit baseline-packager test-driven-development ios-codex-preview)
+  for skill in "${retired_skills[@]}"; do
+    mkdir -p "$tmp/home/.codex/skills/$skill" "$tmp/home/.claude/skills/$skill"
+    printf 'stale\n' > "$tmp/home/.codex/skills/$skill/SKILL.md"
+    printf 'stale\n' > "$tmp/home/.claude/skills/$skill/SKILL.md"
+  done
+  printf 'stale\n' > "$tmp/home/.codex/skills/agent-training-loop.md"
 
   HOME="$tmp/home" bash "$tmp/lotus/install.sh" --global --yes >/dev/null
 
-  assert_file_contains "$tmp/home/.codex/skills/image-2/SKILL.md" "# Image 2"
+  assert_file_contains "$tmp/home/.codex/skills/image-2/SKILL.md" "# Image 2.5 / Image 2"
+  assert_file_contains "$tmp/home/.codex/skills/image-2/runtime.example.json" 'gpt-image-2.5-sunburst'
   if grep -q "^allowed-tools:" "$tmp/home/.codex/skills/image-2/SKILL.md"; then
     fail "image-2 should not restrict Codex native image tools with allowed-tools"
   fi
@@ -198,12 +174,12 @@ test_codex_conversion_with_stubbed_gstack() {
     fail "taste-skill visual concepts reference missing"
   [ ! -e "$tmp/home/.codex/skills/taste-skill.md" ] ||
     fail "taste-skill should be installed as a package, not a flat legacy file"
-  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "# Agent training loop"
-  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "name: agent-training-loop"
-  assert_file_contains "$tmp/home/.codex/skills/agent-training-loop/SKILL.md" "  - Bash"
-  assert_file_contains "$tmp/home/.codex/skills/baseline-packager/SKILL.md" "name: baseline-packager"
   assert_file_contains "$tmp/home/.codex/skills/mini-investigate/SKILL.md" "name: mini-investigate"
-  assert_file_contains "$tmp/home/.codex/skills/test-driven-development/SKILL.md" "# Test-driven development"
+  for skill in "${retired_skills[@]}"; do
+    [ ! -e "$tmp/home/.codex/skills/$skill" ] || fail "retired Codex skill still installed: $skill"
+    [ ! -e "$tmp/home/.claude/skills/$skill" ] || fail "retired Claude skill still installed: $skill"
+  done
+  [ ! -e "$tmp/home/.codex/skills/agent-training-loop.md" ] || fail "retired legacy skill still installed"
   assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "## Route"
   assert_file_contains "$tmp/home/.codex/skills/anysearch/SKILL.md" "One information need gets one primary route"
   assert_file_contains "$tmp/home/.codex/skills/anysearch/runtime.conf" "scripts/anysearch_cli"
@@ -224,6 +200,10 @@ test_codex_conversion_with_stubbed_gstack() {
       "executive-sow-pricing/references/cost-model.md" \
       "codex-history-bridge/SKILL.md" \
       "codex-history-bridge/scripts/inspect_history.py" \
+      "diagram-design/SKILL.md" \
+      "diagram-design/assets/index.html" \
+      "diagram-design/scripts/self_check.py" \
+      "diagram-design/LICENSE" \
       "workflow/SKILL.md" \
       "workflow/scripts/self_test.py" \
       "workflow/assets/workflow-pack/WORKFLOW_SPEC.json.template"; do
@@ -295,7 +275,6 @@ test_incomplete_gstack_install_falls_back_to_bootstrap() {
 }
 
 test_shell_syntax
-test_daloopa_plugin_has_single_discoverable_skill
 test_codex_conversion_with_stubbed_gstack
 test_failed_gstack_install_preserves_existing_codex_runtime_and_succeeds
 test_incomplete_gstack_install_falls_back_to_bootstrap
