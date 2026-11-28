@@ -1,9 +1,9 @@
 {
   "repo": "garrytan/gstack",
   "branch": "main",
-  "version": "1.1.1.0",
-  "commit": "e3c961d00f24334066b4caeb57634c012a346c00",
-  "commit_date": "2026-04-18T15:58:59Z",
-  "commit_subject": "fix(ship): detect + repair VERSION/package.json drift in Step 12 (v1.1.1.0) (#1063)",
-  "tracked_at_utc": "2026-04-19T00:00:00Z"
+  "version": "1.104.2.0",
+  "commit": "b022764a366938320f1f4e652d09517c03da7837",
+  "commit_date": "2026-11-28T07:37:59Z",
+  "commit_subject": "Strip hidden line-break characters from the weekly benchmark line in release plans (GST-3606) (#4866)",
+  "tracked_at_utc": "2026-11-28T07:45:16Z"
 }
